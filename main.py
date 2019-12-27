@@ -53,11 +53,11 @@ def read_chunk(world_name, regionx, regionz, chunkx, chunkz):
 
 
 
-#marching squadata algorithm for generating contour data
+#marching squares algorithm for generating contour data
 #TODO:
 #linear interpolation
 #line assembly and smoothing
-def marching_squadata(heightmap):
+def marching_squares(heightmap):
     data = []
 
     for y in range(len(heightmap) - 1):
@@ -135,18 +135,18 @@ def draw(data, scale = 20):
             x = 0
             for element in row:
                 if element:
+                    for point_set in element:
+                        #translate string to tuple with co-ords
+                        start = translate[point_set[0]]
+                        end = translate[point_set[1]]
 
-                    #translate string to tuple with co-ords
-                    start = translate[element[0]]
-                    end = translate[element[1]]
-
-                    #position in list + tuple inside square + 1
-                    draw_line(
-                        x * 2  + start[0] + 1,
-                        x * 2  + end[0]   + 1,
-                        y * -2 + start[1] - 1 + len(data) * 2,
-                        y * -2 + end[1]   - 1 + len(data) * 2
-                    )
+                        #position in list + tuple inside square + 1
+                        draw_line(
+                            x * 2  + start[0] + 1,
+                            x * 2  + end[0]   + 1,
+                            y * -2 + start[1] - 1 + len(data) * 2,
+                            y * -2 + end[1]   - 1 + len(data) * 2
+                        )
 
                 x += 1
             y += 1
@@ -169,7 +169,7 @@ if __name__ == "__main__":
         args = [0, 0, 0, 0]
 
     heightmap = read_chunk(world, *args)
-    data = marching_squadata(heightmap)
+    data = marching_squares(heightmap)
     draw(data, 20)
     
     pass
