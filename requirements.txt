@@ -1,4 +1,5 @@
 oricraft
-NBT>=1.5.0
+NBT==1.5.0
 frozendict>=1.2
-anvil-parser>=0.1.1
+anvil-parser==0.1.1
+pyglet>=1.4.8
