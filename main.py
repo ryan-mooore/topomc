@@ -1,4 +1,5 @@
 import sys
+import math
 
 try:
     import anvil
@@ -6,7 +7,46 @@ try:
 except:
     raise Exception("incorrect dependencies installed or are missing")
 
-def read_chunk(world_name, regionx, regionz, chunkx, chunkz):
+def read_chunk(world_name, chunkx1, chunkz1, chunkx2, chunkz2):
+    #convert chunk coords to region coords
+    def chunk_to_reg(chunk):
+        return int(math.floor(chunk / 32))
+
+#generate 2d heightmap matrix
+    def get_chunk_height(chunkx, chunkz):
+
+        #get region coords from chunk
+        (regionx, regionz) = tuple(
+            [chunk_to_reg(chunk_coord) for chunk_coord in (chunkx, chunkz)]
+        )
+
+        #path to anvil file
+        anvil_file = saves_path \
+        + world_name \
+        + "/region/r.{}.{}.mca".format(regionx, regionz)
+
+        #open chunk
+        region = anvil.Region.from_file(anvil_file)
+        chunk = anvil.Chunk.from_region(region, chunkx, chunkz)
+
+        #generate heightmap
+        heightmap = []
+
+        for z in range (16):
+            current_row = []
+
+            for x in range (16):
+                for y in range(0xFF, 0, -1):
+                    block = chunk.get_block(x, y, z).id
+
+                    if block in surface_blocks:
+                        current_row.append(y)
+                        break
+
+            heightmap.append(current_row)
+
+        return heightmap
+
     #get path to minecraft save folder
     try:
         path_file = open("path_to_saves.txt", "r")
@@ -15,41 +55,62 @@ def read_chunk(world_name, regionx, regionz, chunkx, chunkz):
     except:
         raise Exception("path_to_saves.txt not found")
 
-    #path to anvil file
-    anvil_file = saves_path \
-        + world_name \
-        + "/region/r.{}.{}.mca".format(regionx, regionz)
-
     #blocks that are considered 'ground' when contours are being generated
     surface_blocks = (
         "grass_block",
+        "grass_path",
         "dirt",
         "coarse_dirt",
-        "sand",
-        "clay",
-        "podzol"
-    )
 
-    region = anvil.Region.from_file(anvil_file)
-    chunk = anvil.Chunk.from_region(region, chunkx, chunkz)
+        "sand",
+        "sandstone",
+
+        "red_sand",
+        "red_sandstone"
+
+        "clay",
+
+        "podzol",
+        "mycelium",
+
+        "stone",
+        "granite",
+        "diorite",
+        "andesite",
+        "gravel",
+
+        "coal_ore",
+        "iron_ore",
+        "gold_ore"
+    )
 
     heightmap = []
 
-    #generate 2d heightmap matrix
-    for z in range (16):
-        current_row = []
+    for z in range(chunkz1, chunkz2):
+        current_map_row = []
+        for x in range(chunkx1, chunkx2):
+            print(x, z)
+            current_map = get_chunk_height(x, z)
+            current_map_row = horizontal_append(current_map_row, current_map)
+        heightmap.append(current_map_row)
 
-        for x in range (16):
-            for y in range(0xFF, 0, -1):
-                block = chunk.get_block(x, y, z).id
+    print(heightmap)
 
-                if block in surface_blocks:
-                    current_row.append(y)
-                    break
 
-        heightmap.append(current_row)
 
-    return heightmap
+#append one chunk to row
+def horizontal_append(map1, map2):
+    #append if map contains content
+    if map1:
+        for row, index in enumerate(map2):
+            index = map2[0]
+            map1[index] = [*map1[index] *map2[1]]
+    #create content
+    else:
+        map1 = map2
+
+    print(map1)
+    return map1
 
 
 
@@ -68,7 +129,7 @@ def marching_squares(heightmap):
             #find height values of 2x2 matrix in clockwise order
             case = (
                 heightmap[y]    [x]    ,
-                heightmap[y]    [x + 1], 
+                heightmap[y]    [x + 1],
                 heightmap[y + 1][x + 1],
                 heightmap[y + 1][x]
             )
@@ -83,7 +144,7 @@ def marching_squares(heightmap):
             if bitmap[3] != bitmap[0]: current_element.append("left")
 
             current_row.append(current_element)
-        
+
         data.append(current_row)
 
     return data
@@ -92,7 +153,7 @@ def marching_squares(heightmap):
 
 #draw map using pyglet
 def draw(data, scale = 20):
-    
+
     #dict for translating strings to xy vaules
     translate = {
         "left": (-1, 0),
@@ -109,7 +170,7 @@ def draw(data, scale = 20):
 
     def draw_line(x1, x2, y1, y2):
         pyglet.graphics.draw(
-            2, pyglet.gl.GL_LINES, 
+            2, pyglet.gl.GL_LINES,
             ('v2i', (
                 x1 * scale,
                 y1 * scale,
@@ -135,18 +196,17 @@ def draw(data, scale = 20):
             x = 0
             for element in row:
                 if element:
-                    for point_set in element:
-                        #translate string to tuple with co-ords
-                        start = translate[point_set[0]]
-                        end = translate[point_set[1]]
+                    #translate string to tuple with co-ords
+                    start = translate[element[0]]
+                    end = translate[element[1]]
 
-                        #position in list + tuple inside square + 1
-                        draw_line(
-                            x * 2  + start[0] + 1,
-                            x * 2  + end[0]   + 1,
-                            y * -2 + start[1] - 1 + len(data) * 2,
-                            y * -2 + end[1]   - 1 + len(data) * 2
-                        )
+                    #position in list + tuple inside square + 1
+                    draw_line(
+                        x * 2  + start[0] + 1,
+                        x * 2  + end[0]   + 1,
+                        y * -2 + start[1] - 1 + len(data) * 2,
+                        y * -2 + end[1]   - 1 + len(data) * 2
+                    )
 
                 x += 1
             y += 1
@@ -161,7 +221,7 @@ if __name__ == "__main__":
     except:
         raise Exception("No world specified")
 
-    try: 
+    try:
         args = sys.argv[2:6]
         args = [int(x) for x in args]
         print(args)
@@ -171,5 +231,5 @@ if __name__ == "__main__":
     heightmap = read_chunk(world, *args)
     data = marching_squares(heightmap)
     draw(data, 20)
-    
+
     pass
