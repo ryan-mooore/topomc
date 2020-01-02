@@ -1,0 +1,26 @@
+surface_blocks:
+  - grass_block
+  - grass_path
+  - dirt
+  - coarse_dirt
+
+  - sand
+  - sandstone
+
+  - red_sand
+  - red_sandstone
+
+  - clay
+
+  - podzol
+  - mycelium
+
+  - stone
+  - granite
+  - diorite
+  - andesite
+  - gravel
+
+  - coal_ore
+  - iron_ore
+  - gold_ore
