@@ -4,9 +4,13 @@ import math
 #dependencies
 try:
     import anvil
+except:
+    raise Exception("Anvil-parser is not installed or is missing")
+
+try:
     import yaml
 except:
-    raise Exception("incorrect dependencies installed or are missing")
+    raise Exception("Yaml is not installed or is missing")
 
 
 
@@ -93,11 +97,10 @@ def horizontal_append(map1, map2):
 
 
 def vertical_append(map1, map2):
-    print(map1, map2)
     #append if map contains content
     if map1:
-        for row in map2[0]:
-            map1[0].append(row)
+        for row in map2:
+            map1.append(row)
 
     #create content
     else:
@@ -110,16 +113,14 @@ def vertical_append(map1, map2):
 def generate_heightmap(world, chunkx1, chunkz1, chunkx2, chunkz2):
     heightmap = []
 
-    # + 1 because ending chunks are incclusive
+    # + 1 because ending chunks are inclusive
     for z in range(chunkz1, chunkz2 + 1):
-        current_map_row = []
+        chunk_row = []
 
         for x in range(chunkx1, chunkx2 + 1):
-            print(x, z)
-            current_map = get_chunk_height(world, x, z)
-            current_map_row = horizontal_append(current_map_row, current_map)
+            chunk = get_chunk_height(world, x, z)
+            chunk_row = horizontal_append(chunk_row, chunk)
 
-        heightmap = vertical_append(heightmap, current_map_row)
+        heightmap = vertical_append(heightmap, chunk_row)
 
-    print(heightmap)
     return heightmap

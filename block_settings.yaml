@@ -24,3 +24,5 @@ surface_blocks:
   - coal_ore
   - iron_ore
   - gold_ore
+
+  - water
