@@ -1,3 +1,5 @@
+saves_path: /home/ryan/.minecraft/saves/
+
 surface_blocks:
   - grass_block
   - grass_path
@@ -26,3 +28,4 @@ surface_blocks:
   - gold_ore
 
   - water
+

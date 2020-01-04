@@ -57,10 +57,10 @@ def draw(data, scale = 20):
                 #account for empty square
                 if line_data:
                     #account for saddle points (TODO: cleanup with iteration)
-                    for i in range(len(line_data[::2])):
+                    for index, point in enumerate(line_data[::2]):
 
                         #translate string to tuple with co-ords
-                        (start, end) = [translate[point] for point in line_data[i * 2:(i + 1) * 2]]
+                        (start, end) = translate[point], translate[line_data[index + 1]]
 
                         #position in list + tuple inside square + 1
                         draw_line((

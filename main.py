@@ -2,7 +2,7 @@
 import sys
 
 #files
-import read_chunks
+import heightmap
 import draw
 
 
@@ -56,9 +56,12 @@ if __name__ == "__main__":
     except:
         raise Exception("no co-ordinates for world specified")
 
-    heightmap = read_chunks.generate_heightmap(world, *args)
+    heightmap = heightmap.create(world, *args)
+
     data = marching_squares(heightmap)
+
     max_len = max(len(data) + 1, len(data[0]) + 1)
+
     draw.draw(data,
         (
             int(16 / max_len * 30)
