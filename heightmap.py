@@ -35,13 +35,13 @@ def get_from_chunk(world, chunkx, chunkz, tag = "MOTION_BLOCKING_NO_LEAVES"):
 
     heightmap = []
     current_row = []
-    print(len(hm_data))
     for index, point_height in enumerate(hm_data):
-        if not index % 16:
+        if index % 16 == 0:
             if current_row:
                 heightmap.append(current_row)
             current_row = []
         current_row.append(point_height)
+    heightmap.append(current_row)
 
     return heightmap
 
@@ -56,7 +56,6 @@ def create_from_chunk(world, chunkx, chunkz):
 
     builtin_hm = get_from_chunk(world, chunkx, chunkz, "MOTION_BLOCKING_NO_LEAVES")
 
-    print(len(builtin_hm))
     #generate heightmap
     heightmap = []
 
