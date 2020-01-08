@@ -1,6 +1,8 @@
 # Oricraft
 
-Oricraft is a python project that will eventually be able to reproduce an orienteering map from a section of a minecraft world. For now all this program does is converts a minecraft chunk into contour data.
+(images/example.png)
+
+Oricraft is a python project that converts minecraft chunks into a topographical (contour) map.
 
 ## How it Works
 
@@ -10,12 +12,16 @@ Firstly, chunk data is decoded and read from minecraft's save-files using the an
 
 ### Installation
 
-Firstly, make sure all the dependencies listed in requirements.txt are installed. You'll also need to be running a python version at least 3.7 or higher.
+- Firstly, make sure all the dependencies listed in requirements.txt are installed. You'll also need to be running a python version at least 3.7 or higher.
 
-Once the script is downloaded, you'll need to create a file in the project's root directory, called 'path_to_saves.txt' which should contain a relative or absolute path to the minecraft saves folder.
+- Once the script is downloaded, you'll need to specify the absolute path to your minecraft saves folder by editing the `path_to_saves` option in settings.yaml. Other settings can optionally be changed as well.
 
 ### Running
 
 Currently the script only works on Linux & Mac.
 
-to run it, use the following format: main.py worldname chunkx1 chunky1 chunkx2 chunky2
+To run the script, run the following command with the following arguments:
+`pythonversion` `main.py` `worldname` `chunkx1` `chunky1` `chunkx2` `chunky2`
+
+For example:
+`python3.7` `main.py` `"New World"` `0` `0` `5` `5`
