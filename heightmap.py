@@ -28,7 +28,12 @@ def get_from_chunk(world, chunkx, chunkz, tag = "MOTION_BLOCKING_NO_LEAVES"):
     current_chunk = chunk.load(world, chunkx, chunkz)
 
     #get heightmap data
-    hm_data_stream = current_chunk.data.tags[INDEX_OF_HEIGHTMAPS].tags[INDEX_OF_TAG]
+
+    try:
+        hm_data_stream = current_chunk.data.tags[INDEX_OF_HEIGHTMAPS].tags[INDEX_OF_TAG]
+    except:
+        raise Exception("Unloaded chunk(s)!")
+
     hm_data = unstream.unstream(
         hm_data_stream, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE
     )

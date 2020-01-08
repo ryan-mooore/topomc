@@ -21,14 +21,14 @@ def draw(data, scale):
     )
 
     #set bg to white
-    #pyglet.gl.glClearColor(1, 1, 1, 1)
+    pyglet.gl.glClearColor(1, 1, 1, 1)
 
     def draw_line(points):
         scaled_points = [int(point * scale) for point in points]
         pyglet.graphics.draw(
             2, pyglet.gl.GL_LINES,
             ('v2i', (scaled_points)),
-            #('c3B', (0, 0, 0, 0, 0, 0))
+            ('c3B', (209, 92, 0, 209, 92, 0))
         )
 
 
@@ -50,7 +50,6 @@ def draw(data, scale):
     @window.event
     def on_draw():
         window.clear()
-        draw_grid()
         #TODO: clean this shit up lol
         for y, row in enumerate(data):
             for x, line_data in enumerate(row):
@@ -59,10 +58,8 @@ def draw(data, scale):
                     for line_set in line_data:
                         #account for saddle points
                         for index, point in enumerate(line_set[::2]):
-                            if len(line_set) == 4: print(line_set)
                             #translate string to tuple with co-ords
                             (start, end) = point, line_set[index + 1]
-                            if len(line_set) == 4: print(start, end)
                             #position in list + tuple inside square + 1
                             draw_line((
                                 x * 2 + start[0] * 2,
@@ -72,6 +69,3 @@ def draw(data, scale):
                             ))
 
     pyglet.app.run()
-
-
-#[[[[[0.5, 1], [0.5, 0]]]
