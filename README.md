@@ -1,6 +1,6 @@
 # Oricraft
 
-(images/example.png)
+!(images/example.png)
 
 Oricraft is a python project that converts minecraft chunks into a topographical (contour) map.
 

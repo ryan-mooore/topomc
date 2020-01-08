@@ -1,5 +1,6 @@
 #core
 import math
+import os
 
 #dependencies
 try:
@@ -25,13 +26,22 @@ def load(world, chunkx, chunkz):
     #get saves path
     saves_path = yaml_open.get("saves_path")
 
+    #path to world
+    world_path = saves_path + world
+
+    #test to see whether world exists
+    if not os.path.isdir(world_path):
+        raise Exception("World does not exist!")
+
     #path to anvil file
-    anvil_file = saves_path \
-    + world \
-    + "/region/r.{}.{}.mca".format(regionx, regionz)
+    anvil_file = world_path + "/region/r.{}.{}.mca".format(regionx, regionz)
 
     #open chunk
-    region = anvil.Region.from_file(anvil_file)
+    try:
+        region = anvil.Region.from_file(anvil_file)
+    except:
+        raise Exception("Unloaded chunk(s)!")
+
     chunk = anvil.Chunk.from_region(region, chunkx, chunkz)
 
     return chunk
