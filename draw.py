@@ -7,15 +7,12 @@ except:
 
 
 #draw map using pyglet
-def draw(data, scale = 20):
+def draw(data, scale):
 
-    #dict for translating strings to xy vaules
-    translate = {
-        "left": (-1, 0),
-        "top": (0, 1),
-        "right": (1, 0),
-        "bottom": (0, -1),
-    }
+    max_len = max(len(data) + 1, len(data[0]) + 1)
+
+    scale = int(16 / max_len * 30 * scale)
+
 
     #create canvas
     window = pyglet.window.Window(
@@ -23,26 +20,29 @@ def draw(data, scale = 20):
         scale * 2 * len(data)
     )
 
+    #set bg to white
+    #pyglet.gl.glClearColor(1, 1, 1, 1)
+
     def draw_line(points):
-        scaled_points = [point * scale for point in points]
+        scaled_points = [int(point * scale) for point in points]
         pyglet.graphics.draw(
             2, pyglet.gl.GL_LINES,
-            (
-                'v2i', (scaled_points)
-            )
+            ('v2i', (scaled_points)),
+            #('c3B', (0, 0, 0, 0, 0, 0))
         )
 
 
 
     #for debugging only
-    """
+
     def draw_grid():
         for i in range(len(data[0])):
-            draw_line(*[arg * 2 for arg in [i, i, 0, scale * len(data)]])
+            draw_line([arg * 2 for arg in [i, 0, i, scale * len(data)]])
 
         for i in range(len(data)):
-            draw_line(*[arg * 2 for arg in [0, scale * len(data[0]), i, i]])
-    """
+            draw_line([arg * 2 for arg in [0, i, scale * len(data[0]), i]])
+
+
 
 
 
@@ -50,24 +50,28 @@ def draw(data, scale = 20):
     @window.event
     def on_draw():
         window.clear()
-
+        draw_grid()
         #TODO: clean this shit up lol
         for y, row in enumerate(data):
             for x, line_data in enumerate(row):
                 #account for empty square
                 if line_data:
-                    #account for saddle points (TODO: cleanup with iteration)
-                    for index, point in enumerate(line_data[::2]):
-
-                        #translate string to tuple with co-ords
-                        (start, end) = translate[point], translate[line_data[index + 1]]
-
-                        #position in list + tuple inside square + 1
-                        draw_line((
-                            x * 2  + start[0] + 1,
-                            y * -2 + start[1] - 1 + len(data) * 2,
-                            x * 2  + end[0]   + 1,
-                            y * -2 + end[1]   - 1 + len(data) * 2
-                        ))
+                    for line_set in line_data:
+                        #account for saddle points
+                        for index, point in enumerate(line_set[::2]):
+                            if len(line_set) == 4: print(line_set)
+                            #translate string to tuple with co-ords
+                            (start, end) = point, line_set[index + 1]
+                            if len(line_set) == 4: print(start, end)
+                            #position in list + tuple inside square + 1
+                            draw_line((
+                                x * 2 + start[0] * 2,
+                                len(data) * 2 - y * 2 - 2 + start[1] * 2,
+                                x * 2 + end[0] * 2,
+                                len(data) * 2 - y * 2 - 2 + end[1] * 2
+                            ))
 
     pyglet.app.run()
+
+
+#[[[[[0.5, 1], [0.5, 0]]]

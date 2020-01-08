@@ -1,5 +1,7 @@
 saves_path: /home/ryan/.minecraft/saves/
 
+window_scale: 1.0
+
 surface_blocks:
   - grass_block
   - grass_path

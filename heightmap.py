@@ -42,7 +42,6 @@ def get_from_chunk(world, chunkx, chunkz, tag = "MOTION_BLOCKING_NO_LEAVES"):
             current_row = []
         current_row.append(point_height)
     heightmap.append(current_row)
-
     return heightmap
 
 
