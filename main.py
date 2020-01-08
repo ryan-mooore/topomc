@@ -10,16 +10,11 @@
 #core
 import sys
 
-#dependencies
-try:
-    import yaml_open
-except:
-    raise Exception("Yaml is not installed or is missing")
-
 #files
+import yaml_open
 import heightmap
-import draw
 import marching_squares
+import draw
 
 
 
@@ -42,7 +37,6 @@ if __name__ == "__main__":
     data = marching_squares.marching_squares(heightmap)
 
     scale = yaml_open.get("window_scale")
-
     draw.draw(data, scale)
 
     pass
