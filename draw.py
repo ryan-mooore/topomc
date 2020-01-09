@@ -59,7 +59,7 @@ def draw(data, scale):
                         #account for saddle points
                         for index, point in enumerate(line_set[::2]):
                             #translate string to tuple with co-ords
-                            (start, end) = point, line_set[index + 1]
+                            (start, end) = point, line_set[index * 2 + 1]
                             #position in list + tuple inside square + 1
                             draw_line((
                                 x * 2 + start[0] * 2,
