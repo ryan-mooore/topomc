@@ -2,7 +2,7 @@ saves_path: /home/ryan/.minecraft/saves/
 
 window_scale: 1
 
-contour_interval: 1
+contour_interval: 5
 contour_offset: 0
 
 surface_blocks:

@@ -34,8 +34,10 @@ if __name__ == "__main__":
     if args[0] > args[2] or args[1] > args[3]:
         raise Exception("Invalid co-ordinates")
 
+    total_chunks = (args[2] + 1 - args[0]) * (args[3] + 1 - args[1])
+
     #create heightmap from selection
-    heightmap = heightmap.create(world, *args)
+    heightmap = heightmap.create(world, *args, total_chunks)
 
     #create contour data from heightmap
     contour_interval = yaml_open.get("contour_interval")
@@ -49,6 +51,6 @@ if __name__ == "__main__":
 
     #draw contour data
     scale = yaml_open.get("window_scale")
-    draw.draw(data, scale)
+    draw.draw(data, scale, total_chunks)
 
     pass

@@ -7,17 +7,16 @@ except:
 
 
 #draw map using pyglet
-def draw(data, scale):
+def draw(data, scale, chunks_to_render):
 
     max_len = max(len(data) + 1, len(data[0]) + 1)
 
-    scale = int(16 / max_len * 30 * scale)
-
+    scale = int(16 / max_len * 60 * scale)
 
     #create canvas
     window = pyglet.window.Window(
-        scale * 2 * len(data[0]),
-        scale * 2 * len(data)
+        scale * len(data[0]),
+        scale * len(data)
     )
 
     #set bg to white
@@ -34,22 +33,18 @@ def draw(data, scale):
 
 
     #for debugging only
-
     def draw_grid():
         for i in range(len(data[0])):
-            draw_line([arg * 2 for arg in [i, 0, i, scale * len(data)]])
+            draw_line([i, 0, i, scale * len(data) / 2])
 
         for i in range(len(data)):
-            draw_line([arg * 2 for arg in [0, i, scale * len(data[0]), i]])
-
-
-
-
+            draw_line([0, i, scale * len(data[0]) / 2, i])
 
     #window event loop here
     @window.event
     def on_draw():
         window.clear()
+        chunks_rendered = 0
         #TODO: clean this shit up lol
         for y, row in enumerate(data):
             for x, line_data in enumerate(row):
@@ -62,10 +57,15 @@ def draw(data, scale):
                             (start, end) = point, line_set[index * 2 + 1]
                             #position in list + tuple inside square + 1
                             draw_line((
-                                x * 2 + start[0] * 2,
-                                len(data) * 2 - y * 2 - 2 + start[1] * 2,
-                                x * 2 + end[0] * 2,
-                                len(data) * 2 - y * 2 - 2 + end[1] * 2
+                                x + start[0],
+                                len(data) - y - 1 + start[1],
+                                x + end[0],
+                                len(data) - y - 1 + end[1]
                             ))
+                            if chunks_rendered < chunks_to_render:
+                                chunks_rendered += 1
+                                print("{}/{} chunks rendered".format(
+                                    chunks_rendered, chunks_to_render
+                                ))
 
     pyglet.app.run()

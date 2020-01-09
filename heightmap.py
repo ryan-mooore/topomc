@@ -83,7 +83,7 @@ def create_from_chunk(world, chunkx, chunkz):
 
 
 
-def create(world, chunkx1, chunkz1, chunkx2, chunkz2):
+def create(world, chunkx1, chunkz1, chunkx2, chunkz2, chunks_to_retrieve):
 
     def horizontal_append(map1, map2):
     #append if map contains content
@@ -111,9 +111,8 @@ def create(world, chunkx1, chunkz1, chunkx2, chunkz2):
 
         return map1
 
-
-
     heightmap = []
+    chunks_retrieved = 0
 
     # + 1 because ending chunks are inclusive
     for z in range(chunkz1, chunkz2 + 1):
@@ -122,6 +121,11 @@ def create(world, chunkx1, chunkz1, chunkx2, chunkz2):
         for x in range(chunkx1, chunkx2 + 1):
             current_chunk = create_from_chunk(world, x, z)
             chunk_row = horizontal_append(chunk_row, current_chunk)
+
+            chunks_retrieved += 1
+            print("{}/{} chunks retrieved".format(
+                chunks_retrieved, chunks_to_retrieve
+            ))
 
         heightmap = vertical_append(heightmap, chunk_row)
 
