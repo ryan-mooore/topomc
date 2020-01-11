@@ -1,6 +1,6 @@
 #core
 import math
-import os
+import os, sys
 
 #dependencies
 try:
@@ -28,15 +28,20 @@ def load(world, chunkx, chunkz):
     #get saves path
     saves_path = yaml_open("saves_path")
 
+    if sys.platform.startswith('win32') \
+    or sys.platform.startswith('cygwin'):
+        path_slash = '\\'
+    else:
+        path_slash = '/'
+
     #path to world
-    world_path = saves_path + world
+    region_path = f"{saves_path}{world}{path_slash}region{path_slash}"
 
     #test to see whether world exists
-    if not os.path.isdir(world_path):
-        raise Exception("World does not exist!")
+    if not os.path.isdir(region_path):
+        raise Exception("World does not exist or error retrieving path")
 
-    #path to anvil file
-    anvil_file = world_path + "/region/r.{}.{}.mca".format(regionx, regionz)
+    anvil_file = region_path + f"r.{regionx}.{regionz}.mca"
 
     #open chunk
     try:
