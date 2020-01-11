@@ -46,6 +46,7 @@ def draw(data, scale, chunks_to_render):
     #window event loop here
     @window.event
     def on_draw():
+        pyglet.gl.glLineWidth(3)
         window.clear()
         chunks_rendered = 0
         #TODO: clean this shit up lol
@@ -68,5 +69,9 @@ def draw(data, scale, chunks_to_render):
                             if chunks_rendered < chunks_to_render:
                                 chunks_rendered += 1
                                 print_progressbar(chunks_rendered, chunks_to_render, 2, "chunks rendered")
+
+                                if chunks_rendered == chunks_to_render:
+                                    print("Loading pyglet window...")
+                                    print()
 
     pyglet.app.run()

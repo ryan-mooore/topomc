@@ -27,13 +27,17 @@ def print_progressbar(iteration, total, prefix = "", suffix = ""):
 
     decimals = 1
     length = 30
-    fill = '█'
-    printEnd = "\r"
+    fill = '■'
+    empty = '□'
+    print_end = "\r"
 
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print('\r%s |%s| %s%% %s/%s %s' % (prefix, bar, percent, iteration, total, suffix), end = printEnd)
+    percent = ("{0:.2f}").format(100 * (iteration / float(total)))
+    filled_length = int(length * iteration // total)
+    bar = fill * filled_length + empty * (length - filled_length)
+    print(
+        f'{print_end}{prefix} {bar} {percent}% {iteration}/{total} {suffix}',
+        end = print_end
+    )
 
     if iteration == 1:
         global start
