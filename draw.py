@@ -4,6 +4,9 @@ try:
 except:
     raise Exception("Pyglet is not installed or is missing")
 
+#files
+from res import print_progressbar
+
 
 
 #draw map using pyglet
@@ -64,8 +67,6 @@ def draw(data, scale, chunks_to_render):
                             ))
                             if chunks_rendered < chunks_to_render:
                                 chunks_rendered += 1
-                                print("{}/{} chunks rendered".format(
-                                    chunks_rendered, chunks_to_render
-                                ))
+                                print_progressbar(chunks_rendered, chunks_to_render, 2, "chunks rendered")
 
     pyglet.app.run()

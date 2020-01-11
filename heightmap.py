@@ -1,7 +1,6 @@
 #files
-import unstream
+from res import unstream, print_progressbar, yaml_open
 import chunk
-import yaml_open
 
 def get_from_chunk(world, chunkx, chunkz, tag = "MOTION_BLOCKING_NO_LEAVES"):
     #builtin chunk heightmap options
@@ -34,7 +33,7 @@ def get_from_chunk(world, chunkx, chunkz, tag = "MOTION_BLOCKING_NO_LEAVES"):
     except:
         raise Exception("Unloaded chunk(s)!")
 
-    hm_data = unstream.unstream(
+    hm_data = unstream(
         hm_data_stream, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE
     )
 
@@ -56,7 +55,7 @@ def create_from_chunk(world, chunkx, chunkz):
 
     current_chunk = chunk.load(world, chunkx, chunkz)
 
-    surface_blocks = yaml_open.get("surface_blocks")
+    surface_blocks = yaml_open("surface_blocks")
 
     builtin_hm = get_from_chunk(world, chunkx, chunkz, "MOTION_BLOCKING_NO_LEAVES")
 
@@ -67,8 +66,7 @@ def create_from_chunk(world, chunkx, chunkz):
         current_row = []
 
         for x in range (16):
-            start = builtin_hm[z][x]
-
+            start = builtin_hm[z][x] - 1
             for y in range(start, 0, -1):
                 block = current_chunk.get_block(x, y, z).id
 
@@ -123,9 +121,7 @@ def create(world, chunkx1, chunkz1, chunkx2, chunkz2, chunks_to_retrieve):
             chunk_row = horizontal_append(chunk_row, current_chunk)
 
             chunks_retrieved += 1
-            print("{}/{} chunks retrieved".format(
-                chunks_retrieved, chunks_to_retrieve
-            ))
+            print_progressbar(chunks_retrieved, chunks_to_retrieve, 1, "chunks retrieved")
 
         heightmap = vertical_append(heightmap, chunk_row)
 

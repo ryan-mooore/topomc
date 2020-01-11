@@ -2,7 +2,6 @@
 #TODO
 #refactor marching squares code
 #add thickness to contour lines
-#add contour interval
 #object-orient
 
 
@@ -11,7 +10,7 @@
 import sys
 
 #files
-import yaml_open
+from res import yaml_open
 import heightmap
 import marching_squares
 import draw
@@ -40,8 +39,8 @@ if __name__ == "__main__":
     heightmap = heightmap.create(world, *args, total_chunks)
 
     #create contour data from heightmap
-    contour_interval = yaml_open.get("contour_interval")
-    contour_offset   = yaml_open.get("contour_offset")
+    contour_interval = yaml_open("contour_interval")
+    contour_offset   = yaml_open("contour_offset")
 
 
     if type(contour_interval + contour_offset) is not int:
@@ -50,7 +49,7 @@ if __name__ == "__main__":
     data = marching_squares.marching_squares(heightmap, contour_interval)
 
     #draw contour data
-    scale = yaml_open.get("window_scale")
+    scale = yaml_open("window_scale")
     draw.draw(data, scale, total_chunks)
 
     pass

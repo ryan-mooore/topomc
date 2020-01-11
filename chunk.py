@@ -9,7 +9,7 @@ except:
     raise Exception("Anvil-parser is not installed or is missing")
 
 #files
-import yaml_open
+from res import yaml_open
 
 
 
@@ -26,7 +26,7 @@ def load(world, chunkx, chunkz):
     )
 
     #get saves path
-    saves_path = yaml_open.get("saves_path")
+    saves_path = yaml_open("saves_path")
 
     #path to world
     world_path = saves_path + world
