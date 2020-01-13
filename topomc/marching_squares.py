@@ -31,7 +31,7 @@ class Cell:
 
 
 
-def marching_squares(heightmap, contour_interval = 1, contour_offset = 0):
+def parse(heightmap, contour_interval = 1, contour_offset = 0):
 
     data = []
 

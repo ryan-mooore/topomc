@@ -1,5 +1,4 @@
-#files
-from res import unstream, print_progressbar, yaml_open
+from common import bin, progressbar, yaml
 import chunk
 
 def get_from_chunk(world, chunkx, chunkz, tag = "MOTION_BLOCKING_NO_LEAVES"):
@@ -33,7 +32,7 @@ def get_from_chunk(world, chunkx, chunkz, tag = "MOTION_BLOCKING_NO_LEAVES"):
     except:
         raise Exception("Unloaded chunk(s)!")
 
-    hm_data = unstream(
+    hm_data = bin.unstream(
         hm_data_stream, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE
     )
 
@@ -55,7 +54,7 @@ def create_from_chunk(world, chunkx, chunkz):
 
     current_chunk = chunk.load(world, chunkx, chunkz)
 
-    surface_blocks = yaml_open("surface_blocks")
+    surface_blocks = yaml.yaml_open("surface_blocks")
 
     builtin_hm = get_from_chunk(world, chunkx, chunkz, "MOTION_BLOCKING_NO_LEAVES")
 
@@ -79,9 +78,7 @@ def create_from_chunk(world, chunkx, chunkz):
 
     return heightmap
 
-
-
-def create(world, chunkx1, chunkz1, chunkx2, chunkz2, chunks_to_retrieve):
+def create(world, chunkx1, chunkz1, chunkx2, chunkz2):
 
     def horizontal_append(map1, map2):
     #append if map contains content
@@ -95,7 +92,7 @@ def create(world, chunkx1, chunkz1, chunkx2, chunkz2, chunks_to_retrieve):
 
         return map1
 
-
+    chunks_to_retrieve = (chunkx2+1 - chunkx1) * (chunkz2+1 - chunkz1)
 
     def vertical_append(map1, map2):
         #append if map contains content
@@ -121,7 +118,7 @@ def create(world, chunkx1, chunkz1, chunkx2, chunkz2, chunks_to_retrieve):
             chunk_row = horizontal_append(chunk_row, current_chunk)
 
             chunks_retrieved += 1
-            print_progressbar(chunks_retrieved, chunks_to_retrieve, 1, "chunks retrieved")
+            progressbar._print(chunks_retrieved, chunks_to_retrieve, 1, "chunks retrieved")
 
         heightmap = vertical_append(heightmap, chunk_row)
 

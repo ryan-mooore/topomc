@@ -9,15 +9,11 @@ except:
     raise Exception("Anvil-parser is not installed or is missing")
 
 #files
-from res import yaml_open
-
-
+from common.yaml import yaml_open
 
 def chunkpos_to_regionpos(chunk):
 #convert chunk coords to region coords
     return int(math.floor(chunk / 32))
-
-
 
 def load(world, chunkx, chunkz):
     #get region coords from chunk

@@ -20,8 +20,8 @@ Firstly, chunk data is decoded and read from minecraft's save-files using the an
 
 Currently the script only works on Linux & Mac.
 
-To run the script, run the following command with the following arguments:
-`pythonversion` `run.py` `chunkx1` `chunky1` `chunkx2` `chunky2`
+To run the script, run the following command in the project root directory with the following arguments:
+`pythonversion` `topomc` `chunkx1` `chunky1` `chunkx2` `chunky2`
 
 The following optional arguments can be added to the end of the command:
 `world` - overrides world setting in `settings.yaml`
@@ -29,4 +29,4 @@ The following optional arguments can be added to the end of the command:
 `contour_offset` - overrides contour_offset setting in `settings.yaml`
 
 For example:
-`python3.7` `run.py` `0` `0` `5` `5` `New World` `2`
+`python3.7` `topomc` `0` `0` `5` `5` `New World` `2`

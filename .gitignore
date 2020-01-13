@@ -1,8 +1,5 @@
 .venv
 .vscode
 
-chunk-decoder.pl
-path_to_saves.txt
-test.py
-
 __pycache__
+common/__pycache__
