@@ -1,7 +1,5 @@
 #marching squares algorithm for generating contour data
 #TODO:
-#clean up with enumeration
-#linear interpolation
 #line assembly and smoothing
 
 

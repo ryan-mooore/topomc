@@ -1,8 +1,8 @@
-# Oricraft
+# TopoMC
 
 ![example contour generation](images/example.png)
 
-Oricraft is a python project that converts minecraft chunks into a topographical (contour) map.
+TopoMC is a python project that converts minecraft chunks into a topographical (contour) map.
 
 ## How it Works
 

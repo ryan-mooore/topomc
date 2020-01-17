@@ -1,4 +1,4 @@
-from common import bin, progressbar, yaml
+from common import bin, progressbar, yaml_open
 import chunk
 
 def get_from_chunk(world, chunkx, chunkz, tag = "MOTION_BLOCKING_NO_LEAVES"):
@@ -54,7 +54,7 @@ def create_from_chunk(world, chunkx, chunkz):
 
     current_chunk = chunk.load(world, chunkx, chunkz)
 
-    surface_blocks = yaml.yaml_open("surface_blocks")
+    surface_blocks = yaml_open.get("surface_blocks")
 
     builtin_hm = get_from_chunk(world, chunkx, chunkz, "MOTION_BLOCKING_NO_LEAVES")
 
