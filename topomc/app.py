@@ -36,5 +36,5 @@ def run(args):
 
     rendering_data = marching_squares.parse(heightmap, contour_interval)
 
-    scale = yaml.yaml_open("window_scale")
+    scale = yaml_open.get("window_scale")
     draw.draw(rendering_data, scale, total_bound_chunks)
