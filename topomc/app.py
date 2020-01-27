@@ -36,8 +36,8 @@ def run(args):
 
     heightmap = hm.create(world, *bounding_points)
 
-    if type(contour_interval) is not int \
-            or type(contour_offset) is not int:
+    if isinstance(contour_interval) is not int \
+    or isinstance(contour_offset) is not int:
         raise InvalidArg
 
     rendering_data = marching_squares.parse(heightmap, contour_interval)

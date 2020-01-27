@@ -1,7 +1,4 @@
-#marching squares algorithm for generating contour data
-#TODO:
-#line assembly and smoothing
-
+# marching squares algorithm for generating contour data
 
 
 class SideHelper:
@@ -11,7 +8,6 @@ class SideHelper:
 
         self.x = x
         self.y = y
-
 
 
 class Cell:
@@ -28,18 +24,17 @@ class Cell:
         self.max_corner_height = max(tl, tr, bl, br)
 
 
-
-def parse(heightmap, contour_interval = 1, contour_offset = 0):
+def parse(heightmap, contour_interval=1, contour_offset=0):
 
     data = []
 
     for y in range(len(heightmap) - 1):
         current_row = []
 
-        for x in range(len(heightmap[0])- 1):
+        for x in range(len(heightmap[0]) - 1):
             current_element = []
 
-            #find height values of 2x2 matrix in clockwise order
+            # find height values of 2x2 matrix in clockwise order
             top_left_corner =     heightmap[y]    [x]
             top_right_corner =    heightmap[y]    [x + 1]
             bottom_right_corner = heightmap[y + 1][x + 1]
@@ -52,8 +47,10 @@ def parse(heightmap, contour_interval = 1, contour_offset = 0):
                 bottom_left_corner
             )
 
-            #algorithm to turn heightmap into isoline co-ordinates
-            for lower_height in range(cell.min_corner_height, cell.max_corner_height):
+            # algorithm to turn heightmap into isoline co-ordinates
+            for lower_height in range(
+                cell.min_corner_height,
+                cell.max_corner_height):
                 upper_height = lower_height + 1
 
                 cell_coord_data = []
@@ -66,7 +63,8 @@ def parse(heightmap, contour_interval = 1, contour_offset = 0):
                             and side.corner1 <= lower_height \
                             and side.corner2 >= upper_height:
 
-                            side_height_difference = side.corner2 - side.corner1
+                            side_height_difference = \
+                                side.corner2 - side.corner1
                             location = (lower_height - side.corner1) \
                                 / side_height_difference \
                                 + 0.5 / side_height_difference
@@ -79,7 +77,8 @@ def parse(heightmap, contour_interval = 1, contour_offset = 0):
                             and side.corner1 >= upper_height \
                             and side.corner2 <=lower_height:
 
-                            side_height_difference = side.corner1 - side.corner2
+                            side_height_difference = \
+                                side.corner1 - side.corner2
                             location = 1 - (upper_height - side.corner2) \
                                 / side_height_difference \
                                 + 0.5 / side_height_difference

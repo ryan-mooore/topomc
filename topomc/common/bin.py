@@ -1,10 +1,11 @@
-"""
-This function is a pythonic adaptation of Reddit user bxny5's unstream
-function for decoding minecraft chunkheightmap data, written in perl.
-https://www.reddit.com/r/Minecraft/comments/bxny75/fun_with_chunk_data_heightmap_edition/
-"""
+
 
 def unstream(data, bits_per_value, int_size):
+    """
+    This function is a pythonic adaptation of Reddit user bxny5's unstream
+    function for decoding minecraft chunkheightmap data, written in perl.
+    https://www.reddit.com/r/Minecraft/comments/bxny75/fun_with_chunk_data_heightmap_edition/
+    """
 
     bl = 0
     result = []
