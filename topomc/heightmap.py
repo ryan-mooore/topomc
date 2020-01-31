@@ -3,10 +3,6 @@ from chunk import Chunk
 
 
 
-
-  
-
-
 class Heightmap:
     def __init__(self, world, chunkx1, chunkz1, chunkx2, chunkz2):
         self.map = []
@@ -29,7 +25,7 @@ class Heightmap:
             for x in range(chunkx1, chunkx2 + 1):
                 current_chunk = Chunk(world, x, z)
                 current_chunk.generate_heightmap()
-                chunk_row = self.horizontal_append(chunk_row, current_chunk)
+                chunk_row.append(current_chunk)
 
                 if current_chunk.min_height < self.min_height:
                     self.min_height = current_chunk.min_height
@@ -45,32 +41,4 @@ class Heightmap:
                     "chunks retrieved"
                 )
 
-            self.map = self.vertical_append(self.map, chunk_row)
-
-    
-    def horizontal_append(self, map1, map2):
-        # append if map contains content
-        if map1:
-            for index, row in enumerate(map2):
-                map1[index].extend(row)
-
-        # else create content
-        else:
-            map1 = map2
-
-        return map1
-
-
-    def vertical_append(self, map1, map2):
-        # append if map contains content
-        if map1:
-            for row in map2:
-                map1.append(row)
-
-        # create content
-        else:
-            map1 = map2
-
-        return map1
-
-
+            self.map.append(chunk_row)
