@@ -1,6 +1,5 @@
 # marching squares algorithm for generating contour data
 
-
 class SideHelper:
     def __init__(self, corner1, corner2, x, y):
         self.corner1 = corner1
@@ -12,39 +11,54 @@ class SideHelper:
 
 class Cell:
 
-    def __init__(self, tl, tr, br, bl):
-        self.sides = [
+    def __init__(self, sides, coords):
+        (tl, tr, br, bl) = sides
+        (x, y) = coords
+        self.sides = (
             SideHelper(bl, tl, 0, None),
             SideHelper(tl, tr, None, 1),
             SideHelper(br, tr, 1, None),
             SideHelper(bl, br, None, 0)
-        ]
+        )
+        self.x = x
+        self.y = y
 
         self.min_corner_height = min(tl, tr, bl, br)
         self.max_corner_height = max(tl, tr, bl, br)
 
+        self.isolines = []
+
+class Isoline:
+    def __init__(self, height):
+        self.height = height
+        self.coords = []
 
 def parse(heightmap, contour_interval=1, contour_offset=0):
-
+    chunk = heightmap.chunks[0][0]
+    print(chunk)
     data = []
 
-    for y in range(len(heightmap) - 1):
+    for y in range(len(chunk.hm) - 1):
         current_row = []
 
-        for x in range(len(heightmap[0]) - 1):
+        for x in range(len(chunk.hm[0]) - 1):
             current_element = []
 
+            tmp = chunk.hm
             # find height values of 2x2 matrix in clockwise order
-            top_left_corner =     heightmap[y]    [x]
-            top_right_corner =    heightmap[y]    [x + 1]
-            bottom_right_corner = heightmap[y + 1][x + 1]
-            bottom_left_corner =  heightmap[y + 1][x]
+            top_left_corner =     tmp[y]    [x]
+            top_right_corner =    tmp[y]    [x + 1]
+            bottom_right_corner = tmp[y + 1][x + 1]
+            bottom_left_corner =  tmp[y + 1][x]
 
             cell = Cell(
-                top_left_corner,
-                top_right_corner,
-                bottom_right_corner,
-                bottom_left_corner
+                (
+                    top_left_corner,
+                    top_right_corner,
+                    bottom_right_corner,
+                    bottom_left_corner
+                ),
+                (x, y)
             )
 
             # algorithm to turn heightmap into isoline co-ordinates
@@ -53,9 +67,9 @@ def parse(heightmap, contour_interval=1, contour_offset=0):
                 cell.max_corner_height):
                 upper_height = lower_height + 1
 
-                cell_coord_data = []
-
                 if (lower_height + contour_offset) % contour_interval == 0:
+
+                    curr_isoline = Isoline(lower_height)
 
                     for side in cell.sides:
 
@@ -71,7 +85,7 @@ def parse(heightmap, contour_interval=1, contour_offset=0):
 
                             coords = [side.x, side.y]
                             coords[coords.index(None)] = location
-                            cell_coord_data.append(coords)
+                            curr_isoline.coords.append(tuple(coords))
 
                         if side.corner1 > side.corner2 \
                             and side.corner1 >= upper_height \
@@ -85,12 +99,16 @@ def parse(heightmap, contour_interval=1, contour_offset=0):
 
                             coords = [side.x, side.y]
                             coords[coords.index(None)] = location
-                            cell_coord_data.append(coords)
+                            curr_isoline.coords.append(tuple(coords))
 
-                current_element.append(cell_coord_data)
+                    cell.isolines.append(curr_isoline)
 
-            current_row.append(current_element)
+            current_row.append(cell)
 
         data.append(current_row)
+    chunk.cells = data
+    import pprint
+    pp = pprint.PrettyPrinter()
+    #pp.pprint(data)
 
-    return data
+    return heightmap

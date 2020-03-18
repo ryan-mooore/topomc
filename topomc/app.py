@@ -3,6 +3,7 @@ from common import yaml_open
 import heightmap as hm
 import marching_squares
 import draw
+import vectorize
 
 MissingCoords = Exception("no co-ordinates for world specified")
 InvalidCoords = Exception("Invalid co-ordinates")
@@ -36,11 +37,13 @@ def run(args):
 
     heightmap = hm.create(world, *bounding_points)
 
-    if isinstance(contour_interval) is not int \
-    or isinstance(contour_offset) is not int:
+    if not isinstance(contour_interval, int) \
+    or not isinstance(contour_offset, int):
         raise InvalidArg
 
-    rendering_data = marching_squares.parse(heightmap, contour_interval)
+    heightmap = marching_squares.parse(heightmap, contour_interval)
+
+    vectorize.vectorize(heightmap)
 
     scale = yaml_open.get("window_scale")
-    draw.draw(rendering_data, scale, total_bound_chunks)
+    draw.draw(heightmap.chunks[0][0].cells, scale, total_bound_chunks)

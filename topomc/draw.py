@@ -43,16 +43,17 @@ def draw(data, scale, chunks_to_render):
     def on_draw():
         pyglet.gl.glLineWidth(3)
         window.clear()
+        draw_grid()
         chunks_rendered = 0
         for y, row in enumerate(data):
-            for x, line_data in enumerate(row):
+            for x, cell in enumerate(row):
                 # account for empty square
-                if line_data:
-                    for line_set in line_data:
+                if cell.isolines:
+                    for isoline in cell.isolines:
                         # account for saddle points
-                        for index, point in enumerate(line_set[::2]):
+                        for index, point in enumerate(isoline.coords[::2]):
                             # translate string to tuple with co-ords
-                            (start, end) = point, line_set[index * 2 + 1]
+                            (start, end) = point, isoline.coords[index * 2 + 1]
                             # position in list + tuple inside square + 1
                             draw_line((
                                 x + start[0],
