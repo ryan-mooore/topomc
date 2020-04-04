@@ -42,17 +42,17 @@ class Coordinates:
         self.y = y
 
 def parse(heightmap, contour_interval=1, contour_offset=0):
-    chunk = heightmap.chunks[0][0]
-    print(chunk)
+    chunk_tile = heightmap.chunk_tiles[0][0]
+    print(chunk_tile)
     data = []
 
-    for y in range(len(chunk.hm) - 1):
+    for y in range(len(chunk_tile.heightmap) - 1):
         current_row = []
 
-        for x in range(len(chunk.hm[0]) - 1):
+        for x in range(len(chunk_tile.heightmap[0]) - 1):
             current_element = []
 
-            tmp = chunk.hm
+            tmp = chunk_tile.heightmap
             # find height values of 2x2 matrix in clockwise order
             top_left_corner =     tmp[y]    [x]
             top_right_corner =    tmp[y]    [x + 1]
@@ -131,7 +131,7 @@ def parse(heightmap, contour_interval=1, contour_offset=0):
             current_row.append(cell)
 
         data.append(current_row)
-    chunk.cells = data
+    chunk_tile.cells = data
     import pprint
     pp = pprint.PrettyPrinter()
     #pp.pprint(data)

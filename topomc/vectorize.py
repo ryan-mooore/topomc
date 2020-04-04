@@ -9,7 +9,7 @@ class Coordinates:
         return self.x == other.x and self.y == other.y
 
 def vectorize(heightmap):
-    chunk =  heightmap.chunks[0][0]
+    chunk =  heightmap.chunk_tiles[0][0]
     bitmap = [[0 for  element in chunk.cells] for element in chunk.cells[0]]
     print(chunk.get_extremes())
 
@@ -23,14 +23,14 @@ def vectorize(heightmap):
 
                             startcell = cell
                             currcell = cell
-                            thread = True
+                            trace = True
                             linkcoords = isoline.coords.start
                             
                             print(f"x: {currcell.coords.x}      y: {currcell.coords.y}      linkcoords: {linkcoords.x, linkcoords.y}")
                             
-                            while thread:
+                            while trace:
                                 if not currcell.isolines:
-                                    thread = False
+                                    trace = False
                                     continue
                                 for isoline in currcell.isolines:
                                     iteration = 0
@@ -38,25 +38,25 @@ def vectorize(heightmap):
                                         if (currcell.coords.x, currcell.coords.y) == (startcell.coords.x, startcell.coords.y) \
                                             and iteration is not 0: # if trail has looped back to start tile
                                             bitmap[currcell.coords.y][currcell.coords.x] = 1
-                                            thread = False
+                                            trace = False
                                             continue
 
                                             # if trail has reached rendering border
                                         if currcell.coords.x == 0 and isoline.coords.start.x == 0: 
                                             bitmap[currcell.coords.y][currcell.coords.x] = 1
-                                            thread = False
+                                            trace = False
                                             continue
                                         if currcell.coords.x == 14 and isoline.coords.end.x == 1: 
                                             bitmap[currcell.coords.y][currcell.coords.x] = 1
-                                            thread = False
+                                            trace = False
                                             continue
                                         if currcell.coords.y == 0 and isoline.coords.start.y == 1: 
                                             bitmap[currcell.coords.y][currcell.coords.x] = 1
-                                            thread = False
+                                            trace = False
                                             continue
                                         if currcell.coords.y == 14 and isoline.coords.end.y == 0:
                                             bitmap[currcell.coords.y][currcell.coords.x] = 1
-                                            thread = False
+                                            trace = False
                                             continue
                                         else:
                                             print(f"coords: {isoline.coords}")
@@ -91,61 +91,3 @@ def vectorize(heightmap):
     import pprint
     pp = pprint.PrettyPrinter()
     pp.pprint(bitmap)
-
-def isoline_explore(chunk, cell, startcell, linkcoords, height, iteration, bitmap, mode):
-
-    print(f"x: {cell.x}      y: {cell.y}      linkcoords: {linkcoords}")
-    for isoline in cell.isolines:
-        if isoline.height == height: #check for operating height
-            if (cell.x, cell.y) == (startcell.x, startcell.y) \
-                and iteration is not 0: # if trail has looped back to start tile
-                bitmap[cell.y][cell.x] = 1
-                thread = False
-
-                # if trail has reached rendering border
-            if cell.x == 0 and isoline.coords[0][0] == 0: 
-                bitmap[cell.y][cell.x] = 1
-                thread = False
-            if cell.x == 14 and isoline.coords[1][0] == 1: 
-                bitmap[cell.y][cell.x] = 1
-                thread = False
-            if cell.y == 0 and isoline.coords[0][1] == 1: 
-                bitmap[cell.y][cell.x] = 1
-                thread = False
-            if cell.y == 14 and isoline.coords[1][1] == 0:
-                bitmap[cell.y][cell.x] = 1
-                thread = False
-            else:
-                print(f"coords: {isoline.coords}")
-                if linkcoords == isoline.coords[0]:
-                    newcoords = isoline.coords[1]
-                if linkcoords == isoline.coords[1]:
-                    newcoords = isoline.coords[0]
-
-                if newcoords[0] in [0, 1]: #if touches x edge
-                    if newcoords[0] == 0:
-                        newcell = chunk.cells[cell.y][cell.x - 1] #touching left
-                        newlinkcoords = (1, newcoords[1])
-                    if newcoords[0] == 1: #touching right
-                        newcell = chunk.cells[cell.y][cell.x + 1]
-                        newlinkcoords = (0, newcoords[1])
-                if newcoords[1] in [0, 1]: #if touches y edge
-                    if newcoords[1] == 0: #touching bottom
-                        newcell = chunk.cells[cell.y + 1][cell.x]
-                        newlinkcoords = (newcoords[0], 1)
-                    if newcoords[1] == 1: #touching top
-                        newcell = chunk.cells[cell.y - 1][cell.x]
-                        newlinkcoords = (newcoords[0], 0)
-
-                print(f"newcoords: {newcoords}")
-                bitmap[cell.y][cell.x] = 1
-                return isoline_explore(
-                    chunk = chunk,
-                    cell = newcell,
-                    startcell = startcell, 
-                    linkcoords = newlinkcoords,
-                    height = height,
-                    iteration = iteration + 1,
-                    bitmap = bitmap,
-                    mode = "explore"
-                        )

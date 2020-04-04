@@ -14,24 +14,24 @@ INDEX_OF_HEIGHTMAPS = 6
 STREAM_BITS_PER_VALUE = 9
 STREAM_INT_SIZE = 64
 
-class Chunk:
+class ChunkTile:
     def get_extremes(self):
         min_height = 0xFF
         max_height = 0x00
-        for row in self.hm:
-            for point_height in row:
-                if point_height < min_height: min_height = point_height
-                if point_height > max_height: max_height = point_height
+
+        point_heights = [point_height for row in self.heightmap for point_height in row]
+        min_height = min(*point_heights)
+        max_height = max(*point_heights)
         
         return (min_height, max_height)
                 
 
 class Heightmap:
-    def __init__(self, chunks):
-        self.chunks = chunks
+    def __init__(self, chunk_tiles):
+        self.chunk_tiles = chunk_tiles
 
 
-def get_hm_data(anvil, tag="MOTION_BLOCKING_NO_LEAVES"):
+def get_chunktag_heightmap(anvil, tag="MOTION_BLOCKING_NO_LEAVES"):
     try:
         tags.index(tag)
     except Exception:
@@ -40,34 +40,33 @@ def get_hm_data(anvil, tag="MOTION_BLOCKING_NO_LEAVES"):
     INDEX_OF_TAG = tags.index(tag)
     
     try:
-        hm_data_stream = \
+        data_stream = \
             anvil.tags[INDEX_OF_HEIGHTMAPS].tags[INDEX_OF_TAG]
     except Exception:
         raise Exception("Unloaded chunk(s)!")
 
-    hm_data = bin.unstream(
-        hm_data_stream, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE
+    chunktag_heightmap = bin.unstream(
+        data_stream, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE
     )
 
-
-    hm_data_formatted = []
-    current_row = []
-    for index, point_height in enumerate(hm_data):
+    chunktag_heightmap_deepened = []
+    row = []
+    for index, point_height in enumerate(chunktag_heightmap):
         if index % 16 == 0:
-            if current_row:
-                hm_data_formatted.append(current_row)
-            current_row = []
-        current_row.append(point_height)
-    hm_data_formatted.append(current_row)
+            if row:
+                chunktag_heightmap_deepened.append(row)
+            row = []
+        row.append(point_height)
+    chunktag_heightmap_deepened.append(row)
 
-    return hm_data_formatted
+    return chunktag_heightmap_deepened
 
 # generate 2d heightmap matrix
-def create_chunk(world, chunkx, chunkz):
+def create_chunktile(world, chunk_x, chunk_z):
 
-    curr_chunk = Chunk()
-    curr_chunk.anvil = chunk.load(world, chunkx, chunkz)
-    curr_chunk.hmdata = get_hm_data(curr_chunk.anvil.data, tags[1])
+    chunk_tile = ChunkTile()
+    chunk_tile.anvil_file = chunk.load(world, chunk_x, chunk_z)
+    chunk_tile.chunktag_heightmap = get_chunktag_heightmap(chunk_tile.anvil_file.data, tags[1])
 
     surface_blocks = yaml_open.get("surface_blocks")
 
@@ -75,36 +74,36 @@ def create_chunk(world, chunkx, chunkz):
     heightmap = []
 
     for z in range(16):
-        current_row = []
+        row = []
 
         for x in range(16):
-            start = curr_chunk.hmdata[z][x] - 1
+            start = chunk_tile.chunktag_heightmap[z][x] - 1
             for y in range(start, 0, -1):
-                block = curr_chunk.anvil.get_block(x, y, z).id
+                block = chunk_tile.anvil_file.get_block(x, y, z).id
 
                 if block in surface_blocks:
-                    current_row.append(y)
+                    row.append(y)
                     break
 
-        heightmap.append(current_row)
+        heightmap.append(row)
 
-    curr_chunk.hm = heightmap
-    return curr_chunk
+    chunk_tile.heightmap = heightmap
+    return chunk_tile
 
 
-def create(world, chunkx1, chunkz1, chunkx2, chunkz2):
+def create_heightmap(world, chunk_x1, chunk_z1, chunk_x2, chunk_z2):
 
-    chunks_to_retrieve = (chunkx2+1 - chunkx1) * (chunkz2+1 - chunkz1)
+    chunks_to_retrieve = (chunk_x2+1 - chunk_x1) * (chunk_z2+1 - chunk_z1)
 
     heightmap = []
     chunks_retrieved = 0
 
     # + 1 because ending chunks are inclusive
-    for z in range(chunkz1, chunkz2 + 1):
+    for z in range(chunk_z1, chunk_z2 + 1):
         chunk_row = []
 
-        for x in range(chunkx1, chunkx2 + 1):
-            chunk_row.append(create_chunk(world, x, z))
+        for x in range(chunk_x1, chunk_x2 + 1):
+            chunk_row.append(create_chunktile(world, x, z))
 
             chunks_retrieved += 1
             progressbar._print(
