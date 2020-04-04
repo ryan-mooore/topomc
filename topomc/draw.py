@@ -51,27 +51,25 @@ def draw(data, scale, chunks_to_render):
                 if cell.isolines:
                     for isoline in cell.isolines:
                         # account for saddle points
-                        for index, point in enumerate(isoline.coords[::2]):
-                            # translate string to tuple with co-ords
-                            (start, end) = point, isoline.coords[index * 2 + 1]
-                            # position in list + tuple inside square + 1
-                            draw_line((
-                                x + start[0],
-                                len(data) - y - 1 + start[1],
-                                x + end[0],
-                                len(data) - y - 1 + end[1]
-                            ))
-                            if chunks_rendered < chunks_to_render:
-                                chunks_rendered += 1
-                                progressbar._print(
-                                    chunks_rendered,
-                                    chunks_to_render,
-                                    2,
-                                    "chunks rendered"
-                                )
+                        (start, end) = isoline.coords.start, isoline.coords.end
+                        # position in list + tuple inside square + 1
+                        draw_line((
+                            x + start.x,
+                            len(data) - y - 1 + start.y,
+                            x + end.x,
+                            len(data) - y - 1 + end.y
+                        ))
+                        if chunks_rendered < chunks_to_render:
+                            chunks_rendered += 1
+                            progressbar._print(
+                                chunks_rendered,
+                                chunks_to_render,
+                                2,
+                                "chunks rendered"
+                            )
 
-                                if chunks_rendered == chunks_to_render:
-                                    print("Loading pyglet window...")
-                                    print()
+                            if chunks_rendered == chunks_to_render:
+                                print("Loading pyglet window...")
+                                print()
 
     pyglet.app.run()

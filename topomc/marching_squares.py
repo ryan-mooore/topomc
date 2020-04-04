@@ -5,33 +5,41 @@ class SideHelper:
         self.corner1 = corner1
         self.corner2 = corner2
 
-        self.x = x
-        self.y = y
+        self.coords = Coordinates(x, y)
+
 
 
 class Cell:
 
     def __init__(self, sides, coords):
         (tl, tr, br, bl) = sides
-        (x, y) = coords
         self.sides = (
             SideHelper(bl, tl, 0, None),
             SideHelper(tl, tr, None, 1),
             SideHelper(br, tr, 1, None),
             SideHelper(bl, br, None, 0)
         )
-        self.x = x
-        self.y = y
+        self.coords = Coordinates(*coords)
 
         self.min_corner_height = min(tl, tr, bl, br)
         self.max_corner_height = max(tl, tr, bl, br)
 
         self.isolines = []
 
+class IsolineCoords:
+    def __init__(self):
+        self.start = Coordinates(0, 0)
+        self.end = Coordinates(0, 0)
+
 class Isoline:
     def __init__(self, height):
         self.height = height
-        self.coords = []
+        self.coords = IsolineCoords()
+
+class Coordinates:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
 def parse(heightmap, contour_interval=1, contour_offset=0):
     chunk = heightmap.chunks[0][0]
@@ -71,25 +79,27 @@ def parse(heightmap, contour_interval=1, contour_offset=0):
 
                     curr_isoline = Isoline(lower_height)
 
+                    search = "start"
+                    side_is_endpoint = False
+
                     for side in cell.sides:
+                        # theoretically this loop should only run twice - 
+                        # only one height isoline so only one start and end exist
 
                         if side.corner1 < side.corner2 \
                             and side.corner1 <= lower_height \
-                            and side.corner2 >= upper_height:
-
+                            and side.corner2 >= upper_height: # a height difference exists
                             side_height_difference = \
                                 side.corner2 - side.corner1
                             location = (lower_height - side.corner1) \
                                 / side_height_difference \
                                 + 0.5 / side_height_difference
-
-                            coords = [side.x, side.y]
-                            coords[coords.index(None)] = location
-                            curr_isoline.coords.append(tuple(coords))
+                            
+                            side_is_endpoint = True
 
                         if side.corner1 > side.corner2 \
                             and side.corner1 >= upper_height \
-                            and side.corner2 <=lower_height:
+                            and side.corner2 <=lower_height: # a height difference exists
 
                             side_height_difference = \
                                 side.corner1 - side.corner2
@@ -97,9 +107,24 @@ def parse(heightmap, contour_interval=1, contour_offset=0):
                                 / side_height_difference \
                                 + 0.5 / side_height_difference
 
-                            coords = [side.x, side.y]
-                            coords[coords.index(None)] = location
-                            curr_isoline.coords.append(tuple(coords))
+                            side_is_endpoint = True
+
+                        if side_is_endpoint:
+                            coords = Coordinates(side.coords.x, side.coords.y)
+                            if coords.x == None:
+                                coords.x = location
+                            if coords.y == None:
+                                coords.y = location
+
+                            if search == "start":
+                                curr_isoline.coords.start.x = coords.x
+                                curr_isoline.coords.start.y = coords.y
+                                search = "end"
+                            elif search == "end":
+                                curr_isoline.coords.end.x = coords.x
+                                curr_isoline.coords.end.y = coords.y
+
+                            side_is_endpoint = False
 
                     cell.isolines.append(curr_isoline)
 
