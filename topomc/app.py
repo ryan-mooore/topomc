@@ -35,15 +35,14 @@ def run(args):
     except IndexError:
         contour_offset = yaml_open.get("contour_offset")
 
-    heightmap = hm.create_heightmap(world, *bounding_points)
+    heightmap = hm.Heightmap(world, *bounding_points)
 
     if not isinstance(contour_interval, int) \
     or not isinstance(contour_offset, int):
         raise InvalidArg
 
-    heightmap = marching_squares.parse(heightmap, contour_interval)
+    squaremarch = marching_squares.SquareMarch(heightmap, contour_interval)
 
-    topodata = vectorize.vectorize(heightmap)
-
+    topodata = vectorize.Topodata(squaremarch)
     scale = yaml_open.get("window_scale")
-    draw.draw(heightmap.chunk_tiles[0][0].cells, scale, total_bound_chunks)
+    draw.draw(heightmap.chunk_tiles[0][0].data, scale, total_bound_chunks)

@@ -7,10 +7,7 @@ class SideHelper:
 
         self.coords = Coordinates(x, y)
 
-
-
 class Cell:
-
     def __init__(self, sides, coords):
         (tl, tr, br, bl) = sides
         self.sides = (
@@ -47,99 +44,92 @@ class Coordinates:
         
         return self.x == other.x and self.y == other.y
 
-def parse(heightmap, contour_interval=1, contour_offset=0):
-    chunk_tile = heightmap.chunk_tiles[0][0]
-    print(chunk_tile)
-    data = []
+class SquareMarch:
+    def __init__(self, heightmap, contour_interval=1, contour_offset=0):
+        chunk_tile = heightmap.chunk_tiles[0][0]
+        chunk_tile.data = []
+        for y in range(len(chunk_tile.heightmap) - 1):
+            current_row = []
+            for x in range(len(chunk_tile.heightmap[0]) - 1):
+                current_element = []
 
-    for y in range(len(chunk_tile.heightmap) - 1):
-        current_row = []
+                hm = chunk_tile.heightmap
+                # find height values of 2x2 matrix in clockwise order
+                top_left_corner =     hm[y]    [x]
+                top_right_corner =    hm[y]    [x + 1]
+                bottom_right_corner = hm[y + 1][x + 1]
+                bottom_left_corner =  hm[y + 1][x]
 
-        for x in range(len(chunk_tile.heightmap[0]) - 1):
-            current_element = []
+                cell = Cell(
+                    (
+                        top_left_corner,
+                        top_right_corner,
+                        bottom_right_corner,
+                        bottom_left_corner
+                    ),
+                    (x, y)
+                )
 
-            tmp = chunk_tile.heightmap
-            # find height values of 2x2 matrix in clockwise order
-            top_left_corner =     tmp[y]    [x]
-            top_right_corner =    tmp[y]    [x + 1]
-            bottom_right_corner = tmp[y + 1][x + 1]
-            bottom_left_corner =  tmp[y + 1][x]
+                # algorithm to turn heightmap into pixline co-ordinates
+                for lower_height in range(
+                    cell.min_corner_height,
+                    cell.max_corner_height):
+                    upper_height = lower_height + 1
 
-            cell = Cell(
-                (
-                    top_left_corner,
-                    top_right_corner,
-                    bottom_right_corner,
-                    bottom_left_corner
-                ),
-                (x, y)
-            )
+                    if (lower_height + contour_offset) % contour_interval == 0:
 
-            # algorithm to turn heightmap into pixline co-ordinates
-            for lower_height in range(
-                cell.min_corner_height,
-                cell.max_corner_height):
-                upper_height = lower_height + 1
+                        pixline = Pixline(lower_height)
 
-                if (lower_height + contour_offset) % contour_interval == 0:
+                        search = "start"
+                        side_is_endpoint = False
 
-                    pixline = Pixline(lower_height)
+                        for side in cell.sides:
+                            # theoretically this loop should only run twice - 
+                            # only one height pixline so only one start and end exist
 
-                    search = "start"
-                    side_is_endpoint = False
+                            if side.corner1 < side.corner2 \
+                                and side.corner1 <= lower_height \
+                                and side.corner2 >= upper_height: # a height difference exists
+                                side_height_difference = \
+                                    side.corner2 - side.corner1
+                                location = (lower_height - side.corner1) \
+                                    / side_height_difference \
+                                    + 0.5 / side_height_difference
+                                
+                                side_is_endpoint = True
 
-                    for side in cell.sides:
-                        # theoretically this loop should only run twice - 
-                        # only one height pixline so only one start and end exist
+                            if side.corner1 > side.corner2 \
+                                and side.corner1 >= upper_height \
+                                and side.corner2 <=lower_height: # a height difference exists
 
-                        if side.corner1 < side.corner2 \
-                            and side.corner1 <= lower_height \
-                            and side.corner2 >= upper_height: # a height difference exists
-                            side_height_difference = \
-                                side.corner2 - side.corner1
-                            location = (lower_height - side.corner1) \
-                                / side_height_difference \
-                                + 0.5 / side_height_difference
-                            
-                            side_is_endpoint = True
+                                side_height_difference = \
+                                    side.corner1 - side.corner2
+                                location = 1 - (upper_height - side.corner2) \
+                                    / side_height_difference \
+                                    + 0.5 / side_height_difference
 
-                        if side.corner1 > side.corner2 \
-                            and side.corner1 >= upper_height \
-                            and side.corner2 <=lower_height: # a height difference exists
+                                side_is_endpoint = True
 
-                            side_height_difference = \
-                                side.corner1 - side.corner2
-                            location = 1 - (upper_height - side.corner2) \
-                                / side_height_difference \
-                                + 0.5 / side_height_difference
+                            if side_is_endpoint:
+                                coords = Coordinates(side.coords.x, side.coords.y)
+                                if coords.x == None:
+                                    coords.x = location
+                                if coords.y == None:
+                                    coords.y = location
 
-                            side_is_endpoint = True
+                                if search == "start":
+                                    pixline.coords.start.x = coords.x
+                                    pixline.coords.start.y = coords.y
+                                    search = "end"
+                                elif search == "end":
+                                    pixline.coords.end.x = coords.x
+                                    pixline.coords.end.y = coords.y
 
-                        if side_is_endpoint:
-                            coords = Coordinates(side.coords.x, side.coords.y)
-                            if coords.x == None:
-                                coords.x = location
-                            if coords.y == None:
-                                coords.y = location
+                                side_is_endpoint = False
 
-                            if search == "start":
-                                pixline.coords.start.x = coords.x
-                                pixline.coords.start.y = coords.y
-                                search = "end"
-                            elif search == "end":
-                                pixline.coords.end.x = coords.x
-                                pixline.coords.end.y = coords.y
+                        cell.pixlines.append(pixline)
 
-                            side_is_endpoint = False
+                current_row.append(cell)
 
-                    cell.pixlines.append(pixline)
-
-            current_row.append(cell)
-
-        data.append(current_row)
-    chunk_tile.cells = data
-    import pprint
-    pp = pprint.PrettyPrinter()
-    #pp.pprint(data)
-
-    return heightmap
+            chunk_tile.data.append(current_row)
+        self.chunk_tile = chunk_tile
