@@ -24,24 +24,27 @@ class Cell:
         self.min_corner_height = min(tl, tr, bl, br)
         self.max_corner_height = max(tl, tr, bl, br)
 
-        self.isolines = []
+        self.pixlines = []
 
-class IsolineCoords:
+class PixlineCoords:
     def __init__(self):
         self.start = Coordinates(0, 0)
         self.end = Coordinates(0, 0)
 
-class Isoline:
+class Pixline:
     def __init__(self, height):
         self.height = height
-        self.coords = IsolineCoords()
+        self.coords = PixlineCoords()
 
 class Coordinates:
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
-    def __eq__(self, other): 
+    def __eq__(self, other):
+        if not isinstance(other, Coordinates):
+            return NotImplemented 
+        
         return self.x == other.x and self.y == other.y
 
 def parse(heightmap, contour_interval=1, contour_offset=0):
@@ -72,7 +75,7 @@ def parse(heightmap, contour_interval=1, contour_offset=0):
                 (x, y)
             )
 
-            # algorithm to turn heightmap into isoline co-ordinates
+            # algorithm to turn heightmap into pixline co-ordinates
             for lower_height in range(
                 cell.min_corner_height,
                 cell.max_corner_height):
@@ -80,14 +83,14 @@ def parse(heightmap, contour_interval=1, contour_offset=0):
 
                 if (lower_height + contour_offset) % contour_interval == 0:
 
-                    curr_isoline = Isoline(lower_height)
+                    pixline = Pixline(lower_height)
 
                     search = "start"
                     side_is_endpoint = False
 
                     for side in cell.sides:
                         # theoretically this loop should only run twice - 
-                        # only one height isoline so only one start and end exist
+                        # only one height pixline so only one start and end exist
 
                         if side.corner1 < side.corner2 \
                             and side.corner1 <= lower_height \
@@ -120,16 +123,16 @@ def parse(heightmap, contour_interval=1, contour_offset=0):
                                 coords.y = location
 
                             if search == "start":
-                                curr_isoline.coords.start.x = coords.x
-                                curr_isoline.coords.start.y = coords.y
+                                pixline.coords.start.x = coords.x
+                                pixline.coords.start.y = coords.y
                                 search = "end"
                             elif search == "end":
-                                curr_isoline.coords.end.x = coords.x
-                                curr_isoline.coords.end.y = coords.y
+                                pixline.coords.end.x = coords.x
+                                pixline.coords.end.y = coords.y
 
                             side_is_endpoint = False
 
-                    cell.isolines.append(curr_isoline)
+                    cell.pixlines.append(pixline)
 
             current_row.append(cell)
 

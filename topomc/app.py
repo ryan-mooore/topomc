@@ -43,7 +43,7 @@ def run(args):
 
     heightmap = marching_squares.parse(heightmap, contour_interval)
 
-    vectorize.vectorize(heightmap)
+    topodata = vectorize.vectorize(heightmap)
 
     scale = yaml_open.get("window_scale")
     draw.draw(heightmap.chunk_tiles[0][0].cells, scale, total_bound_chunks)
