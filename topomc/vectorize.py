@@ -1,78 +1,73 @@
-enum = enumerate
-
-class Coordinates:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __eq__(self, other): 
-        return self.x == other.x and self.y == other.y
+from marching_squares import Coordinates
 
 def vectorize(heightmap):
-    chunk =  heightmap.chunk_tiles[0][0]
-    bitmap = [[0 for  element in chunk.cells] for element in chunk.cells[0]]
-    print(chunk.get_extremes())
+    chunk_tile =  heightmap.chunk_tiles[0][0]
+    bitmap = [[0 for  cell_row in chunk_tile.cells] for cell in chunk_tile.cells[0]]
+    print(chunk_tile.get_extremes())
 
-    def isoline_explore(first_iter=False, line=[], currcell=None, linkcoords=None):
-        # globals: bitmap (reassigned), height (static), startcell (static)
+    def isoline_tracer(first_iter=False, line=[], this_cell=None, this_cell_link=None):
+        # globals: bitmap (reassigned), height (static), origin_cell (static)
 
-        if not currcell:
-            currcell = startcell
-        if not linkcoords:
-            linkcoords = currcell.isolines[0].coords.start
+        def swap_endpoints():
+            if this_cell_link == isoline.coords.start:
+                return isoline.coords.end
+            elif this_cell_link == isoline.coords.end:
+                return isoline.coords.start
+            else:
+                return AttributeError
+        
+        def cell_link_buider(cell_offset, link_offset):
+            global new_cell
+            global new_cell_link
+            (cell_offset_x, cell_offset_y) = cell_offset
+            (link_offset_x, link_offset_y) = link_offset
+            new_cell = chunk_tile.cells[this_cell.coords.y + cell_offset_y]\
+                [this_cell.coords.x + cell_offset_x]
+            if link_offset_x == '~':
+                link_offset_x = opposite_link.x
+            if link_offset_y == '~':
+                link_offset_y = opposite_link.y
+            new_cell_link = Coordinates(link_offset_x, link_offset_y)
+        
+        if not this_cell:
+            this_cell = origin_cell
+        if not this_cell_link:
+            this_cell_link = this_cell.isolines[0].coords.start
 
-        isoline = currcell.isolines[0]
+        isoline = this_cell.isolines[0]
 
         if isoline.height == height: #check for operating height
             
-            def swap_endpoints():
-                if linkcoords == isoline.coords.start:
-                    return isoline.coords.end
-                if linkcoords == isoline.coords.end:
-                    return isoline.coords.start
 
-            line.append((currcell.coords.x, currcell.coords.y))
-            bitmap[currcell.coords.y][currcell.coords.x] = 1
+            line.append((this_cell.coords.x, this_cell.coords.y))
+            bitmap[this_cell.coords.y][this_cell.coords.x] = 1
             
-            link_endpoint = swap_endpoints()
+            opposite_link = swap_endpoints()
             
             if not first_iter:
-                location = (currcell, link_endpoint)
+                location = (this_cell, opposite_link)
 
                 #loop testing
-                if (currcell == startcell):
-                    bitmap[currcell.coords.y][currcell.coords.x] = 1
-                    return line, location
+                if (this_cell == origin_cell): return line, location
                 
                 #edge testing
-                c = currcell.coords
+                c = this_cell.coords
                 l = isoline.coords
-                if c.x == 0 and l.start.x == 0 or \
-                    c.x == 14 and l.end.x == 1 or \
-                    c.y == 0 and l.start.y == 1 or \
-                    c.y == 14 and l.end.y == 0:
-                    return line, location
-                
+                if c.x == 0  and l.start.x == 0: return line, location
+                if c.x == 14 and l.end.x   == 1: return line, location
+                if c.y == 0  and l.start.y == 1: return line, location
+                if c.y == 14 and l.end.y   == 0: return line, location
+            
+            # build link
+            if opposite_link.x == 0: cell_link_buider((-1, 0), (1, '~')) # left
+            if opposite_link.x == 1: cell_link_buider(( 1, 0), (0, '~')) # right
+            if opposite_link.y == 0: cell_link_buider(( 0, 1), ('~', 1))  # bottom
+            if opposite_link.y == 1: cell_link_buider(( 0,-1), ('~', 0)) # top
 
-            if link_endpoint.x in [0, 1]: #if touches x edge
-                if link_endpoint.x == 0:
-                    new_cell = chunk.cells[currcell.coords.y][currcell.coords.x - 1] #touching left
-                    new_cell_link_endpoint = Coordinates(1, link_endpoint.y)
-                if link_endpoint.x == 1: #touching right
-                    new_cell = chunk.cells[currcell.coords.y][currcell.coords.x + 1]
-                    new_cell_link_endpoint = Coordinates(0, link_endpoint.y)
-            if link_endpoint.y in [0, 1]: #if touches y edge
-                if link_endpoint.y == 0: #touching bottom
-                    new_cell = chunk.cells[currcell.coords.y + 1][currcell.coords.x]
-                    new_cell_link_endpoint = Coordinates(link_endpoint.x, 1)
-                if link_endpoint.y == 1: #touching top
-                    new_cell = chunk.cells[currcell.coords.y - 1][currcell.coords.x]
-                    new_cell_link_endpoint = Coordinates(link_endpoint.x, 0)
-
-            return isoline_explore(
+            return isoline_tracer(
                 line=line,
-                currcell=new_cell,
-                linkcoords=new_cell_link_endpoint
+                this_cell=new_cell,
+                this_cell_link=new_cell_link
             )
     
 
@@ -80,25 +75,24 @@ def vectorize(heightmap):
 
 
 
-    #for height in range(*chunk.get_extremes()):
-    for height in range(chunk.get_extremes()[0], chunk.get_extremes()[0] + 1):
-        for y, row in enum(chunk.cells):
-            for x, cell in enum(row): #foreach cell
+    #for height in range(*chunk_tile.get_extremes()):
+    for height in range(chunk_tile.get_extremes()[0], chunk_tile.get_extremes()[0] + 1):
+        for y, row in enumerate(chunk_tile.cells):
+            for x, cell in enumerate(row): #foreach cell
                 if bitmap[y][x] is not 1: #if it has not already been used at this height
                     for isoline in cell.isolines:
                         if isoline.height == height: #explore
 
-                            startcell = cell
-                            linkcoords = isoline.coords.start
+                            origin_cell = cell
 
-                            line, (new_startcell, new_start_coords) = isoline_explore(
+                            line, (new_origin_cell, new_start_coords) = isoline_tracer(
                                 first_iter=True,
                             )
                             
-                            startcell = new_startcell
-                            line = isoline_explore(
+                            origin_cell = new_origin_cell
+                            line = isoline_tracer(
                                 first_iter=True,
-                                linkcoords=new_start_coords
+                                this_cell_link=new_start_coords
                             )[0] # only get line value
 
     print(line)

@@ -41,6 +41,9 @@ class Coordinates:
         self.x = x
         self.y = y
 
+    def __eq__(self, other): 
+        return self.x == other.x and self.y == other.y
+
 def parse(heightmap, contour_interval=1, contour_offset=0):
     chunk_tile = heightmap.chunk_tiles[0][0]
     print(chunk_tile)
