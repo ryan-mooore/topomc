@@ -1,7 +1,5 @@
 # TopoMC
-
-![example contour generation](images/4_chunks.png)
-![example contour generation](images/25_chunks.png)
+![example contour generation](images/4_chunks.png) ![example contour generation](images/25_chunks.png)
 
 
 TopoMC is a python project that converts minecraft chunks into a topographical map.
