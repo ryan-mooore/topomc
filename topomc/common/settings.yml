@@ -1,4 +1,4 @@
-saves_path: /home/ryan/.minecraft/saves/
+saves_path: ~/.minecraft/saves/
 world: test
 
 window_scale: 1

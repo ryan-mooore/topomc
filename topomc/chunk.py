@@ -24,6 +24,8 @@ def load(world, chunkx, chunkz):
     ])
 
     saves_path = yaml_open.get("saves_path")
+    if saves_path.startswith('~'):
+        saves_path = os.environ['HOME'] + saves_path[1:]
     world_path = saves_path + world
 
     # test to see whether world exists

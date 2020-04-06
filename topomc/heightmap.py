@@ -1,6 +1,6 @@
 from marching_squares import Coordinates
 
-from common import bin, progressbar, yaml_open
+from common import decode, progressbar, yaml_open
 import chunk
 
 # builtin chunk heightmap options
@@ -33,7 +33,7 @@ class ChunkTile:
             except Exception:
                 raise Exception("Unloaded chunk(s)!")
 
-            chunktag_heightmap = bin.unstream(
+            chunktag_heightmap = decode.unstream(
                 data_stream, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE
             )
 
