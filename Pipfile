@@ -8,9 +8,11 @@ verify_ssl = true
 [packages]
 frozendict = ">=1.2"
 anvil-parser = ">=0.1.1"
-pyglet = "*"
 NBT = "*"
 PyYAML = ">=5.0"
+numpy = "*"
+scipy = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.7"
