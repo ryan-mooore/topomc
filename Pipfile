@@ -12,6 +12,8 @@ NBT = "*"
 PyYAML = ">=5.0"
 scipy = "*"
 matplotlib = "*"
+numpy = "*"
+env = "*"
 
 [requires]
 python_version = "3.7"

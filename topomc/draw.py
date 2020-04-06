@@ -4,11 +4,14 @@ from scipy.ndimage import gaussian_filter1d
 # files
 from common import progressbar
 
-def draw(data, scale, chunks_to_render, smooth):   
+def draw(data, scale, smooth):   
 
     max_len = max(len(data.heightplanes[0].bitmap) + 1, len(data.heightplanes[0].bitmap[0]) + 1)
+    isolines_to_render = 0
+    for index, heightplane in enumerate(data.heightplanes):
+        isolines_to_render += len(heightplane.isolines)
 
-    chunks_rendered = 0
+    isolines_rendered = 0
     for index, heightplane in enumerate(data.heightplanes):
         for isoline in heightplane.isolines:
             isoline.vertices = []
@@ -27,12 +30,12 @@ def draw(data, scale, chunks_to_render, smooth):
 
             plt.plot(x, y, "#D15C00", linewidth=1)
 
-            chunks_rendered += 1
+            isolines_rendered += 1
             progressbar._print(
-                chunks_rendered,
-                chunks_to_render,
+                isolines_rendered,
+                isolines_to_render,
                 2,
-                "chunks rendered"
+                f"isolines rendered across {len(data.heightplanes)} heightplanes"
             )
 
 

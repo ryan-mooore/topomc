@@ -46,4 +46,4 @@ def run(args):
     topodata = vectorize.Topodata(heightmap)
     scale = yaml_open.get("window_scale")
     smooth = yaml_open.get("smoothen")
-    draw.draw(topodata, scale, total_bound_chunks, smooth)
+    draw.draw(topodata, scale, smooth)

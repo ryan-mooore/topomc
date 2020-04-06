@@ -137,6 +137,9 @@ class Heightmap:
 
             self.heightmap = vertical_append(self.heightmap, chunk_row)
             self.chunk_tiles.append(chunk_tile_row)
+
+            self.start_coords = Coordinates(chunk_x1 * 16, chunk_z1 * 16)
+            self.end_coords = Coordinates(chunk_x2 * 16, chunk_z2 * 16)
         
         
         """

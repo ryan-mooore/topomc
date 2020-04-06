@@ -6,7 +6,7 @@ class Topodata:
         self.heightplanes = []
 
         for height in range(*heightmap.get_extremes()):
-            heightplane = Heightplane(height, heightmap.cells)
+            heightplane = Heightplane(height, heightmap.cells, heightmap.start_coords, heightmap.end_coords)
             self.heightplanes.append(heightplane)
 
 class Isoline:
@@ -16,7 +16,7 @@ class Isoline:
         self.closed = False
 
 class Heightplane:
-    def __init__(self, height, all_cells):
+    def __init__(self, height, all_cells, start, end):
         def pixline_tracer(first_iter=False, isoline=Isoline(), this_cell=None, this_cell_link=None):
         # globals: heightplane (reassigned), height (static), origin_cell (static)
 
@@ -26,7 +26,8 @@ class Heightplane:
                 elif this_cell_link == this_pixline.coords.end:
                     return this_pixline.coords.start
                 else:
-                    raise Exception("Fatal: Error occured during line vectorization")
+                    print(f"Warning: Error occured during line vectorization at block {start.x + this_cell.coords.x, start.y + this_cell.coords.y}: isoline arbitrarily ends")
+                    return None
             
             def cell_link_helper(cell_offset, link_offset):
                 global new_cell
@@ -72,6 +73,9 @@ class Heightplane:
                     self.bitmap[this_cell.coords.y][this_cell.coords.x] = 1
                     
                     opposite_link = swap_endpoints()
+                    if opposite_link == None:
+                        return None
+
                     location = (this_cell, opposite_link)
                     
                     if not first_iter:
@@ -84,9 +88,9 @@ class Heightplane:
                     c = this_cell.coords
                     l = opposite_link
                     if c.x == 0  and 0 == l.x: return end_trace()
-                    if c.x == len(all_cells[0]) - 1 and 1 == l.x: return end_trace()
-                    if c.y == 0  and 1 == l.y: return end_trace()
-                    if c.y == len(all_cells) - 1 and 0 == l.y: return end_trace()
+                    elif c.x == len(all_cells[0]) - 1 and 1 == l.x: return end_trace()
+                    elif c.y == 0  and 1 == l.y: return end_trace()
+                    elif c.y == len(all_cells) - 1 and 0 == l.y: return end_trace()
 
                     # build link
                     if opposite_link.x == 0:   cell_link_helper((-1, 0), (1, '~')) # left
@@ -94,13 +98,17 @@ class Heightplane:
                     elif opposite_link.y == 0: cell_link_helper(( 0, 1), ('~', 1))  # bottom
                     elif opposite_link.y == 1: cell_link_helper(( 0,-1), ('~', 0)) # top
                     else:
-                        raise AttributeError
+                        print(f"Warning: Error occured during line vectorization at block {start.x + this_cell.coords.x, start.y + this_cell.coords.y}: isoline does not span cell")
+                        return None
 
                     return pixline_tracer(
                         isoline=this_isoline,
                         this_cell=new_cell,
                         this_cell_link=new_cell_link
                     )
+            
+            print(f"Warning: Error occured during line vectorization at block {start.x + this_cell.coords.x, start.y + this_cell.coords.y}: no isolines could be found")
+            return None
 
 
         self.height = height
@@ -120,13 +128,24 @@ class Heightplane:
                     
                     origin_cell = cell
 
-                    (new_origin_cell, new_start_coords) = pixline_tracer(
+                    trace = pixline_tracer(
                         first_iter=True,
-                    )[1]
+                    )
+                    if trace:
+                        (new_origin_cell, new_start_coords) = trace[1]
+                    else:
+                        print(f"Warning: Drawing isoline at height {height} with origin cell {origin_cell.coords.x, origin_cell.coords.y} failed")
+                        continue
                     
                     origin_cell = new_origin_cell
-                    new_isoline = pixline_tracer(
+
+                    trace = pixline_tracer(
                         first_iter=True,
                         this_cell_link=new_start_coords
-                    )[0]
+                    )
+                    if trace:
+                        new_isoline = trace[0]
+                    else:
+                        print(f"Warning: Drawing isoline at height {height} with origin cell {origin_cell.coords.x, origin_cell.coords.y} failed")
+                        continue
                     self.isolines.append(new_isoline) # only get line value

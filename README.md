@@ -30,7 +30,7 @@ In order to smooth the isolines, the 1d guassian filter function is used from th
 The iso-line smoothing can be turned off in [settings.yml](topomc/common/settings.yml).
 
 ### 6. Drawing
-Pyplot from matplotlab is used to render the lines.
+Pyplot from matplotlib is used to render the lines.
 
 ## Installation and running
 ### Installation
