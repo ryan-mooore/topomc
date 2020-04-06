@@ -45,4 +45,4 @@ def run(args):
 
     topodata = vectorize.Topodata(squaremarch)
     scale = yaml_open.get("window_scale")
-    draw.draw(heightmap.chunk_tiles[0][0].data, scale, total_bound_chunks)
+    draw.draw(topodata, scale, total_bound_chunks)

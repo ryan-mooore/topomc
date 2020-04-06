@@ -40,6 +40,14 @@ class Heightplane:
                     link_offset_y = opposite_link.y
                 new_cell_link = Coordinates(link_offset_x, link_offset_y)
             
+            def end_trace():
+                this_isoline.contour.append((
+                        opposite_link,
+                        this_cell.coords
+                    ))
+                return this_isoline, location
+
+
             if not this_cell:
                 this_cell = origin_cell
 
@@ -49,9 +57,16 @@ class Heightplane:
                     if not this_cell_link:
                         this_cell_link = this_pixline.coords.start
 
-                    this_isoline = isoline
+                    if first_iter:
+                        this_isoline = Isoline()
+                    else:
+                        this_isoline = isoline
                     
-                    this_isoline.contour.append(this_pixline)
+                    this_isoline.contour.append((
+                        this_cell_link,
+                        this_cell.coords
+                    ))
+
                     self.bitmap[this_cell.coords.y][this_cell.coords.x] = 1
                     
                     opposite_link = swap_endpoints()
@@ -61,15 +76,15 @@ class Heightplane:
                         #loop testing
                         if (this_cell == origin_cell): 
                             this_isoline.closed = True
-                            return this_isoline, location
+                            return end_trace()
                         
                     #edge testing
                     c = this_cell.coords
-                    l = this_pixline.coords
-                    if c.x == 0  and 0 in [l.start.x, l.end.x]: return this_isoline, location
-                    if c.x == 14 and 1 in [l.start.x, l.end.x]: return this_isoline, location
-                    if c.y == 0  and 1 in [l.start.y, l.end.y]: return this_isoline, location
-                    if c.y == 14 and 0 in [l.start.y, l.end.y]: return this_isoline, location
+                    l = opposite_link
+                    if c.x == 0  and 0 == l.x: return end_trace()
+                    if c.x == 14 and 1 == l.x: return end_trace()
+                    if c.y == 0  and 1 == l.y: return end_trace()
+                    if c.y == 14 and 0 == l.y: return end_trace()
 
                     # build link
                     if opposite_link.x == 0:   cell_link_helper((-1, 0), (1, '~')) # left
@@ -106,13 +121,9 @@ class Heightplane:
                     )[1]
                     
                     origin_cell = new_origin_cell
-                    self.isolines.append(
-                        pixline_tracer(
-                            first_iter=True,
-                            this_cell_link=new_start_coords
-                        )[0]
-                    ) # only get line value
+                    new_isoline = pixline_tracer(
+                        first_iter=True,
+                        this_cell_link=new_start_coords
+                    )[0]
+                    self.isolines.append(new_isoline) # only get line value
 
-def vectorize(heightmap):
-    chunk_tile =  heightmap.chunk_tiles[0][0]
-    print(chunk_tile.get_extremes())
