@@ -26,7 +26,7 @@ class Heightplane:
                 elif this_cell_link == this_pixline.coords.end:
                     return this_pixline.coords.start
                 else:
-                    return AttributeError
+                    raise Exception("Fatal: Error occured during line vectorization")
             
             def cell_link_helper(cell_offset, link_offset):
                 global new_cell

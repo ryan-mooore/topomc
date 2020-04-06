@@ -1,6 +1,5 @@
 from matplotlib import pyplot as plt
 from scipy.ndimage import gaussian_filter1d
-import numpy as np
 
 # files
 from common import progressbar
@@ -18,8 +17,8 @@ def draw(data, scale, chunks_to_render, smooth):
                 isoline.vertices.append((cell_coords.x + contour_coords.x,
                 len(heightplane.bitmap) - cell_coords.y - 1 + contour_coords.y))
 
-            points = np.array(isoline.vertices)
-            x, y = points.transpose()
+            x = [vertice[0] for vertice in isoline.vertices]
+            y = [vertice[1] for vertice in isoline.vertices]
             
             sigma = 1
             if smooth:
