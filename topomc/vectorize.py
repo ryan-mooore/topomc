@@ -1,11 +1,12 @@
 from marching_squares import Coordinates
+import math
 
 class Topodata:
-    def __init__(self, squaremarch):
+    def __init__(self, heightmap):
         self.heightplanes = []
-        
-        for height in range(*squaremarch.chunk_tile.get_extremes()):
-            heightplane = Heightplane(height, squaremarch.chunk_tile.data)
+
+        for height in range(*heightmap.get_extremes()):
+            heightplane = Heightplane(height, heightmap.cells)
             self.heightplanes.append(heightplane)
 
 class Isoline:
@@ -15,7 +16,7 @@ class Isoline:
         self.closed = False
 
 class Heightplane:
-    def __init__(self, height, cells):
+    def __init__(self, height, all_cells):
         def pixline_tracer(first_iter=False, isoline=Isoline(), this_cell=None, this_cell_link=None):
         # globals: heightplane (reassigned), height (static), origin_cell (static)
 
@@ -32,7 +33,7 @@ class Heightplane:
                 global new_cell_link
                 (cell_offset_x, cell_offset_y) = cell_offset
                 (link_offset_x, link_offset_y) = link_offset
-                new_cell = cells[this_cell.coords.y + cell_offset_y]\
+                new_cell = all_cells[this_cell.coords.y + cell_offset_y]\
                     [this_cell.coords.x + cell_offset_x]
                 if link_offset_x == '~':
                     link_offset_x = opposite_link.x
@@ -47,9 +48,10 @@ class Heightplane:
                     ))
                 return this_isoline, location
 
-
+            
             if not this_cell:
                 this_cell = origin_cell
+
 
             for this_pixline in this_cell.pixlines:
                 if this_pixline.height == height:
@@ -61,7 +63,7 @@ class Heightplane:
                         this_isoline = Isoline()
                     else:
                         this_isoline = isoline
-                    
+
                     this_isoline.contour.append((
                         this_cell_link,
                         this_cell.coords
@@ -82,9 +84,9 @@ class Heightplane:
                     c = this_cell.coords
                     l = opposite_link
                     if c.x == 0  and 0 == l.x: return end_trace()
-                    if c.x == 14 and 1 == l.x: return end_trace()
+                    if c.x == len(all_cells[0]) - 1 and 1 == l.x: return end_trace()
                     if c.y == 0  and 1 == l.y: return end_trace()
-                    if c.y == 14 and 0 == l.y: return end_trace()
+                    if c.y == len(all_cells) - 1 and 0 == l.y: return end_trace()
 
                     # build link
                     if opposite_link.x == 0:   cell_link_helper((-1, 0), (1, '~')) # left
@@ -100,11 +102,13 @@ class Heightplane:
                         this_cell_link=new_cell_link
                     )
 
+
         self.height = height
         self.isolines = []
-        self.bitmap = [[0 for  cell_row in cells] for cell in cells[0]]
+        self.bitmap = [[0 for  cell_row in all_cells] for cell in all_cells[0]]
         
-        for y, row in enumerate(cells):
+
+        for y, row in enumerate(all_cells):
             for x, cell in enumerate(row): # foreach cell
                 if self.bitmap[y][x] is not 1: #if it has not already been used at this height
                     
@@ -126,4 +130,3 @@ class Heightplane:
                         this_cell_link=new_start_coords
                     )[0]
                     self.isolines.append(new_isoline) # only get line value
-

@@ -1,3 +1,5 @@
+from marching_squares import Coordinates
+
 from common import bin, progressbar, yaml_open
 import chunk
 
@@ -86,19 +88,44 @@ class ChunkTile:
 class Heightmap:
     def __init__(self, world, chunk_x1, chunk_z1, chunk_x2, chunk_z2):
         
+        def horizontal_append(map1, map2):
+        # append if map contains content
+            if map1:
+                for index, row in enumerate(map2):
+                    map1[index].extend(row)
+            # else create content
+            else:
+                map1 = map2
+            return map1
+
+        def vertical_append(map1, map2):
+            # append if map contains content
+            if map1:
+                for row in map2:
+                    map1.append(row)
+            # create content
+            else:
+                map1 = map2
+            return map1
+
+
         self.chunk_tiles = []
+        self.heightmap = []
 
         chunks_to_retrieve = (chunk_x2+1 - chunk_x1) * (chunk_z2+1 - chunk_z1)
 
-        heightmap = []
         chunks_retrieved = 0
 
         # + 1 because ending chunks are inclusive
         for z in range(chunk_z1, chunk_z2 + 1):
             chunk_row = []
-
+            chunk_tile_row = []
             for x in range(chunk_x1, chunk_x2 + 1):
-                chunk_row.append(ChunkTile(world, x, z))
+                chunk_tile = ChunkTile(world, x, z)
+                chunk_row = horizontal_append(chunk_row, chunk_tile.heightmap)
+                
+                chunk_tile.coords = Coordinates(x - chunk_x1, z - chunk_z1)
+                chunk_tile_row.append(chunk_tile)
 
                 chunks_retrieved += 1
                 progressbar._print(
@@ -108,4 +135,41 @@ class Heightmap:
                     "chunks retrieved"
                 )
 
-            self.chunk_tiles.append(chunk_row)
+            self.heightmap = vertical_append(self.heightmap, chunk_row)
+            self.chunk_tiles.append(chunk_tile_row)
+        
+        
+        """
+        for z in range(chunk_z1, chunk_z2 + 1):
+            chunk_row = []
+
+            for x in range(chunk_x1, chunk_x2 + 1):
+                chunk_tile = ChunkTile(world, x, z)
+                chunk_tile.coords = Coordinates(x - chunk_x1, z - chunk_z1)
+                chunk_row.append(chunk_tile)
+
+                chunks_retrieved += 1
+                progressbar._print(
+                    chunks_retrieved,
+                    chunks_to_retrieve,
+                    1,
+                    "chunks retrieved"
+                )
+
+            self.chunk_tiles.append(chunk_row)"""
+        
+
+
+    def get_extremes(self):
+        min_height = 0xFF
+        max_height = 0x00
+
+        if len(self.chunk_tiles) == 1 and len(self.chunk_tiles[0]) == 1:
+            return self.chunk_tiles[0][0].get_extremes()
+        else:
+            min_heights = [chunk_tile.get_extremes()[0] for row in self.chunk_tiles for chunk_tile in row]
+            min_height = min(*min_heights)
+            max_heights = [chunk_tile.get_extremes()[1] for row in self.chunk_tiles for chunk_tile in row]
+            max_height = max(*max_heights)
+
+        return (min_height, max_height)

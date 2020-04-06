@@ -41,8 +41,8 @@ def run(args):
     or not isinstance(contour_offset, int):
         raise InvalidArg
 
-    squaremarch = marching_squares.SquareMarch(heightmap, contour_interval)
+    marching_squares.square_march(heightmap, contour_interval)
 
-    topodata = vectorize.Topodata(squaremarch)
+    topodata = vectorize.Topodata(heightmap)
     scale = yaml_open.get("window_scale")
     draw.draw(topodata, scale, total_bound_chunks)
