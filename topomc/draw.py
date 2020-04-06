@@ -4,8 +4,8 @@ from scipy.ndimage import gaussian_filter1d
 # files
 from common import progressbar
 
-def draw(data, scale, smooth):   
-
+def draw(data, scale, smooth, contour_index):   
+    print()
     max_len = max(len(data.heightplanes[0].bitmap) + 1, len(data.heightplanes[0].bitmap[0]) + 1)
     isolines_to_render = 0
     for index, heightplane in enumerate(data.heightplanes):
@@ -28,7 +28,10 @@ def draw(data, scale, smooth):
                 x = gaussian_filter1d(x, sigma)
                 y = gaussian_filter1d(y, sigma)
 
-            plt.plot(x, y, "#D15C00", linewidth=1)
+            if heightplane.height % contour_index == 0:
+                plt.plot(x, y, "#D15C00", linewidth=2)
+            else:
+                plt.plot(x, y, "#D15C00", linewidth=1)
 
             isolines_rendered += 1
             progressbar._print(

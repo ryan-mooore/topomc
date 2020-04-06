@@ -5,6 +5,7 @@ window_scale: 1
 
 contour_interval: 1
 contour_offset: 0
+index: 5
 
 smoothen: yes
 

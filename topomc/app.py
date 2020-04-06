@@ -4,6 +4,8 @@ import heightmap as hm
 import marching_squares
 import draw
 import vectorize
+import logging
+logging.basicConfig(format='%(process)d-%(levelname)s-%(message)s')
 
 MissingCoords = Exception("no co-ordinates for world specified")
 InvalidCoords = Exception("Invalid co-ordinates")
@@ -46,4 +48,5 @@ def run(args):
     topodata = vectorize.Topodata(heightmap)
     scale = yaml_open.get("window_scale")
     smooth = yaml_open.get("smoothen")
-    draw.draw(topodata, scale, smooth)
+    index = yaml_open.get("index")
+    draw.draw(topodata, scale, smooth, index)
