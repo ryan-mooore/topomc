@@ -1,7 +1,8 @@
 .vscode
 .venv
 
-Pipfile.lock
+Pipfile
+
 
 __pycache__
 common/__pycache__

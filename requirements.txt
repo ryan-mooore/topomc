@@ -1,6 +1,0 @@
-
-NBT
-frozendict>=1.2
-anvil-parser>=0.1.1
-pyglet
-PyYAML>=5.0
