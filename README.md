@@ -1,5 +1,5 @@
 # TopoMC
-![4 chunks](images/4_chunks_smooth.png) ![25 chunks](images/25_chunks_smooth.png)
+![Standard](images/example1) ![Amplified](images/example2)
 
 
 TopoMC is a python project that converts minecraft chunks into a topographical map.
