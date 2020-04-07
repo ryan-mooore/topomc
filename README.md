@@ -1,5 +1,5 @@
 # TopoMC
-![Standard](images/example1) ![Amplified](images/example2)
+![Standard](images/example1.png) ![Amplified](images/example2.png)
 
 
 TopoMC is a python project that converts minecraft chunks into a topographical map.
@@ -27,7 +27,7 @@ In order for these pixel lines (pixlines) to be smoothed later on, they need to 
 ### 5. Generalization
 In order to smooth the isolines, the 1d guassian filter function is used from the `scipy.ndimage` library. This is an algorithm that creates many points in order to create a smooth line.
 
-The iso-line smoothing can be turned off in [settings.yml](topomc/common/settings.yml).
+The iso-line smoothing can be turned off in [settings.yml](settings.yml).
 
 ### 6. Drawing
 Pyplot from matplotlib is used to render the lines.
@@ -42,12 +42,12 @@ Using the included virtual environment (pipenv) is highly reccommended as all th
   * On Windows, the default path is `%appdata%\.minecraft\saves\`
   * On Linux, the default path is `~/.minecraft/saves/`
   * On Mac, the default path is `~/Library/Application Support/minecraft/saves/`
-4. Optionally, other settings in [settings.yml](topomc/common/settings.yml) can be changed as well, but testing has only been done on default settings.
+4. Optionally, other settings in [settings.yml](settings.yml) can be changed as well, but testing has only been done on default settings.
 
 ### Running
 This script needs Python **3.7** or higher to run.
 
-Firstly, specify the world you would like to run the script on in [settings.yml](topomc/common/settings.yml).
+Firstly, specify the world you would like to run the script on in [settings.yml](settings.yml).
 
 The arguments to run the script are as follows:
 `python` `topomc` `x1` `z1` `x2` `z2`
@@ -59,6 +59,5 @@ The arguments to run the script are as follows:
 * Make sure the command is run in the root derectory of the project.
 
 #### The following optional arguments can be added to the end of the command:
-* `world` - overrides the world setting in [settings.yml](topomc/common/settings.yml)
-* `contour_interval` - overrides the contour_interval setting in [settings.yml](topomc/common/settings.yml)
-* `contour_offset` - overrides the contour_offset setting in [settings.yml](topomc/common/settings.yml)
+* `world` - overrides the world setting in [settings.yml](settings.yml)
+* `contour_interval` - overrides the contour_interval setting in [settings.yml](settings.yml)
