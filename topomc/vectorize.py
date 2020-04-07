@@ -1,14 +1,22 @@
 from marching_squares import Coordinates
 import math
 import logging
+from common import progressbar
 
 class Topodata:
     def __init__(self, heightmap):
         self.heightplanes = []
 
+        (low, high) = heightmap.get_extremes()
         for height in range(*heightmap.get_extremes()):
             heightplane = Heightplane(height, heightmap.cells, heightmap.start_coords, heightmap.end_coords)
             self.heightplanes.append(heightplane)
+            progressbar._print(
+                height + 1 - low,
+                high - low,
+                2,
+                f"heightplanes created"
+            )
 
 class Isoline:
     def __init__(self):

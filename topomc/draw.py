@@ -5,7 +5,6 @@ from scipy.ndimage import gaussian_filter1d
 from common import progressbar
 
 def draw(data, scale, smooth, contour_index):   
-    print()
     max_len = max(len(data.heightplanes[0].bitmap) + 1, len(data.heightplanes[0].bitmap[0]) + 1)
     isolines_to_render = 0
     for index, heightplane in enumerate(data.heightplanes):
@@ -37,8 +36,8 @@ def draw(data, scale, smooth, contour_index):
             progressbar._print(
                 isolines_rendered,
                 isolines_to_render,
-                2,
-                f"isolines rendered across {len(data.heightplanes)} heightplanes"
+                3,
+                f"isolines rendered"
             )
 
 
