@@ -9,7 +9,7 @@ contour_interval: 1
 contour_offset: 0
 index: 5
 
-smoothen: no
+smoothen: yes
 smoothness: 1
 
 surface_blocks:

@@ -121,7 +121,7 @@ class Heightplane:
 
         self.height = height
         self.isolines = []
-        self.bitmap = [[0 for  cell_row in all_cells] for cell in all_cells[0]]
+        self.bitmap = [[0 for  cell_row in all_cells[0]] for cell in all_cells]
         
 
         for y, row in enumerate(all_cells):
