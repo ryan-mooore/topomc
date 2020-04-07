@@ -1,5 +1,7 @@
 saves_path: ~/.minecraft/saves/
-world: test
+world: New World
+
+pdf_save_location:
 
 window_scale: 1
 
@@ -8,6 +10,7 @@ contour_offset: 0
 index: 5
 
 smoothen: yes
+smoothness: 1
 
 surface_blocks:
   - grass_block

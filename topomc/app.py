@@ -63,5 +63,16 @@ def run(args):
     topodata = vectorize.Topodata(heightmap)
     scale = yaml_open.get("window_scale")
     smooth = yaml_open.get("smoothen")
+    smoothness = yaml_open.get("smoothness")
     index = yaml_open.get("index")
-    draw.draw(topodata, scale, smooth, index)
+    save_loc = yaml_open.get("pdf_save_location")
+    if smooth and not smoothness:
+        logging.critical("App: smoothness can not be zero if smoothing is enabled")
+        sys.exit()
+    if save_loc:
+        if not save_loc.endswith(".pdf"):
+            if save_loc.endswith("/"):
+                save_loc = save_loc + "map.pdf"
+            else:
+                save_loc = save_loc + ".pdf"
+    draw.draw(topodata, scale, smooth, smoothness, index, save_loc)

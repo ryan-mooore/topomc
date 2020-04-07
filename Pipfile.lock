@@ -1,11 +1,12 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e8976584e463ef8f1a320d4ed6dfd06ed787c20468d4faaa9955d36f7d9a727b"
+            "sha256": "21b276e230ebf5d0185ef9ad9dbfceabd691c10edbde89ea75d453ef35590015"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.7"
+            "python_version": "3.7",
+            "tkinter": "*"
         },
         "sources": [
             {
@@ -30,6 +31,13 @@
                 "sha256:cd7b2d1018258d7247a71425e9f26463dfb444d411c39569972f4ce586b0c9d8"
             ],
             "version": "==0.10.0"
+        },
+        "env": {
+            "hashes": [
+                "sha256:e07975087b08dd2aea45bf83447c7e21f43cf916bbc2a0722fceb66e54d03935"
+            ],
+            "index": "pypi",
+            "version": "==0.1.0"
         },
         "frozendict": {
             "hashes": [
