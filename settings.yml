@@ -1,7 +1,7 @@
 saves_path: ~/.minecraft/saves/
 world: New World
 
-pdf_save_location:
+pdf_save_location: examples/
 
 window_scale: 1
 

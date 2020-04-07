@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 from scipy.ndimage import gaussian_filter1d
-
+import numpy
 # files
 from common import progressbar
 
@@ -66,6 +66,9 @@ def draw(data, scale, smooth, smoothness, contour_index, save_loc):
 
         graph.savefig(save_loc)
 
+    for line in axes.lines:
+        line.set_linewidth(
+            line.get_linewidth() * 2**(4 - numpy.log2(max_len / 15)))
     graph.set_size_inches(8 * scale, 8 * scale) 
     graph.canvas.toolbar.pack_forget()
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
