@@ -41,9 +41,9 @@ Using the included virtual environment (pipenv) is highly reccommended as all th
  2.  Clone this repository
 
  3.  Specify where your minecraft save files are located. This changes from system to system so it needs to be configured in the repository's [settings.yml](topomc/common/settings.yml) file, next to the option `path_to_saves`. **This needs to be an abslute path**.
-  *  On Windows, the default path is `%appdata%\.minecraft\saves\`
-  *  On Linux, the default path is `~/.minecraft/saves/`
-  *  On Mac, the default path is `~/Library/Application Support/minecraft/saves/`
+   *   On Windows, the default path is `%appdata%\.minecraft\saves\`
+   *   On Linux, the default path is `~/.minecraft/saves/`
+   *   On Mac, the default path is `~/Library/Application Support/minecraft/saves/`
 
 4.  Optionally, other settings in [settings.yml](settings.yml) can be changed as well, but testing has only been done on default settings.
 
@@ -54,14 +54,14 @@ Firstly, specify the world you would like to run the script on in [settings.yml]
 
 The arguments to run the script are as follows:
 `python` `topomc` `x1` `z1` `x2` `z2`
-*  (`x1`, `z1`) - Top left chunk limit
-*  (`x2`, `z2`) - Bottom right chunk limit
-*  All chunks within these arguments will be bounded and shown on the map.
-*  Both co-ordinates are inclusive.
-*  Make sure the command is run in the root derectory of the project.
+*   (`x1`, `z1`) - Top left chunk limit
+*   (`x2`, `z2`) - Bottom right chunk limit
+*   All chunks within these arguments will be bounded and shown on the map.
+*   Both co-ordinates are inclusive.
+*   Make sure the command is run in the root derectory of the project.
 
 #### The following optional arguments can be added to the end of the command:
-*  `world` - overrides the world setting in [settings.yml](settings.yml).
-*  `contour_interval` - overrides the Interval setting in [settings.yml](settings.yml) under contours.
+*   `world` - overrides the world setting in [settings.yml](settings.yml).
+*   `contour_interval` - overrides the Interval setting in [settings.yml](settings.yml) under contours.
 
 By default, the script will output a PDF file of the map at the scale defined in [settings.yml](settings.yml). As well as this, a preview window will appear. If file output is not necessary, the setting for output file can be left blank and the preview window by itself can be used.
