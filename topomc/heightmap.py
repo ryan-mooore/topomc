@@ -158,8 +158,9 @@ class Heightmap:
                     "chunks retrieved"
                 )
 
-            self.chunk_tiles.append(chunk_row)"""
-        
+            self.chunk_tiles.append(chunk_row)
+        """
+
 
 
     def get_extremes(self):

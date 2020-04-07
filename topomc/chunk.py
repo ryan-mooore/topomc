@@ -41,10 +41,10 @@ def load(world, chunkx, chunkz):
     # open chunk
     try:
         region = anvil.Region.from_file(anvil_file)
-    except Exception as r:
+    except Exception:
         logging.critical(f"Chunk: Region {regionx, regionz} for chunk {chunkx, chunkz} is not loaded and does not have an save file")
         sys.exit()
-    
+
     try:
         chunk = anvil.Chunk.from_region(region, chunkx, chunkz)
     except:

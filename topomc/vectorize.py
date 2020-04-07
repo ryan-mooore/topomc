@@ -1,5 +1,4 @@
 from marching_squares import Coordinates
-import math
 import logging
 from common import progressbar
 
@@ -88,7 +87,7 @@ class Heightplane:
                     
                     if not first_iter:
                         #loop testing
-                        if (this_cell == origin_cell): 
+                        if (this_cell == origin_cell):
                             this_isoline.closed = True
                             return end_trace()
                         
@@ -144,7 +143,7 @@ class Heightplane:
                     else:
                         logging.error(f"Vectorization: Drawing isoline at height {height} with origin cell {origin_cell.coords.x, origin_cell.coords.y} failed on SEARCH")
                         continue
-                    
+
                     origin_cell = new_origin_cell
 
                     trace = pixline_tracer(

@@ -4,7 +4,7 @@ import numpy as np
 
 from common import progressbar, yaml_open
 
-def draw(data, smoothness, contour_index, save_loc, line_width):   
+def draw(data, smoothness, contour_index, save_loc, line_width):
 
     plt.figure("Preview")
 
@@ -102,13 +102,13 @@ def debug(data):
     
     axes = plt.gca()
     graph = plt.gcf()
-    
+
     axes.set_xlim(0, width)
     axes.set_ylim(0, height)
     axes.invert_yaxis()
     axes.set_aspect(1)
 
-    graph.set_size_inches(8, 8) 
+    graph.set_size_inches(8, 8)
     plt.xticks(range(0, width))
     plt.yticks(range(0, height))
     graph.canvas.toolbar.pack_forget()

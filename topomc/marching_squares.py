@@ -40,7 +40,7 @@ class Coordinates:
 
     def __eq__(self, other):
         if not isinstance(other, Coordinates):
-            return NotImplemented 
+            return NotImplemented
         
         return self.x == other.x and self.y == other.y
 
@@ -83,7 +83,7 @@ def square_march(heightmap, contour_interval=1, contour_offset=0):
                     side_is_endpoint = False
 
                     for side in cell.sides:
-                        # theoretically this loop should only run twice - 
+                        # theoretically this loop should only run twice -
                         # only one height pixline so only one start and end exist
 
                         if side.corner1 < side.corner2 \
@@ -94,7 +94,7 @@ def square_march(heightmap, contour_interval=1, contour_offset=0):
                             location = (lower_height - side.corner1) \
                                 / side_height_difference \
                                 + 0.5 / side_height_difference
-                            
+
                             side_is_endpoint = True
 
                         if side.corner1 > side.corner2 \
