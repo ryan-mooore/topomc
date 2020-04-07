@@ -74,7 +74,7 @@ def draw(data, smoothness, contour_index, save_loc, line_width):
             line.get_linewidth() * 2**(4 - np.log2(max_len)))
     
     window_size = yaml_open.get("preview size")
-    graph.set_size_inches(8 * window_size, 8 * window_size) 
+    graph.set_size_inches(8 * window_size, 8 * window_size)
     graph.canvas.toolbar.pack_forget()
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
