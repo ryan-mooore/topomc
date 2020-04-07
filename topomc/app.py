@@ -1,4 +1,4 @@
-import sys
+import sys, os
 #import argparse
 # files
 from common import yaml_open
@@ -7,14 +7,6 @@ import marching_squares
 import draw
 import vectorize
 import logging
-
-try:
-    from matplotlib import pyplot
-    from scipy.ndimage import gaussian_filter1d
-    import anvil
-except ImportError as e:
-    logging.critical("Main: Dependencies not installed")
-    raise e
 
 version = sys.version_info
 if version.major == 2:
@@ -69,10 +61,11 @@ def run(args):
         smoothness = yaml_open.get("smoothness")
         index = yaml_open.get("index")
         save_loc = yaml_open.get("pdf save location")
+        save_loc = os.path.normcase(save_loc)
         line_width = yaml_open.get("line width")
         if save_loc:
             if not save_loc.endswith(".pdf"):
-                if save_loc.endswith("/"):
+                if save_loc.endswith(os.sep):
                     save_loc = save_loc + "map.pdf"
                 else:
                     save_loc = save_loc + ".pdf"
