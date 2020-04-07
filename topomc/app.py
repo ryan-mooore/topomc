@@ -1,5 +1,5 @@
 import sys
-
+#import argparse
 # files
 from common import yaml_open
 import heightmap as hm
@@ -24,6 +24,11 @@ if version.major == 3 and version.minor < 7:
     logging.critical("Main: Unsupported Python version")
     sys.exit()
 
+
+#parser = argparse.ArgumentParser(description='Generate a map')
+#parser.add_argument('Bounding co-ordinates', metavar='C', type=int, nargs=4, help='Bounding co-ordinates')
+#parser.add_argument('World', metavar='W', nargs=1, help='World')
+#parser.add_argument('--World', metavar='W', nargs=1, help='World')
 logging.basicConfig(format='%(process)d-%(levelname)s-%(message)s', level=10)
 
 def run(args):
@@ -59,20 +64,22 @@ def run(args):
         logging.critical("App: Contour interval/offset must be an integer")
 
     marching_squares.square_march(heightmap, contour_interval)
-
-    topodata = vectorize.Topodata(heightmap)
-    scale = yaml_open.get("window_scale")
-    smooth = yaml_open.get("smoothen")
-    smoothness = yaml_open.get("smoothness")
-    index = yaml_open.get("index")
-    save_loc = yaml_open.get("pdf_save_location")
-    if smooth and not smoothness:
-        logging.critical("App: smoothness can not be zero if smoothing is enabled")
-        sys.exit()
-    if save_loc:
-        if not save_loc.endswith(".pdf"):
-            if save_loc.endswith("/"):
-                save_loc = save_loc + "map.pdf"
-            else:
-                save_loc = save_loc + ".pdf"
-    draw.draw(topodata, scale, smooth, smoothness, index, save_loc)
+    if not "--debug" in args:
+        topodata = vectorize.Topodata(heightmap)
+        scale = yaml_open.get("window_scale")
+        smooth = yaml_open.get("smoothen")
+        smoothness = yaml_open.get("smoothness")
+        index = yaml_open.get("index")
+        save_loc = yaml_open.get("pdf_save_location")
+        if smooth and not smoothness:
+            logging.critical("App: smoothness can not be zero if smoothing is enabled")
+            sys.exit()
+        if save_loc:
+            if not save_loc.endswith(".pdf"):
+                if save_loc.endswith("/"):
+                    save_loc = save_loc + "map.pdf"
+                else:
+                    save_loc = save_loc + ".pdf"
+        draw.draw(topodata, scale, smooth, smoothness, index, save_loc)
+    else:
+        draw.debug(heightmap)

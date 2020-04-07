@@ -58,15 +58,52 @@ def draw(data, scale, smooth, smoothness, contour_index, save_loc):
     graph = plt.gcf()
     
     axes.set_aspect(1)
+    axes.set_xlim(0, width)
+    axes.set_ylim(0, height)
+    
     if save_loc:
         graph.set_size_inches(0.629921 * height / 16, 0.629921 * height / 16) 
 
         graph.savefig(save_loc)
 
-    graph.set_size_inches(2 * scale, 2 * scale) 
+    graph.set_size_inches(8 * scale, 8 * scale) 
     graph.canvas.toolbar.pack_forget()
-    axes.set_xlim(0, len(data.heightplanes[0].bitmap[0]))
-    axes.set_ylim(0, len(data.heightplanes[0].bitmap))
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
+    plt.show()
+
+def debug(data):
+    plt.figure("Preview")
+
+    width = len(data.cells[0])
+    height = len(data.cells)
+
+    for y, row in enumerate(data.cells):
+            for x, cell in enumerate(row):
+                if cell.pixlines:
+                    for pixline in cell.pixlines:
+                        x = [pixline.coords.start.x + cell.coords.x, pixline.coords.end.x + cell.coords.x]
+                        y = [cell.coords.y - pixline.coords.start.y + 1, cell.coords.y - pixline.coords.end.y + 1]
+                        plt.plot(x, y, "#D15C00", linewidth=2)
+
+    print("Loading matplotlib window...")
+    print()
+
+
+    #plt.axis("off")
+    
+    axes = plt.gca()
+    graph = plt.gcf()
+    
+    axes.set_xlim(0, width)
+    axes.set_ylim(0, height)
+    axes.invert_yaxis()
+    axes.set_aspect(1)
+
+    graph.set_size_inches(8, 8) 
+    plt.xticks(range(0, width))
+    plt.yticks(range(0, height))
+    graph.canvas.toolbar.pack_forget()
+    #plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    plt.grid(color='#000', linestyle='-', linewidth=0.1, which="both")
     plt.show()

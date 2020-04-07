@@ -79,8 +79,6 @@ def square_march(heightmap, contour_interval=1, contour_offset=0):
 
                 if (lower_height + contour_offset) % contour_interval == 0:
 
-                    pixline = Pixline(lower_height)
-
                     search = "start"
                     side_is_endpoint = False
 
@@ -119,16 +117,17 @@ def square_march(heightmap, contour_interval=1, contour_offset=0):
                                 coords.y = location
 
                             if search == "start":
+                                pixline = Pixline(lower_height)
                                 pixline.coords.start.x = coords.x
                                 pixline.coords.start.y = coords.y
                                 search = "end"
                             elif search == "end":
                                 pixline.coords.end.x = coords.x
                                 pixline.coords.end.y = coords.y
+                                cell.pixlines.append(pixline)
+                                search = "start"
 
                             side_is_endpoint = False
-
-                    cell.pixlines.append(pixline)
 
             cell_row.append(cell)
 

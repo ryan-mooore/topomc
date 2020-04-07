@@ -35,7 +35,6 @@ class Heightplane:
                 elif this_cell_link == this_pixline.coords.end:
                     return this_pixline.coords.start
                 else:
-                    logging.warning(f"Vectorization: {start.x + this_cell.coords.x, start.y + this_cell.coords.y}: isoline arbitrarily ends")
                     return None
             
             def cell_link_helper(cell_offset, link_offset):
@@ -83,7 +82,7 @@ class Heightplane:
                     
                     opposite_link = swap_endpoints()
                     if opposite_link == None:
-                        return None
+                        continue
 
                     location = (this_cell, opposite_link)
                     
@@ -107,8 +106,8 @@ class Heightplane:
                     elif opposite_link.y == 0: cell_link_helper(( 0, 1), ('~', 1))  # bottom
                     elif opposite_link.y == 1: cell_link_helper(( 0,-1), ('~', 0)) # top
                     else:
-                        logging.Warning(f"Vectorization: {start.x + this_cell.coords.x, start.y + this_cell.coords.y}: isoline does not span cell")
-                        return None
+                        logging.warning(f"Vectorization: {start.x + this_cell.coords.x, start.y + this_cell.coords.y}: isoline does not span cell")
+                        continue
 
                     return pixline_tracer(
                         isoline=this_isoline,
@@ -116,7 +115,7 @@ class Heightplane:
                         this_cell_link=new_cell_link
                     )
             
-            logging.Warning(f"Vectorization: {start.x + this_cell.coords.x, start.y + this_cell.coords.y}: no isolines could be found")
+            logging.warning(f"Vectorization: {start.x + this_cell.coords.x, start.y + this_cell.coords.y}: no isolines could be found")
             return None
 
 
