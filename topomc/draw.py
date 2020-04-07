@@ -1,17 +1,17 @@
 from matplotlib import pyplot as plt
 from scipy.ndimage import gaussian_filter1d
-import numpy
-# files
-from common import progressbar
+import numpy as np
 
-def draw(data, scale, smooth, smoothness, contour_index, save_loc):   
+from common import progressbar, yaml_open
+
+def draw(data, smoothness, contour_index, save_loc, line_width):   
 
     plt.figure("Preview")
 
     width = len(data.heightplanes[0].bitmap[0])
     height = len(data.heightplanes[0].bitmap)
 
-    max_len = max(width + 1, height + 1)
+    max_len = max(np.floor(width / 15), np.floor(height / 15))
     isolines_to_render = 0
     for index, heightplane in enumerate(data.heightplanes):
         isolines_to_render += len(heightplane.isolines)
@@ -27,17 +27,16 @@ def draw(data, scale, smooth, smoothness, contour_index, save_loc):
 
             x = [vertice[0] for vertice in isoline.vertices]
             y = [vertice[1] for vertice in isoline.vertices]
-            
-            if smooth:
+
+            if smoothness:
                 x = gaussian_filter1d(x, smoothness)
                 y = gaussian_filter1d(y, smoothness)
 
-            line_width = 0.3
-
-            if heightplane.height % contour_index == 0:
-                plt.plot(x, y, "#D15C00", linewidth=line_width * 25/14)
+            IOF_INDEX_RATIO = 25/14
+            if contour_index and heightplane.height % contour_index == 0:
+                plt.plot(x, y, "#D15C00", linewidth=line_width / 3 * IOF_INDEX_RATIO)
             else:
-                plt.plot(x, y, "#D15C00", linewidth=line_width)
+                plt.plot(x, y, "#D15C00", linewidth=line_width / 3)
 
             isolines_rendered += 1
             progressbar._print(
@@ -60,16 +59,22 @@ def draw(data, scale, smooth, smoothness, contour_index, save_loc):
     axes.set_aspect(1)
     axes.set_xlim(0, width)
     axes.set_ylim(0, height)
+
+    scale_ratio = yaml_open.get("scale")
+    divisor, scale = scale_ratio.split(":")
+    scale = int(scale) / int(divisor)
     
     if save_loc:
-        graph.set_size_inches(0.629921 * height / 16, 0.629921 * height / 16) 
-
+        # units * 100(metres) / scale * inch conversion
+        graph.set_size_inches(width * 100 / scale * 0.393701, height * 100 / scale * 0.393701) 
         graph.savefig(save_loc)
 
     for line in axes.lines:
         line.set_linewidth(
-            line.get_linewidth() * 2**(4 - numpy.log2(max_len / 15)))
-    graph.set_size_inches(8 * scale, 8 * scale) 
+            line.get_linewidth() * 2**(4 - np.log2(max_len)))
+    
+    window_size = yaml_open.get("preview size")
+    graph.set_size_inches(8 * window_size, 8 * window_size) 
     graph.canvas.toolbar.pack_forget()
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 

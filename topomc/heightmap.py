@@ -54,7 +54,7 @@ class ChunkTile:
             self.anvil_file.data, tags[1]
         )
 
-        surface_blocks = yaml_open.get("surface_blocks")
+        surface_blocks = yaml_open.get("surface blocks")
 
         # generate heightmap
         self.heightmap = []

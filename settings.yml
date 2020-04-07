@@ -1,18 +1,23 @@
-saves_path: ~/.minecraft/saves/
-world: New World
+#------ Config ------#
+Saves path: ~/.minecraft/saves/    # Path to local minecraft saves directory
+World: New World    # Name of world to map
+PDF save location: ./examples/    # Leave this blank to avoid saving to anywhere
 
-pdf_save_location: examples/
+#------ Map ------#
+Scale: 1:1000    # Scale of map for PDF output
 
-window_scale: 1
+#------ Preview ------#
+Preview size: 1    # Size of preview window
 
-contour_interval: 1
-contour_offset: 0
-index: 5
+#------ Contours ------#
+Interval: 1    # Height distance between drawn contours
+Phase: 0    # What height the first contour is drawn at
+Index: 5    # The amount of standard contours for each index contour. Set to 0 to turn off
+Smoothness: 1    # Intensity of Gaussian1D smoothing level (sigma). Set to 0 to turn off
+Line width: 1
 
-smoothen: yes
-smoothness: 1
-
-surface_blocks:
+#------ Blocks ------#
+Surface blocks:    # Blocks considered 'ground level'
   - grass_block
   - grass_path
   - dirt

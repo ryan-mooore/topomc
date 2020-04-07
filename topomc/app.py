@@ -46,16 +46,16 @@ def run(args):
     try:
         world = args[5]
     except IndexError:
-        logging.info("No world found, using default")
+        logging.info("App: No world found, using default")
         world = yaml_open.get("world")
 
     try:
         contour_interval = int(args[6])
     except IndexError:
-        logging.info("None or invalid contour interval found, using default")
-        contour_interval = yaml_open.get("contour_interval")
+        logging.info("App: None or invalid contour interval found, using default")
+        contour_interval = yaml_open.get("interval")
 
-    contour_offset = yaml_open.get("contour_offset")
+    contour_offset = yaml_open.get("phase")
 
     heightmap = hm.Heightmap(world, *bounding_points)
 
@@ -66,20 +66,16 @@ def run(args):
     marching_squares.square_march(heightmap, contour_interval)
     if not "--debug" in args:
         topodata = vectorize.Topodata(heightmap)
-        scale = yaml_open.get("window_scale")
-        smooth = yaml_open.get("smoothen")
         smoothness = yaml_open.get("smoothness")
         index = yaml_open.get("index")
-        save_loc = yaml_open.get("pdf_save_location")
-        if smooth and not smoothness:
-            logging.critical("App: smoothness can not be zero if smoothing is enabled")
-            sys.exit()
+        save_loc = yaml_open.get("pdf save location")
+        line_width = yaml_open.get("line width")
         if save_loc:
             if not save_loc.endswith(".pdf"):
                 if save_loc.endswith("/"):
                     save_loc = save_loc + "map.pdf"
                 else:
                     save_loc = save_loc + ".pdf"
-        draw.draw(topodata, scale, smooth, smoothness, index, save_loc)
+        draw.draw(topodata, smoothness, index, save_loc, line_width)
     else:
         draw.debug(heightmap)

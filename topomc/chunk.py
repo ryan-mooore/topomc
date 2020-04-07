@@ -18,7 +18,7 @@ def load(world, chunkx, chunkz):
         chunkpos_to_regionpos(chunk_coord) for chunk_coord in (chunkx, chunkz)
     ])
 
-    saves_path = yaml_open.get("saves_path")
+    saves_path = yaml_open.get("saves path")
     if saves_path.startswith('~'):
         saves_path = os.environ['HOME'] + saves_path[1:]
     world_path = saves_path + world
