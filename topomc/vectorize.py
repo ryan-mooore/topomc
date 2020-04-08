@@ -125,7 +125,7 @@ class Heightplane:
 
         for y, row in enumerate(all_cells):
             for x, cell in enumerate(row): # foreach cell
-                if self.bitmap[y][x] is not 1: #if it has not already been used at this height
+                if self.bitmap[y][x] != 1: #if it has not already been used at this height
                     
                     for pixline in cell.pixlines:
                         if pixline.height == height:
