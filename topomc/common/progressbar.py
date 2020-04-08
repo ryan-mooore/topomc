@@ -12,8 +12,8 @@ def _print(iteration, total, prefix="", suffix=""):
 
     decimals = 1
     length = 30
-    fill = '■'
-    empty = '□'
+    fill = "\u25A0"
+    empty = "\u25A1"
     print_end = "\r"
 
     percent = ("{0:." + str(decimals) + "f}")\
