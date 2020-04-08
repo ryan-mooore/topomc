@@ -1,5 +1,4 @@
 import sys, os
-#import argparse
 # files
 from common import yaml_open
 import heightmap as hm
@@ -8,24 +7,9 @@ import draw
 import vectorize
 import logging
 
-version = sys.version_info
-if version.major == 2:
-    logging.critical("Main: Unsupported Python version")
-    sys.exit()
-if version.major == 3 and version.minor < 7:
-    logging.critical("Main: Unsupported Python version")
-    sys.exit()
-
-
-#parser = argparse.ArgumentParser(description='Generate a map')
-#parser.add_argument('Bounding co-ordinates', metavar='C', type=int, nargs=4, help='Bounding co-ordinates')
-#parser.add_argument('World', metavar='W', nargs=1, help='World')
-#parser.add_argument('--World', metavar='W', nargs=1, help='World')
-logging.basicConfig(format='%(process)d-%(levelname)s-%(message)s', level=10)
-
 def run(args):
     try:
-        bounding_points = (x1, z1, x2, z2) = [int(x) for x in args[1:5]]
+        bounding_points = x1, z1, x2, z2 = args.x1, args.z1, args.x2, args.z2
     except ValueError:
         logging.critical("App: no co-ordinates for world specified")
         return 1
@@ -33,17 +17,15 @@ def run(args):
         logging.critical("App: Invalid co-ordinates")
         return 1
 
-    total_bound_chunks = (x2+1 - x1) * (z2+1 - z1)
-
-    try:
-        world = args[5]
-    except IndexError:
+    if args.world:
+        world = args.world
+    else:
         logging.info("App: No world found, using default")
         world = yaml_open.get("world")
 
-    try:
-        contour_interval = int(args[6])
-    except IndexError:
+    if args.interval:
+        contour_interval = args.interval
+    else:
         logging.info("App: None or invalid contour interval found, using default")
         contour_interval = yaml_open.get("interval")
 
@@ -56,19 +38,8 @@ def run(args):
         logging.critical("App: Contour interval/offset must be an integer")
 
     marching_squares.square_march(heightmap, contour_interval)
-    if not "--debug" in args:
-        topodata = vectorize.Topodata(heightmap)
-        smoothness = yaml_open.get("smoothness")
-        index = yaml_open.get("index")
-        save_loc = yaml_open.get("pdf save location")
-        save_loc = os.path.normcase(save_loc)
-        line_width = yaml_open.get("line width")
-        if save_loc:
-            if not save_loc.endswith(".pdf"):
-                if save_loc.endswith(os.sep):
-                    save_loc = save_loc + "map.pdf"
-                else:
-                    save_loc = save_loc + ".pdf"
-        draw.draw(topodata, smoothness, index, save_loc, line_width)
-    else:
+    if args.debug:
         draw.debug(heightmap)
+    else:
+        topodata = vectorize.Topodata(heightmap)
+        draw.draw(topodata)

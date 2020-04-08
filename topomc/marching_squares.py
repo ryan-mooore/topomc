@@ -1,4 +1,5 @@
 # marching squares algorithm for generating contour data
+from common import progressbar
 
 class SideHelper:
     def __init__(self, corner1, corner2, x, y):
@@ -41,7 +42,7 @@ class Coordinates:
     def __eq__(self, other):
         if not isinstance(other, Coordinates):
             return NotImplemented
-        
+
         return self.x == other.x and self.y == other.y
 
 def square_march(heightmap, contour_interval=1, contour_offset=0):
@@ -50,6 +51,8 @@ def square_march(heightmap, contour_interval=1, contour_offset=0):
         for chunk_tile in chunk_tile_row:"""
 
     heightmap.cells = []
+    cells_created = 0
+    cells_to_create = (len(heightmap.heightmap) - 1) * (len(heightmap.heightmap[0]) - 1)
 
     for z in range(len(heightmap.heightmap) - 1):
         cell_row = []
@@ -128,7 +131,14 @@ def square_march(heightmap, contour_interval=1, contour_offset=0):
                                 search = "start"
 
                             side_is_endpoint = False
-
+            cells_created += 1
+            progressbar._print(
+                cells_created,
+                cells_to_create,
+                2,
+                "pixline cells created"
+            )
+            
             cell_row.append(cell)
 
         heightmap.cells.append(cell_row)

@@ -1,12 +1,25 @@
 from matplotlib import pyplot as plt
 from scipy.ndimage import gaussian_filter1d
 import numpy as np
+import os
+import logging
 
 from common import progressbar, yaml_open
 
-def draw(data, smoothness, contour_index, save_loc, line_width):
+def draw(data):
 
     plt.figure("Preview")
+    
+    smoothness = yaml_open.get("smoothness")
+    contour_index = yaml_open.get("index")
+    save_loc = os.path.normcase(yaml_open.get("pdf save location"))
+    line_width = yaml_open.get("line width")
+    if save_loc:
+        if not save_loc.endswith(".pdf"):
+            if save_loc.endswith(os.sep):
+                save_loc = save_loc + "map.pdf"
+            else:
+                save_loc = save_loc + ".pdf"
 
     width = len(data.heightplanes[0].bitmap[0])
     height = len(data.heightplanes[0].bitmap)
@@ -17,7 +30,7 @@ def draw(data, smoothness, contour_index, save_loc, line_width):
         isolines_to_render += len(heightplane.isolines)
 
     isolines_rendered = 0
-    for index, heightplane in enumerate(data.heightplanes):
+    for heightplane in data.heightplanes:
         for isoline in heightplane.isolines:
             isoline.vertices = []
             for point in isoline.contour:
@@ -42,20 +55,20 @@ def draw(data, smoothness, contour_index, save_loc, line_width):
             progressbar._print(
                 isolines_rendered,
                 isolines_to_render,
-                3,
+                4,
                 f"isolines rendered"
             )
 
 
-    print("Loading matplotlib window...")
+    logging.info("Draw: Loading matplotlib window...")
     print()
 
 
     plt.axis("off")
-    
+
     axes = plt.gca()
     graph = plt.gcf()
-    
+
     axes.set_aspect(1)
     axes.set_xlim(0, width)
     axes.set_ylim(0, height)
@@ -63,16 +76,16 @@ def draw(data, smoothness, contour_index, save_loc, line_width):
     scale_ratio = yaml_open.get("scale")
     divisor, scale = scale_ratio.split(":")
     scale = int(scale) / int(divisor)
-    
+
     if save_loc:
         # units * 100(metres) / scale * inch conversion
-        graph.set_size_inches(width * 100 / scale * 0.393701, height * 100 / scale * 0.393701) 
+        graph.set_size_inches(width * 100 / scale * 0.393701, height * 100 / scale * 0.393701)
         graph.savefig(save_loc)
 
     for line in axes.lines:
         line.set_linewidth(
             line.get_linewidth() * 2**(4 - np.log2(max_len)))
-    
+
     window_size = yaml_open.get("preview size")
     graph.set_size_inches(8 * window_size, 8 * window_size)
     graph.canvas.toolbar.pack_forget()
@@ -83,8 +96,8 @@ def draw(data, smoothness, contour_index, save_loc, line_width):
 def debug(data):
     plt.figure("Preview")
 
-    width = len(data.cells[0])
-    height = len(data.cells)
+    width = 15
+    height = 15
 
     for y, row in enumerate(data.cells):
             for x, cell in enumerate(row):
@@ -94,24 +107,24 @@ def debug(data):
                         y = [cell.coords.y - pixline.coords.start.y + 1, cell.coords.y - pixline.coords.end.y + 1]
                         plt.plot(x, y, "#D15C00", linewidth=2)
 
-    print("Loading matplotlib window...")
-    print()
-
-
-    #plt.axis("off")
-    
     axes = plt.gca()
     graph = plt.gcf()
 
-    axes.set_xlim(0, width)
-    axes.set_ylim(0, height)
+    axes.set_xlim(0, 15)
+    axes.set_ylim(0, 15)
     axes.invert_yaxis()
     axes.set_aspect(1)
 
     graph.set_size_inches(8, 8)
-    plt.xticks(range(0, width))
-    plt.yticks(range(0, height))
+    plt.xticks(range(0, 15))
+    plt.yticks(range(0, 15))
     graph.canvas.toolbar.pack_forget()
     #plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     plt.grid(color='#000', linestyle='-', linewidth=0.1, which="both")
+    
+    logging.debug(f"App: Debugging chunk {data.start_coords.x, data.start_coords.y}")
+    logging.info("Draw: Loading matplotlib window...")
+    logging.disable(logging.DEBUG)
+    print()
+    
     plt.show()

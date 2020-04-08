@@ -36,17 +36,17 @@ Pyplot from matplotlib is used to render the lines.
 ## Installation and running
 ### Installation
 
-1.   Firstly, make sure all [dependencies](Pipfile) are installed.
+1.    Firstly, make sure all [dependencies](Pipfile) are installed.
 Using the included virtual environment (pipenv) is highly reccommended as all the default dependencies are already set up.
 
-2.   Clone this repository
+2.    Clone this repository
 
-3.   Specify where your minecraft save files are located. This changes from system to system so it needs to be configured in the repository's [settings.yml](topomc/common/settings.yml) file, next to the option `path_to_saves`. **This needs to be an abslute path**.
-   *   On Windows, the default path is `%appdata%\.minecraft\saves\`
-   *   On Linux, the default path is `~/.minecraft/saves/`
-   *   On Mac, the default path is `~/Library/Application Support/minecraft/saves/`
+3.    Specify where your minecraft save files are located. This changes from system to system so it needs to be configured in the repository's [settings.yml](topomc/common/settings.yml) file, next to the option `path_to_saves`. **This needs to be an abslute path**.
+ *  On Windows, the default path is `%appdata%\.minecraft\saves\`
+ *  On Linux, the default path is `~/.minecraft/saves/`
+ *  On Mac, the default path is `~/Library/Application Support/minecraft/saves/`
 
-4.   Optionally, other settings in [settings.yml](settings.yml) can be changed as well, but testing has only been done on default settings.
+4.    Optionally, other settings in [settings.yml](settings.yml) can be changed as well, but testing has only been done on default settings.
 
 ### Running
 This script needs Python **3.7** or higher to run.
@@ -62,7 +62,8 @@ The arguments to run the script are as follows:
 *   Make sure the command is run in the root derectory of the project.
 
 The following optional arguments can be added to the end of the command:
-*   `world` - overrides the world setting in [settings.yml](settings.yml).
-*   `contour_interval` - overrides the Interval setting in [settings.yml](settings.yml) under contours.
+*   `-D, --debug ` `x, z` - Opens a preview in debug mode for chunk `(x, z)`
+*   `-w, --world` - overrides the world setting in [settings.yml](settings.yml).
+*   `-I` - overrides the Interval setting in [settings.yml](settings.yml) under contours.
 
 By default, the script will output a PDF file of the map at the scale defined in [settings.yml](settings.yml). As well as this, a preview window will appear. If file output is not necessary, the setting for output file can be left blank and the preview window by itself can be used.

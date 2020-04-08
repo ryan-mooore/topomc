@@ -139,8 +139,8 @@ class Heightmap:
 
             self.start_coords = Coordinates(chunk_x1 * 16, chunk_z1 * 16)
             self.end_coords = Coordinates(chunk_x2 * 16, chunk_z2 * 16)
-        
-        
+
+
         """
         for z in range(chunk_z1, chunk_z2 + 1):
             chunk_row = []

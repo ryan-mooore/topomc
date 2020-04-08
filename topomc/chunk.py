@@ -50,7 +50,7 @@ def load(world, chunkx, chunkz):
 
     try:
         chunk = anvil.Chunk.from_region(region, chunkx, chunkz)
-    except:
+    except Exception:
         logging.critical(f"Chunk: Chunk {chunkx, chunkz} is not loaded or corrupt")
         sys.exit()
 

@@ -15,4 +15,4 @@ def get(key):
     except Exception as e:
         logging.fatal("Yaml: settings.yml is incorrectly formatted or missing")
         raise e
-        sys.exit()
+

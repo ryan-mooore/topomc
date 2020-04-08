@@ -13,7 +13,7 @@ class Topodata:
             progressbar._print(
                 height + 1 - low,
                 high - low,
-                2,
+                3,
                 f"heightplanes created"
             )
 
