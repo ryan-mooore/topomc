@@ -42,9 +42,9 @@ Using the included virtual environment (pipenv) is highly reccommended as all th
 2.    Clone this repository
 
 3.    Specify where your minecraft save files are located. This changes from system to system so it needs to be configured in the repository's [settings.yml](topomc/common/settings.yml) file, next to the option `path_to_saves`. **This needs to be an abslute path**.
- *  On Windows, the default path is `%appdata%\.minecraft\saves\`
  *  On Linux, the default path is `~/.minecraft/saves/`
  *  On Mac, the default path is `~/Library/Application Support/minecraft/saves/`
+ *  On Windows, the default path is `%appdata%\.minecraft\saves\`. Please note that if the path starts with a % symbol, it will need to be enclosed in quotes in [settings.yml](settings.yml).
 
 4.    Optionally, other settings in [settings.yml](settings.yml) can be changed as well, but testing has only been done on default settings.
 
