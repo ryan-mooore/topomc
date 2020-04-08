@@ -49,7 +49,7 @@ Using the included virtual environment (pipenv) is highly reccommended as all th
 4.    Optionally, other settings in [settings.yml](settings.yml) can be changed as well, but testing has only been done on default settings.
 
 ### Running
-This script needs Python **3.7** or higher to run.
+This script needs Python **3.8** or higher to run.
 
 Firstly, specify the world you would like to run the script on in [settings.yml](settings.yml).
 
