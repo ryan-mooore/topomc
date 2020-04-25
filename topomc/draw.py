@@ -42,21 +42,26 @@ def draw(data):
             x = [vertice[0] for vertice in isoline.vertices]
             y = [vertice[1] for vertice in isoline.vertices]
 
-            if smoothness:
-                if isoline.closed:
-                    t = np.arange(0, 1.1, .1)
-                    tck, u = interpolate.splprep([x, y], s=0)
-                    unew = np.arange(0, 1.01, 0.01)
-                    x, y = interpolate.splev(unew, tck)
-                else:
-                    x = gaussian_filter1d(x, smoothness)
-                    y = gaussian_filter1d(y, smoothness)
+            try:
+                if smoothness:
+                    if isoline.closed:
+                        t = np.arange(0, 1.1, .1)
+                        tck, u = interpolate.splprep([x, y], s=0)
+                        unew = np.arange(0, 1.01, 0.01)
+                        x, y = interpolate.splev(unew, tck)
+                    else:
+                        x = gaussian_filter1d(x, smoothness)
+                        y = gaussian_filter1d(y, smoothness)
 
-            IOF_INDEX_RATIO = 25/14
-            if contour_index and heightplane.height % contour_index == 0:
-                plt.plot(x, y, "#D15C00", linewidth=line_width / 3 * IOF_INDEX_RATIO)
-            else:
-                plt.plot(x, y, "#D15C00", linewidth=line_width / 3)
+                IOF_INDEX_RATIO = 25/14
+                if contour_index and heightplane.height % contour_index == 0:
+                    plt.plot(x, y, "#D15C00", linewidth=line_width / 3 * IOF_INDEX_RATIO)
+                else:
+                    plt.plot(x, y, "#D15C00", linewidth=line_width / 3)
+            except Exception as e:
+                logging.error(f"Draw: {e}")
+                logging.error(f"Draw: error drawing isoline {isoline} in heigtplane at height {heightplane.height}")
+                logging.error(f"Isoline data: {isoline.contour}")
 
             isolines_rendered += 1
             progressbar._print(
