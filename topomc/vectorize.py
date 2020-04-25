@@ -89,7 +89,7 @@ class Heightplane:
                         #loop testing
                         if (this_cell == origin_cell):
                             this_isoline.closed = True
-                            return end_trace()
+                            return this_isoline, location
                         
                     #edge testing
                     c = this_cell.coords
