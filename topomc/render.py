@@ -5,6 +5,7 @@ import numpy as np
 import os
 import logging
 
+from pixline import Coordinates
 from common import progressbar, yaml_open
 
 def draw(data):
@@ -123,9 +124,40 @@ def debug(data):
             for x, cell in enumerate(row):
                 if cell.pixlines:
                     for pixline in cell.pixlines:
-                        x = [pixline.coords.start.x + cell.coords.x, pixline.coords.end.x + cell.coords.x]
-                        y = [cell.coords.y - pixline.coords.start.y + 1, cell.coords.y - pixline.coords.end.y + 1]
-                        plt.plot(x, y, "#D15C00", linewidth=2)
+                        pc = pixline.coords
+                        cc = cell.coords
+                        x =[
+                            pc.start.x + cc.x,
+                            pc.end.x + cc.x
+                        ]
+                        y = [
+                            cc.y - pc.start.y + 1,
+                            cc.y - pc.end.y + 1
+                        ]
+                        center = Coordinates(
+                            cc.x + min(*pc.x) + abs(pc.x_diff()) / 2, \
+                            cc.y - min(*pc.y) - abs(pc.y_diff()) / 2 + 1)
+
+                        try:
+                            gradient = pc.y_diff() / pc.x_diff()
+                            tangent = np.arctan(gradient)
+                        except:
+                            tangent = np.pi / 2
+                            normal = tangent + np.pi / 2
+
+                        normal = tangent + np.pi / 2
+
+                        end = Coordinates(
+                            center.x + 0.2 * np.cos(normal),
+                            center.y - 0.2 * np.sin(normal)
+                        )
+
+                        plot = np.array([center.get_list(), end.get_list()])
+                        plt.plot(x, y, "#000", linewidth=1)
+                        plt.plot(*plot.transpose(), "#000", linewidth=1)
+                        plt.plot(
+                            (x[0] + center.x) / 2, (y[0] + center.y ) / 2, "go", ms=4)
+                        plt.plot((x[1] + center.x) / 2, (y[1] + center.y) / 2, "ro", ms=4)
 
     axes = plt.gca()
     graph = plt.gcf()
@@ -140,7 +172,7 @@ def debug(data):
     plt.yticks(range(0, 15))
     graph.canvas.toolbar.pack_forget()
     #plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-    plt.grid(color='#000', linestyle='-', linewidth=0.1, which="both")
+    plt.grid(color='#000', linestyle='-', linewidth=1, which="both")
     
     logging.debug(f"App: Debugging chunk {data.start_coords.x, data.start_coords.y}")
     logging.info("Render: Loading matplotlib window...")

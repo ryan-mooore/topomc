@@ -37,7 +37,7 @@ def run(args):
     or not isinstance(contour_offset, int):
         logging.critical("App: Contour interval/offset must be an integer")
 
-    pixline.square_march(heightmap, contour_interval)
+    pixline.march(heightmap, contour_interval)
     if args.debug:
         render.debug(heightmap)
     else:

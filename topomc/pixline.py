@@ -46,11 +46,31 @@ class PixlineCoords:
     def __init__(self):
         self.start = Coordinates(0, 0)
         self.end = Coordinates(0, 0)
+    
+    @property
+    def x(self):
+        return self.start.x, self.end.x
+    @x.setter
+    def x(self, value):
+        self.start.x, self.end.x = value
+    
+    @property
+    def y(self):
+        return self.start.y, self.end.y
+    @y.setter
+    def y(self, value):
+        self.start.y, self.end.y = value
+
+    def x_diff(self):
+        return self.end.x - self.start.x
+    def y_diff(self):
+        return self.end.y - self.start.y
 
 class Pixline:
-    def __init__(self, height):
+    def __init__(self, height, direction):
         self.height = height
         self.coords = PixlineCoords()
+        self.direction = direction
 
 class Coordinates:
     def __init__(self, x, y):
@@ -62,11 +82,14 @@ class Coordinates:
             return NotImplemented
 
         return self.x == other.x and self.y == other.y
+    
+    def get_list(self):
+        return self.x, self.y
 
     def __repr__(self):
         return f"{self.x, self.y}"
 
-def square_march(heightmap, contour_interval=1, contour_offset=0):
+def march(heightmap, contour_interval=1, contour_offset=0):
     """
     for chunk_tile_row in heightmap.chunk_tiles:
         for chunk_tile in chunk_tile_row:"""
@@ -116,6 +139,9 @@ def square_march(heightmap, contour_interval=1, contour_offset=0):
 
                             location = (lower_height - side.corner1) \
                                 / side.difference + 0.5 / side.difference
+                            
+                            if search == "start":
+                                direction = 1
 
                             side_is_endpoint = True
 
@@ -125,6 +151,9 @@ def square_march(heightmap, contour_interval=1, contour_offset=0):
 
                             location = 1 - (upper_height - side.corner2) \
                                 / side.difference + 0.5 / side.difference
+                            
+                            if search == "start":
+                                direction = -1
 
                             side_is_endpoint = True
 
@@ -136,13 +165,14 @@ def square_march(heightmap, contour_interval=1, contour_offset=0):
                                 coords.y = location
 
                             if search == "start":
-                                pixline = Pixline(lower_height)
+                                pixline = Pixline(lower_height, direction)
                                 pixline.coords.start.x = coords.x
                                 pixline.coords.start.y = coords.y
                                 search = "end"
                             elif search == "end":
                                 pixline.coords.end.x = coords.x
                                 pixline.coords.end.y = coords.y
+                                pixline.direction = 1
                                 cell.pixlines.append(pixline)
                                 search = "start"
 

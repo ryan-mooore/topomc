@@ -59,6 +59,11 @@ class ChunkTile:
         # generate heightmap
         self.heightmap = []
 
+
+        # TODO:
+        # implement generator
+        # account for waterlogged blocks
+
         for z in range(16):
             row = []
 
