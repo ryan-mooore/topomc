@@ -20,6 +20,7 @@ def _print(iteration, total, prefix="", suffix=""):
         .format(100 * (iteration / float(total)))
     filled_length = int(length * iteration // total)
     bar = fill * filled_length + empty * (length - filled_length)
+    
     print(
         f"{print_end}{prefix} {bar} {percent}% {iteration}/{total} {suffix}",
         end=print_end
@@ -34,5 +35,5 @@ def _print(iteration, total, prefix="", suffix=""):
         end = perf_counter()
         exec_time = round(end - start, 2)
         print()
-        print('%s %s in %ss' % (total, suffix, exec_time))
+        print(f"{total} {suffix} in {exec_time}s")
         print()

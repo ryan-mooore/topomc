@@ -44,10 +44,9 @@ def draw(data):
 
             try:
                 if smoothness:
-                    if isoline.closed:
-                        t = np.arange(0, 1.1, .1)
-                        tck, u = interpolate.splprep([x, y], s=0)
-                        unew = np.arange(0, 1.01, 0.01)
+                    if  0: #isoline.closed
+                        tck, _ = interpolate.splprep([x, y], s=0)
+                        unew = np.arange(0, 1, 0.01)
                         x, y = interpolate.splev(unew, tck)
                     else:
                         x = gaussian_filter1d(x, smoothness)
@@ -59,20 +58,22 @@ def draw(data):
                 else:
                     plt.plot(x, y, "#D15C00", linewidth=line_width / 3)
             except Exception as e:
-                logging.error(f"Draw: {e}")
-                logging.error(f"Draw: error drawing isoline {isoline} in heigtplane at height {heightplane.height}")
+
+                logging.error(f"Render: {e}")
+                logging.error(f"Render: error Rendering isoline {isoline} in heightplane at height {heightplane.height}")
                 logging.error(f"Isoline data: {isoline.contour}")
 
             isolines_rendered += 1
-            progressbar._print(
-                isolines_rendered,
-                isolines_to_render,
-                4,
-                f"isolines rendered"
-            )
+            if isolines_rendered % 50 == 0 or isolines_rendered == isolines_to_render:
+                progressbar._print(
+                    isolines_rendered,
+                    isolines_to_render,
+                    2,
+                    "isolines rendered"
+                )
 
 
-    logging.info("Draw: Loading matplotlib window...")
+    logging.info("Render: Loading matplotlib window...")
     print()
 
 
@@ -135,7 +136,7 @@ def debug(data):
     plt.grid(color='#000', linestyle='-', linewidth=0.1, which="both")
     
     logging.debug(f"App: Debugging chunk {data.start_coords.x, data.start_coords.y}")
-    logging.info("Draw: Loading matplotlib window...")
+    logging.info("Render: Loading matplotlib window...")
     logging.disable(logging.DEBUG)
     print()
     

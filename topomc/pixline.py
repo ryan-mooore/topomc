@@ -8,6 +8,24 @@ class SideHelper:
 
         self.coords = Coordinates(x, y)
 
+    @property
+    def direction(self):
+        if self.corner1 < self.corner2:
+            return 1
+        elif self.corner1 > self.corner2:
+            return -1
+        else:
+            return None
+
+    @property
+    def difference(self):
+        if self.direction == 1:
+            return self.corner2 - self.corner1
+        elif self.direction == -1:
+            return self.corner1 - self.corner2
+        else:
+            return 0
+
 class Cell:
     def __init__(self, sides, coords):
         (tl, tr, br, bl) = sides
@@ -89,26 +107,21 @@ def square_march(heightmap, contour_interval=1, contour_offset=0):
                         # theoretically this loop should only run twice -
                         # only one height pixline so only one start and end exist
 
-                        if side.corner1 < side.corner2 \
+                        if side.direction == 1 \
                             and side.corner1 <= lower_height \
                             and side.corner2 >= upper_height: # a height difference exists
-                            side_height_difference = \
-                                side.corner2 - side.corner1
+
                             location = (lower_height - side.corner1) \
-                                / side_height_difference \
-                                + 0.5 / side_height_difference
+                                / side.difference + 0.5 / side.difference
 
                             side_is_endpoint = True
 
-                        if side.corner1 > side.corner2 \
+                        if side.direction == -1 \
                             and side.corner1 >= upper_height \
                             and side.corner2 <=lower_height: # a height difference exists
 
-                            side_height_difference = \
-                                side.corner1 - side.corner2
                             location = 1 - (upper_height - side.corner2) \
-                                / side_height_difference \
-                                + 0.5 / side_height_difference
+                                / side.difference + 0.5 / side.difference
 
                             side_is_endpoint = True
 
@@ -132,12 +145,13 @@ def square_march(heightmap, contour_interval=1, contour_offset=0):
 
                             side_is_endpoint = False
             cells_created += 1
-            progressbar._print(
-                cells_created,
-                cells_to_create,
-                2,
-                "pixline cells created"
-            )
+            if cells_created % 50 == 0 or cells_created == cells_to_create:
+                progressbar._print(
+                    cells_created,
+                    cells_to_create,
+                    2,
+                    "pixline cells created"
+                )
             
             cell_row.append(cell)
 

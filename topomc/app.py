@@ -1,32 +1,32 @@
 import sys, os
-# files
+import logging
+
 from common import yaml_open
 import heightmap as hm
-import marching_squares
-import draw
-import vectorize
-import logging
+import pixline
+import render
+import heightplane
 
 def run(args):
     try:
         bounding_points = x1, z1, x2, z2 = args.x1, args.z1, args.x2, args.z2
     except ValueError:
         logging.critical("App: no co-ordinates for world specified")
-        return 1
+        sys.exit()
     if x1 > x2 or z1 > z2:
         logging.critical("App: Invalid co-ordinates")
-        return 1
+        sys.exit()
 
     if args.world:
+        logging.info("App: Using explicitly defined world")
         world = args.world
     else:
-        logging.info("App: No world found, using default")
         world = yaml_open.get("world")
 
     if args.interval:
         contour_interval = args.interval
+        logging.info("App: Using explicitly defined contour interval")
     else:
-        logging.info("App: None or invalid contour interval found, using default")
         contour_interval = yaml_open.get("interval")
 
     contour_offset = yaml_open.get("phase")
@@ -37,9 +37,9 @@ def run(args):
     or not isinstance(contour_offset, int):
         logging.critical("App: Contour interval/offset must be an integer")
 
-    marching_squares.square_march(heightmap, contour_interval)
+    pixline.square_march(heightmap, contour_interval)
     if args.debug:
-        draw.debug(heightmap)
+        render.debug(heightmap)
     else:
-        topodata = vectorize.Topodata(heightmap)
-        draw.draw(topodata)
+        topodata = heightplane.Topodata(heightmap)
+        render.draw(topodata)

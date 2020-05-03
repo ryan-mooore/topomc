@@ -1,4 +1,4 @@
-from marching_squares import Coordinates
+from pixline import Coordinates
 import logging
 from common import progressbar
 
@@ -141,7 +141,7 @@ class Heightplane:
                     if trace:
                         (new_origin_cell, new_start_coords) = trace[1]
                     else:
-                        logging.error(f"Vectorization: Drawing isoline at height {height} with origin cell {origin_cell.coords.x, origin_cell.coords.y} failed on SEARCH")
+                        logging.error(f"Heightplane: Drawing isoline at height {height} with origin cell {origin_cell.coords.x, origin_cell.coords.y} failed on SEARCH")
                         continue
 
                     origin_cell = new_origin_cell
@@ -153,6 +153,6 @@ class Heightplane:
                     if trace:
                         new_isoline = trace[0]
                     else:
-                        logging.error(f"Vectorization: Drawing isoline at height {height} with origin cell {origin_cell.coords.x, origin_cell.coords.y} failed on TRACE")
+                        logging.error(f"Heightplane: Drawing isoline at height {height} with origin cell {origin_cell.coords.x, origin_cell.coords.y} failed on TRACE")
                         continue
                     self.isolines.append(new_isoline) # only get line value
