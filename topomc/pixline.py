@@ -63,6 +63,9 @@ class Coordinates:
 
         return self.x == other.x and self.y == other.y
 
+    def __repr__(self):
+        return f"{self.x, self.y}"
+
 def square_march(heightmap, contour_interval=1, contour_offset=0):
     """
     for chunk_tile_row in heightmap.chunk_tiles:

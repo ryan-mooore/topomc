@@ -31,6 +31,8 @@ def draw(data):
         isolines_to_render += len(heightplane.isolines)
 
     isolines_rendered = 0
+    margin = 3
+
     for heightplane in data.heightplanes:
         for isoline in heightplane.isolines:
             isoline.vertices = []
@@ -44,13 +46,18 @@ def draw(data):
 
             try:
                 if smoothness:
-                    if  0: #isoline.closed
-                        tck, _ = interpolate.splprep([x, y], s=0)
-                        unew = np.arange(0, 1, 0.01)
-                        x, y = interpolate.splev(unew, tck)
-                    else:
-                        x = gaussian_filter1d(x, smoothness)
-                        y = gaussian_filter1d(y, smoothness)
+                    if isoline.closed:
+                        x_start, x_end = x[0:margin], x[-margin:]
+                        y_start, y_end = y[0:margin], y[-margin:]
+                        x = x_end + x + x_start
+                        y = y_end + y + y_start
+
+                    x = gaussian_filter1d(x, smoothness)
+                    y = gaussian_filter1d(y, smoothness)
+
+                    if isoline.closed:
+                        x = x[margin:-margin + 1]
+                        y = y[margin:-margin + 1]
 
                 IOF_INDEX_RATIO = 25/14
                 if contour_index and heightplane.height % contour_index == 0:
