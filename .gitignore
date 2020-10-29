@@ -1,5 +1,6 @@
 .vscode
 .venv
+debug.pdf
 
 __pycache__
 common/__pycache__

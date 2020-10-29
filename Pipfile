@@ -11,9 +11,10 @@ anvil-parser = ">=0.1.1"
 NBT = "*"
 PyYAML = ">=5.0"
 scipy = "*"
-matplotlib = "*"
 numpy = "*"
 env = "*"
+matplotlib = "*"
+ipykernel = "*"
 
 [requires]
 python_version = "3.8"

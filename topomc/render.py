@@ -14,9 +14,10 @@ def draw(data):
     
     smoothness = yaml_open.get("smoothness")
     contour_index = yaml_open.get("index")
-    save_loc = os.path.normcase(yaml_open.get("pdf save location"))
+    save_loc = yaml_open.get("pdf save location")
     line_width = yaml_open.get("line width")
     if save_loc:
+        save_loc = os.path.normpath(save_loc)
         if not save_loc.endswith(".pdf"):
             if save_loc.endswith(os.sep):
                 save_loc = save_loc + "map.pdf"
@@ -109,7 +110,8 @@ def draw(data):
 
     window_size = yaml_open.get("preview size")
     graph.set_size_inches(8 * window_size, 8 * window_size)
-    graph.canvas.toolbar.pack_forget()
+    if graph.canvas.toolbar:
+        graph.canvas.toolbar.pack_forget()
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
     plt.show()

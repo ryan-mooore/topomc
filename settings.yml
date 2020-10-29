@@ -1,7 +1,7 @@
 #------ Config ------#
-Saves path: ~/.minecraft/saves/    # Path to local minecraft saves directory
-World: New World    # Name of world to map
-PDF save location: ./examples/    # Leave this blank to avoid saving to anywhere
+Saves path: /mnt/c/Users/ryan/AppData/Roaming/.minecraft/saves # Path to local minecraft saves directory
+World: topomc15    # Name of world to map
+PDF save location: ./examples/debug.pdf    # Leave this blank to avoid saving to anywhere
 
 #------ Map ------#
 Scale: 1:1000    # Scale of map for PDF output
