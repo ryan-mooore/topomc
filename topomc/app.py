@@ -37,9 +37,6 @@ def run(args):
     or not isinstance(contour_offset, int):
         logging.critical("App: Contour interval/offset must be an integer")
 
-    pixline.march(heightmap, contour_interval)
-    if args.debug:
-        render.debug(heightmap)
-    else:
-        topodata = heightplane.Topodata(heightmap)
-        render.draw(topodata)
+    contours = pixline.march(heightmap, contour_interval)
+
+    render.draw(contours)

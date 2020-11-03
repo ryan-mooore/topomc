@@ -146,28 +146,6 @@ class Heightmap:
             self.end_coords = Coordinates(chunk_x2 * 16, chunk_z2 * 16)
 
 
-        """
-        for z in range(chunk_z1, chunk_z2 + 1):
-            chunk_row = []
-
-            for x in range(chunk_x1, chunk_x2 + 1):
-                chunk_tile = ChunkTile(world, x, z)
-                chunk_tile.coords = Coordinates(x - chunk_x1, z - chunk_z1)
-                chunk_row.append(chunk_tile)
-
-                chunks_retrieved += 1
-                progressbar._print(
-                    chunks_retrieved,
-                    chunks_to_retrieve,
-                    1,
-                    "chunks retrieved"
-                )
-
-            self.chunk_tiles.append(chunk_row)
-        """
-
-
-
     def get_extremes(self):
         min_height = 0xFF
         max_height = 0x00
