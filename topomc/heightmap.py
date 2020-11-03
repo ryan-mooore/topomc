@@ -1,4 +1,4 @@
-from pixline import Coordinates
+from marching_squares import Coordinates
 from common import decode, progressbar, yaml_open
 import chunk
 

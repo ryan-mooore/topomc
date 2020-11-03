@@ -4,128 +4,121 @@ from scipy import interpolate
 import numpy as np
 import os
 import logging
-from labellines import labelLine, labelLines
 
-
-from pixline import Coordinates
+from marching_squares import Coordinates
 from common import progressbar, yaml_open
 
-def draw(data):
+class MapRender:
+    def __init__(self, topomap):
+        self.topomap = topomap
 
-    plt.figure("Preview")
-    
-    smoothness = yaml_open.get("smoothness")
-    contour_index = yaml_open.get("index")
-    save_loc = yaml_open.get("pdf save location")
-    line_width = yaml_open.get("line width")
-    if save_loc:
-        save_loc = os.path.normpath(save_loc)
-        if not save_loc.endswith(".pdf"):
-            if save_loc.endswith(os.sep):
-                save_loc = save_loc + "map.pdf"
-            else:
-                save_loc = save_loc + ".pdf"
+    def render(self):
 
-    width = len(data.heightmap[0])
-    height = len(data.heightmap)
+        plt.figure("Preview")
+        
+        smoothness = yaml_open.get("smoothness")
+        contour_index = yaml_open.get("index")
+        save_loc = yaml_open.get("pdf save location")
+        line_width = yaml_open.get("line width")
+        if save_loc:
+            save_loc = os.path.normpath(save_loc)
+            if not save_loc.endswith(".pdf"):
+                if save_loc.endswith(os.sep):
+                    save_loc = save_loc + "map.pdf"
+                else:
+                    save_loc = save_loc + ".pdf"
 
-    max_len = max(np.floor(width / 15), np.floor(height / 15))
-    isolines_to_render = 0
-    # for index, heightplane in enumerate(data.heightplanes):
-    #     isolines_to_render += len(heightplane.isolines)
+        max_len = max(np.floor(self.topomap.width / 15), np.floor(self.topomap.height / 15))
+        isolines_to_render = 0
 
-    isolines_rendered = 0
-    margin = 3
+        isolines_rendered = 0
+        margin = 3
 
-    # for heightplane in data.heightplanes:
-    for i in range (1):
-        for isoline in data.contours:
-            isoline.vertices = []
-            for point in isoline.contour:
-                (contour_coords, cell_coords) = point
-                isoline.vertices.append((cell_coords.x + contour_coords.x,
-                height - cell_coords.y - 1 + contour_coords.y))
+        for i in range (1):
+            for isoline in self.topomap.isolines:
+                isoline.vertices = []
+                for point in isoline.contour:
+                    (contour_coords, cell_coords) = point
+                    isoline.vertices.append((cell_coords.x + contour_coords.x,
+                    self.topomap.height - cell_coords.y - 1 + contour_coords.y))
 
-            x = [vertice[0] for vertice in isoline.vertices]
-            y = [vertice[1] for vertice in isoline.vertices]
+                x = [vertice[0] for vertice in isoline.vertices]
+                y = [vertice[1] for vertice in isoline.vertices]
 
-            try:
-                if smoothness:
-                    if isoline.closed:
-                        x_start, x_end = x[0:margin], x[-margin:]
-                        y_start, y_end = y[0:margin], y[-margin:]
-                        x = x_end + x + x_start
-                        y = y_end + y + y_start
+                try:
+                    if smoothness:
+                        if isoline.closed:
+                            x_start, x_end = x[0:margin], x[-margin:]
+                            y_start, y_end = y[0:margin], y[-margin:]
+                            x = x_end + x + x_start
+                            y = y_end + y + y_start
 
-                    x = gaussian_filter1d(x, smoothness)
-                    y = gaussian_filter1d(y, smoothness)
+                        x = gaussian_filter1d(x, smoothness)
+                        y = gaussian_filter1d(y, smoothness)
 
-                    if isoline.closed:
-                        x = x[margin:-margin + 1]
-                        y = y[margin:-margin + 1]
+                        if isoline.closed:
+                            x = x[margin:-margin + 1]
+                            y = y[margin:-margin + 1]
 
-                IOF_INDEX_RATIO = 25/14
-                # if contour_index and heightplane.height % contour_index == 0:
-                #     plt.plot(x, y, "#D15C00", linewidth=line_width / 3 * IOF_INDEX_RATIO)
-                # else:
-                plt.plot(x, y, "#D15C00", linewidth=line_width / 3)
-            except Exception as e:
+                    IOF_INDEX_RATIO = 25/14
+                    # if contour_index and heightplane.height % contour_index == 0:
+                    #     plt.plot(x, y, "#D15C00", linewidth=line_width / 3 * IOF_INDEX_RATIO)
+                    # else:
+                    plt.plot(x, y, "#D15C00", linewidth=line_width / 3)
+                except Exception as e:
+                    pass
 
-                logging.error(f"Render: {e}")
-                logging.error(f"Render: error Rendering isoline {isoline} in heightplane at height {heightplane.height}")
-                logging.error(f"Isoline data: {isoline.contour}")
-
-            isolines_rendered += 1
-            if isolines_rendered % 50 == 0 or isolines_rendered == isolines_to_render:
-                progressbar._print(
-                    isolines_rendered,
-                    isolines_to_render,
-                    2,
-                    "isolines rendered"
-                )
+                isolines_rendered += 1
+                if isolines_rendered % 50 == 0 or isolines_rendered == isolines_to_render:
+                    progressbar._print(
+                        isolines_rendered,
+                        isolines_to_render,
+                        2,
+                        "isolines rendered"
+                    )
 
 
-    logging.info("Render: Loading matplotlib window...")
-    print()
+        logging.info("Render: Loading matplotlib window...")
+        print()
 
 
-    plt.axis("off")
+        plt.axis("off")
 
-    axes = plt.gca()
-    graph = plt.gcf()
+        axes = plt.gca()
+        graph = plt.gcf()
 
-    axes.set_aspect(1)
-    axes.set_xlim(0, width)
-    axes.set_ylim(0, height)
+        axes.set_aspect(1)
+        axes.set_xlim(0, width)
+        axes.set_ylim(0, height)
 
-    scale_ratio = yaml_open.get("scale")
-    divisor, scale = scale_ratio.split(":")
-    scale = int(scale) / int(divisor)
+        scale_ratio = yaml_open.get("scale")
+        divisor, scale = scale_ratio.split(":")
+        scale = int(scale) / int(divisor)
 
-    if save_loc:
-        # units * 100(metres) / scale * inch conversion
-        graph.set_size_inches(width * 100 / scale * 0.393701, height * 100 / scale * 0.393701)
-        graph.savefig(save_loc)
+        if save_loc:
+            # units * 100(metres) / scale * inch conversion
+            graph.set_size_inches(width * 100 / scale * 0.393701, height * 100 / scale * 0.393701)
+            graph.savefig(save_loc)
 
-    for line in axes.lines:
-        line.set_linewidth(
-            line.get_linewidth() * 2**(4 - np.log2(max_len)))
+        for line in axes.lines:
+            line.set_linewidth(
+                line.get_linewidth() * 2**(4 - np.log2(max_len)))
 
-    window_size = yaml_open.get("preview size")
-    graph.set_size_inches(8 * window_size, 8 * window_size)
-    if graph.canvas.toolbar:
-        graph.canvas.toolbar.pack_forget()
-    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+        window_size = yaml_open.get("preview size")
+        graph.set_size_inches(8 * window_size, 8 * window_size)
+        if graph.canvas.toolbar:
+            graph.canvas.toolbar.pack_forget()
+        plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
-    plt.show()
+        plt.show()
 
-def debug(data):
+def debug(topomap, heightmap):
     plt.figure("Preview")
 
     width = 15
     height = 15
 
-    for value, isoline in enumerate(data.contours):
+    for value, isoline in enumerate(topomap.isolines):
         isoline.vertices = []
         for point in isoline.contour:
             (contour_coords, cell_coords) = point
@@ -136,7 +129,7 @@ def debug(data):
         x = [vertice[0] for vertice in isoline.vertices]
         y = [vertice[1] for vertice in isoline.vertices]
     
-        plt.plot(x, y, "#D15C00", linewidth=1, marker="o", label=value)
+        plt.plot(x, y, linewidth=1, marker="o", label=value)
         plt.text(x[0], y[0], value, color="#D15C00", size="20")
 
     axes = plt.gca()
@@ -154,11 +147,11 @@ def debug(data):
     #plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     plt.grid(color='#000', linestyle='-', linewidth=1, which="both")
 
-    for y, row in enumerate(data.heightmap):
+    for y, row in enumerate(heightmap.heightmap):
         for x, cell in enumerate(row):
             plt.text(x, y, cell)
 
-    logging.debug(f"App: Debugging chunk {data.start_coords.x, data.start_coords.y}")
+    logging.debug(f"App: Debugging chunk")
     logging.info("Render: Loading matplotlib window...")
     logging.disable(logging.DEBUG)
     print()

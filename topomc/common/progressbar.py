@@ -9,6 +9,7 @@ def _print(iteration, total, prefix="", suffix=""):
     the use case of this application
     https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
     """
+    return
 
     decimals = 1
     length = 30

@@ -2,10 +2,9 @@ import sys, os
 import logging
 
 from common import yaml_open
-import heightmap as hm
-import pixline
+import heightmap
+import marching_squares
 import render
-import heightplane
 
 def run(args):
     try:
@@ -31,12 +30,17 @@ def run(args):
 
     contour_offset = yaml_open.get("phase")
 
-    heightmap = hm.Heightmap(world, *bounding_points)
-
     if not isinstance(contour_interval, int) \
     or not isinstance(contour_offset, int):
         logging.critical("App: Contour interval/offset must be an integer")
 
-    contours = pixline.march(heightmap, contour_interval)
 
-    render.draw(contours)
+
+
+    hmap = heightmap.Heightmap(world, *bounding_points)
+    cellmap =   marching_squares.CellMap(hmap)
+    topomap =   marching_squares.TopoMap(cellmap)
+
+    map_render = render.MapRender(topomap)
+
+    render.debug(topomap, hmap)
