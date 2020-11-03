@@ -47,5 +47,6 @@ def run(args):
     logging.info("Done")
     logging.info("Rendering map...")
     map_render = render.MapRender(topomap)
-    map_render.render()
+    if args.debug: map_render.debug(hmap)
+    else:          map_render.render()
     logging.info("Done")

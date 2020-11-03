@@ -112,60 +112,59 @@ class MapRender:
 
         plt.show()
 
-def debug(topomap, heightmap):
-    plt.figure("Preview")
+    def debug(self, heightmap):
+        plt.figure("Preview")
 
-    width = 15
-    height = 15
+        for value, isoline in enumerate(self.topomap.isolines):
+            isoline.vertices = []
+            for point in isoline.contour:
+                (contour_coords, cell_coords) = point
+                isoline.vertices.append((cell_coords.x + contour_coords.x,
+                cell_coords.y + 1 - contour_coords.y))
+            
 
-    for value, isoline in enumerate(topomap.isolines):
-        isoline.vertices = []
-        for point in isoline.contour:
-            (contour_coords, cell_coords) = point
-            isoline.vertices.append((cell_coords.x + contour_coords.x,
-            cell_coords.y + 1 - contour_coords.y))
+            x = [vertice[0] for vertice in isoline.vertices]
+            y = [vertice[1] for vertice in isoline.vertices]
         
+            plt.plot(x, y, linewidth=1, marker="o", label=value)
+            try:
+                plt.text(x[0], y[0], value, color="#D15C00", size="20")
+            except:
+                pass
 
-        x = [vertice[0] for vertice in isoline.vertices]
-        y = [vertice[1] for vertice in isoline.vertices]
-    
-        plt.plot(x, y, linewidth=1, marker="o", label=value)
-        plt.text(x[0], y[0], value, color="#D15C00", size="20")
+        axes = plt.gca()
+        graph = plt.gcf()
 
-    axes = plt.gca()
-    graph = plt.gcf()
+        axes.set_xlim(0, 15)
+        axes.set_ylim(0, 15)
+        axes.invert_yaxis()
+        axes.set_aspect(1)
 
-    axes.set_xlim(0, 15)
-    axes.set_ylim(0, 15)
-    axes.invert_yaxis()
-    axes.set_aspect(1)
+        graph.set_size_inches(8, 8)
+        plt.xticks(range(0, 15))
+        plt.yticks(range(0, 15))
+        # graph.canvas.toolbar.pack_forget()
+        #plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+        plt.grid(color='#000', linestyle='-', linewidth=1, which="both")
 
-    graph.set_size_inches(8, 8)
-    plt.xticks(range(0, 15))
-    plt.yticks(range(0, 15))
-    # graph.canvas.toolbar.pack_forget()
-    #plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-    plt.grid(color='#000', linestyle='-', linewidth=1, which="both")
+        for y, row in enumerate(heightmap.heightmap):
+            for x, cell in enumerate(row):
+                plt.text(x, y, cell)
 
-    for y, row in enumerate(heightmap.heightmap):
-        for x, cell in enumerate(row):
-            plt.text(x, y, cell)
+        logging.debug(f"App: Debugging chunk")
+        logging.info("Render: Loading matplotlib window...")
+        logging.disable(logging.DEBUG)
+        print()
 
-    logging.debug(f"App: Debugging chunk")
-    logging.info("Render: Loading matplotlib window...")
-    logging.disable(logging.DEBUG)
-    print()
+        save_loc = yaml_open.get("pdf save location")
+        if save_loc:
+            save_loc = os.path.normpath(save_loc)
+            if not save_loc.endswith(".pdf"):
+                if save_loc.endswith(os.sep):
+                    save_loc = save_loc + "map.pdf"
+                else:
+                    save_loc = save_loc + ".pdf"
+        if save_loc:
+            graph.savefig(save_loc)
 
-    save_loc = yaml_open.get("pdf save location")
-    if save_loc:
-        save_loc = os.path.normpath(save_loc)
-        if not save_loc.endswith(".pdf"):
-            if save_loc.endswith(os.sep):
-                save_loc = save_loc + "map.pdf"
-            else:
-                save_loc = save_loc + ".pdf"
-    if save_loc:
-        graph.savefig(save_loc)
-
-
-    plt.show()
+        plt.show()

@@ -1,6 +1,7 @@
 # marching squares algorithm for generating contour data
 from common import progressbar
 from enum import Enum
+import logging
 
 class EdgeType(Enum):
     LEFT = "left"
@@ -132,7 +133,7 @@ class TopoMap:
             if edge.type == EdgeType.BOTTOM: return cellmap.cells[cell.coords.y + 1][cell.coords.x]
             if edge.type == EdgeType.TOP:    return cellmap.cells[cell.coords.y - 1][cell.coords.x] 
 
-            print(f"Error: no contour found: Height")
+            logging.critical(f"Tracing Error: could not find next cell for cell {cell.coords})
 
         def has_hit_boundary(cell: Cell, edge: Edge) -> bool:
             
@@ -216,14 +217,18 @@ class TopoMap:
                                 cell = hop_to_next_cell(cell, edge)
                                 break
                     else:
-                        print("error")
+                        logging.critical(f"Routing Error at {cell.coords}")
                         break
         
         def start_traces(cell: Cell, edgetype: EdgeType) -> None:
-            for height in range(cell.min_corner_height, cell.max_corner_height + 1):
-                isoline = trace_from_here(cell, cell.edges[edgetype], height)
-                if isoline:
-                    self.isolines.append(isoline)
+            edge = cell.edges[edgetype] 
+            for height in range(edge.min_corner(), edge.max_corner() + 1):
+                if not edge.contours[height]: # no contour here already
+                    isoline = trace_from_here(cell, cell.edges[edgetype], height)
+                    if isoline:
+                        self.isolines.append(isoline)
+                else:
+                    pass
 
         for cell in cellmap.cells[0]: 
             start_traces(cell, EdgeType.TOP)
