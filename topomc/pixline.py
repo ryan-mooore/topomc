@@ -141,7 +141,7 @@ def march(heightmap, contour_interval=1, contour_offset=0):
         et == EdgeType.LEFT   and pos.x == 0 or \
         et == EdgeType.TOP    and pos.y == 0 or \
         et == EdgeType.RIGHT  and pos.x == len(heightmap.cells[0]) - 1 or \
-        et == EdgeType.BOTTOM and pos.y == len(heightmap.cells) - 1:
+        et == EdgeType.BOTTOM and pos.y == len(heightmap.cells)    - 1:
             return True
         else: 
             return False
@@ -156,18 +156,30 @@ def march(heightmap, contour_interval=1, contour_offset=0):
         
         return coords
 
-    def trace_from_here(cell, edge, height) -> Isoline:
+    def has_self_closed(isoline):
+        if isoline.closed:
+            if len(isoline.contour) > 3:
+                if isoline.contour[1] == isoline.contour[-1]:
+                    return True
+                else:
+                    return False
+
+    def trace_from_here(cell, edge, height, closed=False) -> Isoline:
         if edge.min_corner() <= height < edge.max_corner(): # a contour starts at this edge at this height
             
             isoline = Isoline()
-            distance_from_edge = height - edge.min_corner()
+            if closed:
+                isoline.closed = True
+            else:
+                distance_from_edge = height - edge.min_corner()
 
-            point = distance_from_edge / edge.difference
-            if edge.direction == -1: point = 1 - point
+                point = distance_from_edge / edge.difference
+                if edge.direction == -1: point = 1 - point
 
-            cell.contours[height] = isoline
-            point_coords = create_point_coords(edge, point)
-            isoline.contour.append((point_coords, cell.coords))
+                cell.contours[height] = isoline
+                point_coords = create_point_coords(edge, point)
+                isoline.contour.append((point_coords, cell.coords))
+            
             edge = cell.edges[edge.flip_edge()]
 
             while True:
@@ -187,6 +199,10 @@ def march(heightmap, contour_interval=1, contour_offset=0):
 
                         if has_hit_boundary(cell, edge):
                             return isoline
+                        
+                        elif has_self_closed(isoline):
+                            return isoline
+
                         else:
                             cell = hop_to_next_cell(cell, edge)
                             break
@@ -195,9 +211,9 @@ def march(heightmap, contour_interval=1, contour_offset=0):
                     break
     
     def start_traces(cell: Cell, edgetype: EdgeType) -> None:
-        for height, reference in cell.contours.items():
+        for height, referenced in cell.contours.items():
             if height in cell.contours:
-                if not reference:
+                if not referenced:
                     isoline = trace_from_here(cell, cell.edges[edgetype], height)
                     if isoline:
                         heightmap.contours.append(isoline)
@@ -211,4 +227,18 @@ def march(heightmap, contour_interval=1, contour_offset=0):
     for row in heightmap.cells: 
         start_traces(row[0], EdgeType.LEFT)
 
+    for row in heightmap.cells:
+        for cell in row:
+            for height, referenced in cell.contours.items():
+                if not referenced:
+                    for edge in cell.edges.values():
+                        if edge.min_corner() <= height < edge.max_corner():
+                            isoline = trace_from_here(cell, edge, height, closed=True)
+                            if isoline:
+                                heightmap.contours.append(isoline)
+                            break
+
     return heightmap
+
+
+
