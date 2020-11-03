@@ -15,6 +15,7 @@ numpy = "*"
 env = "*"
 matplotlib = "*"
 ipykernel = "*"
+matplotlib-label-lines = "*"
 
 [requires]
 python_version = "3.8"

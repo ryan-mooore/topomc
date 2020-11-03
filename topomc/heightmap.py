@@ -116,9 +116,10 @@ class Heightmap:
         self.chunk_tiles = []
         self.heightmap = []
 
-        chunks_to_retrieve = (chunk_x2+1 - chunk_x1) * (chunk_z2+1 - chunk_z1)
+        # chunks_to_retrieve = (chunk_x2+1 - chunk_x1) * (chunk_z2+1 - chunk_z1)
 
-        chunks_retrieved = 0
+        # chunks_retrieved = 0
+
 
         # + 1 because ending chunks are inclusive
         for z in range(chunk_z1, chunk_z2 + 1):
@@ -131,20 +132,19 @@ class Heightmap:
                 chunk_tile.coords = Coordinates(x - chunk_x1, z - chunk_z1)
                 chunk_tile_row.append(chunk_tile)
 
-                chunks_retrieved += 1
-                progressbar._print(
-                    chunks_retrieved,
-                    chunks_to_retrieve,
-                    1,
-                    "chunks retrieved"
-                )
+                # chunks_retrieved += 1
+                # progressbar._print(
+                #     chunks_retrieved,
+                #     chunks_to_retrieve,
+                #     1,
+                #     "chunks retrieved"
+                # )
 
             self.heightmap = vertical_append(self.heightmap, chunk_row)
             self.chunk_tiles.append(chunk_tile_row)
 
             self.start_coords = Coordinates(chunk_x1 * 16, chunk_z1 * 16)
             self.end_coords = Coordinates(chunk_x2 * 16, chunk_z2 * 16)
-
 
     def get_extremes(self):
         min_height = 0xFF

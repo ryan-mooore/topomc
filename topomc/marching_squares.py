@@ -192,8 +192,12 @@ class TopoMap:
                         edge = cell.edges[edge_type]
                         if edge.min_corner() <= height < edge.max_corner(): # a contour starts at this edge at this height
 
-                            if edge.contours[height]:
-                                continue # contour already goes to this edge
+                            if edge.contours[height]: # found a contour already here
+                                if isoline.closed:
+                                    if not edge.contours[height] == isoline: # first check that it is not the start of a closed contour
+                                        continue
+                                else:
+                                    continue
 
                             edge.contours[height] = isoline
                             distance_from_edge = height - edge.min_corner()
@@ -202,10 +206,10 @@ class TopoMap:
                             point_coords = create_point_coords(edge, point)
                             isoline.contour.append((point_coords, cell.coords))
 
-                            if has_hit_boundary(cell, edge):
+                            if has_self_closed(isoline):
                                 return isoline
                             
-                            elif has_self_closed(isoline):
+                            elif has_hit_boundary(cell, edge):
                                 return isoline
 
                             else:

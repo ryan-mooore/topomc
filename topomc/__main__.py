@@ -19,6 +19,7 @@ parser.add_argument("z1", type=int, help="Z value of start chunk")
 parser.add_argument("x2", type=int, nargs="?", help="X value of end chunk", default=None)
 parser.add_argument("z2", type=int, nargs="?", help="Z value of end chunk", default=None)
 parser.add_argument("--debug", '-D', action='store_true', help="Brings up a debug view of selected chunks")
+parser.add_argument("-V", "-v", "--verbose", action='store_true', help="Runs verbose output")
 parser.add_argument('-w', "--world", metavar="WORLD", type=str, help="Overrides 'World' setting in settings.yml")
 parser.add_argument("-I", dest="interval", metavar="CONTOUR_INT", type=int, help="Overrides 'Interval' setting in settings.yml")
 

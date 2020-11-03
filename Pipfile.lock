@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "070cedeaa03b233403a252d4a5318f7fafb6916eac9be195708f73c12d86eb9b"
+            "sha256": "9af6399ee081eef3d5c099c1284843d09fb762b38e34f1b1a86796154069e01c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -171,6 +171,14 @@
             ],
             "index": "pypi",
             "version": "==3.3.2"
+        },
+        "matplotlib-label-lines": {
+            "hashes": [
+                "sha256:2f4f1346f49293a3c34c6e4a50a08c80c81551054ccd85007afb8b85d45407a4",
+                "sha256:b7e6702f62beae2544c69d4ff6020c6bae7f590b5d9e0f66254a2829fd6c911b"
+            ],
+            "index": "pypi",
+            "version": "==0.3.8"
         },
         "nbt": {
             "hashes": [

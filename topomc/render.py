@@ -88,8 +88,8 @@ class MapRender:
         graph = plt.gcf()
 
         axes.set_aspect(1)
-        axes.set_xlim(0, width)
-        axes.set_ylim(0, height)
+        axes.set_xlim(0, self.topomap.width)
+        axes.set_ylim(0, self.topomap.height)
 
         scale_ratio = yaml_open.get("scale")
         divisor, scale = scale_ratio.split(":")
@@ -97,7 +97,7 @@ class MapRender:
 
         if save_loc:
             # units * 100(metres) / scale * inch conversion
-            graph.set_size_inches(width * 100 / scale * 0.393701, height * 100 / scale * 0.393701)
+            graph.set_size_inches(self.topomap.width * 100 / scale * 0.393701, self.topomap.height * 100 / scale * 0.393701)
             graph.savefig(save_loc)
 
         for line in axes.lines:

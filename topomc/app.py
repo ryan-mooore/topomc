@@ -36,11 +36,16 @@ def run(args):
 
 
 
-
+    logging.info("Collecting chunks...")
     hmap = heightmap.Heightmap(world, *bounding_points)
+    logging.info("Done")
+    logging.info("Creating cell matrix...")
     cellmap =   marching_squares.CellMap(hmap)
+    logging.info("Done")
+    logging.info("Tracing contours...")
     topomap =   marching_squares.TopoMap(cellmap)
-
+    logging.info("Done")
+    logging.info("Rendering map...")
     map_render = render.MapRender(topomap)
-
-    render.debug(topomap, hmap)
+    map_render.render()
+    logging.info("Done")
