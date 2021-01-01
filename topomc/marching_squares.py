@@ -170,7 +170,7 @@ class TopoMap:
         def has_self_closed(isoline, custom_check: Tuple=None):
             if isoline.closed:
                 if len(isoline.contour) > 3:
-                    if isoline.contour[1] == (custom_check if custom_check else isoline.contour[-1]):
+                    if isoline.contour[0] == (custom_check if custom_check else isoline.contour[-1]):
                         return True
                     else:
                         return False
@@ -183,9 +183,8 @@ class TopoMap:
                 if closed:
                     isoline.closed = True # this countour will not touch the edge; therefore must be closed
                 else:
-                    distance_from_edge = height - edge.min_corner()
+                    point = (height - edge.min_corner() + 1) / (edge.difference + 1)
 
-                    point = distance_from_edge / edge.difference
                     if edge.direction == -1: point = 1 - point
 
                     edge.contours[height] = isoline
@@ -203,12 +202,12 @@ class TopoMap:
                             if edge.contours[height]: # found a contour already here
                                 if isoline.closed:
                                     if edge.contours[height] == isoline: # found another part of the same contour
-                                        distance_from_edge = height - edge.min_corner()
-                                        point = distance_from_edge / edge.difference
+                                        point = (height - edge.min_corner() + 1) / (edge.difference + 1)
                                         if edge.direction == -1: point = 1 - point
                                         point_coords = create_point_coords(edge, point)
                                         if has_self_closed(isoline, custom_check=(point_coords, cell.coords)):
-                                            pass
+                                            isoline.contour.append((point_coords, cell.coords))
+                                            return isoline
                                         else:
                                             # have reached the same contour but not at the start.
                                             continue
@@ -221,13 +220,12 @@ class TopoMap:
                             if not has_hit_boundary(cell, edge):
                                 hop_to_next_cell(cell, edge).edges[edge.flip_edge()].contours[height] = isoline
 
-                            distance_from_edge = height - edge.min_corner()
-                            point = distance_from_edge / edge.difference
+                            point = (height - edge.min_corner() + 1) / (edge.difference + 1)
                             if edge.direction == -1: point = 1 - point
                             point_coords = create_point_coords(edge, point)
                             isoline.contour.append((point_coords, cell.coords))
 
-                            if has_self_closed(isoline) or has_hit_boundary(cell, edge):
+                            if has_hit_boundary(cell, edge):
                                 return isoline
                             else:
                                 cell = hop_to_next_cell(cell, edge)
