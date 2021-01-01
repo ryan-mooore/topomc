@@ -3,4 +3,4 @@
 debug.pdf
 
 **/__pycache__
-*.pyc
+**.pyc

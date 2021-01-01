@@ -3,11 +3,11 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/805c61e9222146e2830f0920560d6e4d)](https://www.codacy.com/manual/ArcodeW/topomc?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ArcodeW/topomc&amp;utm_campaign=Badge_Grade)
 
-TopoMC is a python project that converts minecraft chunks into a topographical map.
+TopoMC is a python project that converts minecraft chunks into a topographical map. **Please note that at the moment this project only works for 1.15 and below due to Mojang changing the way that chunk heightmaps are encoded.** Feel free to create a PR to implement a new decoding algorithm that can handle 1.16 chunks
 
 ## How it Works
 
-Creating the topo map from the chunks, inside the chosen bounding co-ordinates, is a 6 step process:
+Creating the topo map from the chunks, inside the chosen bounding co-ordinates, is a 5 step process:
 
 ### 1. Reading Chunks
 Firstly the raw chunk data needs to be read and processed. This is done by opening the minecraft world save directory and reading the region files (`.mca`) for a world save. The data in these files is processed by the **anvil-parser** python library. This may change in the future.
@@ -17,20 +17,15 @@ Once the region data is decoded chunks can be iterated through. The chunk is spl
 
 To make this process faster and more efficient, the loop can take advantage of chunk-format heightmaps. To improve minecraft's performance, every chunk file contains precomputed heightmap data which contains info such as the first motion-blocking minecraft block from above. By starting the loop from the height precalculated by these heightmaps instead of y-256 every time a column is searched, efficiency is greatly improved.
 
-After height-points for every ground block have been gathered they are stored in a class containing a 2d list.
-
 ### 3. Marching Squares Algorithm
-After a heightmap has been created, it needs to be converted into coordinate data which is later used to draw lines that split up the height differences of the heightmap - or contours. To do this the heightmap is transformed into cells, with a height point in each corner. The difference between the corners is then used to decide where to place the points for the line to be drawn. This is called the [marching squares algorithm](https://en.wikipedia.org/wiki/Marching_squares). This creates cells, each with a line (or absence thereof) inside.
+After a heightmap has been created, it needs to be converted into coordinate data which is later used to draw lines that split up the height differences of the heightmap - or contours. To do this the heightmap is transformed into cells, with a height point in each corner. The difference between the corners is then used to decide where to place the points for the line to be drawn. This is called the [marching squares algorithm](https://en.wikipedia.org/wiki/Marching_squares). I have created a more advanced "wandering marching squares" [marching_squares.py](topomc/algorithms/marching_squares.py) algorithm which also creates vector lines in the process
 
-### 4. Vectorization
-In order for these pixel lines (pixlines) to be smoothed later on, they need to be vectorised so that this line data is stored as a series of coordinates with a start and end, rather than a single pixel with a line in it. To do this, I developed a [tracing algorithm](./topomc/vectorize.py) that finds a pixline, and explores outwards from the line until the edge of the bounding co-ordinates is found, or the line loops back on itself. After this the explored pixels are logged in a bitmap, and the lines are joined. At the end of this process the data is transformed into heightplanes, each which contain these lines.
-
-### 5. Generalization
+### 4. Generalization
 In order to smooth the isolines, the 1d guassian filter function is used from the `scipy.ndimage` library. This is an algorithm that creates many points in order to create a smooth line.
 
 The iso-line smoothing can be turned off in [settings.yml](settings.yml).
 
-### 6. Drawing
+### 5. Drawing
 Pyplot from matplotlib is used to render the lines.
 
 ## Installation and running
