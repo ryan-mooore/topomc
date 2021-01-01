@@ -1,10 +1,10 @@
 import sys, os
 import logging
 
-from common import yaml_open
-import heightmap
-import marching_squares
-import render
+from topomc.common import yaml_open
+from topomc import heightmap
+from topomc import marching_squares
+from topomc import render
 
 def run(args):
     try:

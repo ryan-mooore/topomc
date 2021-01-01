@@ -1,4 +1,4 @@
-import app
+from topomc import app
 import sys, argparse, logging
 
 logging.basicConfig(format='%(process)d-%(levelname)s-%(message)s', level=10)

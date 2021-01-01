@@ -6,7 +6,7 @@ import logging
 import anvil
 
 # files
-from common import yaml_open
+from topomc.common import yaml_open
 
 
 def chunkpos_to_regionpos(chunk):

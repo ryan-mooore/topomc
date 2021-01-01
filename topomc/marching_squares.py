@@ -1,5 +1,5 @@
 # marching squares algorithm for generating contour data
-from common import progressbar
+from topomc.common import progressbar
 from enum import Enum
 import logging
 
@@ -133,7 +133,7 @@ class TopoMap:
             if edge.type == EdgeType.BOTTOM: return cellmap.cells[cell.coords.y + 1][cell.coords.x]
             if edge.type == EdgeType.TOP:    return cellmap.cells[cell.coords.y - 1][cell.coords.x] 
 
-            logging.critical(f"Tracing Error: could not find next cell for cell {cell.coords})
+            logging.critical(f"Tracing Error: could not find next cell for cell {cell.coords}")
 
         def has_hit_boundary(cell: Cell, edge: Edge) -> bool:
             

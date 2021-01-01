@@ -5,8 +5,8 @@ import numpy as np
 import os
 import logging
 
-from marching_squares import Coordinates
-from common import progressbar, yaml_open
+from topomc.marching_squares import Coordinates
+from topomc.common import progressbar, yaml_open
 
 class MapRender:
     def __init__(self, topomap):
