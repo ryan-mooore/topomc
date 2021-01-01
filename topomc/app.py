@@ -50,7 +50,7 @@ def run(args):
         symbol.build(hmap)
     Logger.log(logging.info, "BUILD COMPLETED SUCCESSFULLY", t=False)
 
-    Logger.log(logging.info, "RENDER STARTING")
+    Logger.log(logging.info, "RENDER STARTING", t=False)
     map_render = render.MapRender(len(hmap.heightmap[0]), len(hmap.heightmap))
     if args.debug: map_render.debug(symbols)
     else:          map_render.render(symbols)

@@ -178,7 +178,7 @@ class TopoMap:
                 while True:
                     edges = [*cell.edges]
                     edges.remove(edge)
-                    edges.sort(key=lambda e: e.orientation != edge.orientation) # sort by adjacent first, then opposite (to avoid crossover)
+                    edges.sort(key=lambda e: e.orientation == edge.orientation) # sort by adjacent first, then opposite (to avoid crossover)
                     for edge in edges:
                         if height_within_difference(height, edge):
                             if edge.contours[height]: # if a contour at the same height exists

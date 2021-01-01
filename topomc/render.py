@@ -43,7 +43,7 @@ class MapRender:
                 for x, y in renders:
                     plt.plot(x, y, symbol.color, linewidth=symbol.linewidth / 3)
 
-        Logger.log(logging.info, "Render: Loading matplotlib window...", t=False)
+        Logger.log(logging.info, "Loading matplotlib window...", t=False)
         print()
 
 
