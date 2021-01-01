@@ -1,7 +1,7 @@
 from topomc import app
 import sys, argparse, logging
 
-logging.basicConfig(format='%(process)d-%(levelname)s-%(message)s', level=10)
+logging.basicConfig(format='(%(levelname)s) %(message)s', level=10)
 
 version = sys.version_info
 

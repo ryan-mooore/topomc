@@ -69,6 +69,13 @@ class Cell:
         self.min_corner_height = min(tl, tr, bl, br)
         self.max_corner_height = max(tl, tr, bl, br)
 
+    def get_possible_edges(self, edge):
+        et = EdgeType
+        if edge == et.LEFT: return [self.edges[etype] for etype in [et.TOP, et.BOTTOM, et.RIGHT]]
+        if edge == et.TOP:   return [self.edges[etype] for etype in [et.RIGHT, et.LEFT, et.BOTTOM]]
+        if edge == et.RIGHT: return [self.edges[etype] for etype in [et.TOP, et.BOTTOM, et.LEFT]]
+        if edge == et.BOTTOM: return [self.edges[etype] for etype in [et.RIGHT, et.LEFT, et.TOP]]
+
 
 class Isoline:
     def __init__(self):
@@ -170,9 +177,10 @@ class TopoMap:
         def trace_from_here(cell, edge, height, closed=False) -> Isoline:
             if edge.min_corner() <= height < edge.max_corner(): # a contour starts at this edge at this height
                 
+                # create contour
                 isoline = Isoline()
                 if closed:
-                    isoline.closed = True
+                    isoline.closed = True # this countour will not touch the edge; therefore must be closed
                 else:
                     distance_from_edge = height - edge.min_corner()
 
@@ -185,22 +193,25 @@ class TopoMap:
                 
                 edge = cell.edges[edge.flip_edge()]
 
-                while True:
-                    possible_edges = [*cell.edges]
-                    possible_edges.remove(edge.flip_edge()) # remove edge contour came from
-                    for edge_type in possible_edges:
-                        
-                        edge = cell.edges[edge_type]
+                # trace
+                for _ in range(100000):
+                    possible_edges = cell.get_possible_edges(edge.flip_edge())
+                    for edge in possible_edges:
                         if edge.min_corner() <= height < edge.max_corner(): # a contour starts at this edge at this height
 
                             if edge.contours[height]: # found a contour already here
                                 if isoline.closed:
                                     if not edge.contours[height] == isoline: # first check that it is not the start of a closed contour
-                                        continue
+                                    #    print("found existing contour here") 
+                                        continue 
                                 else:
                                     continue
-
+                            
+                            # set both adjacent cells' edges to point to the current countour
                             edge.contours[height] = isoline
+                            if not has_hit_boundary(cell, edge):
+                                hop_to_next_cell(cell, edge).edges[edge.flip_edge()].contours[height] = isoline
+
                             distance_from_edge = height - edge.min_corner()
                             point = distance_from_edge / edge.difference
                             if edge.direction == -1: point = 1 - point
@@ -219,6 +230,8 @@ class TopoMap:
                     else:
                         logging.critical(f"Routing Error at {cell.coords}")
                         break
+                else:
+                    logging.critical(f"routing error, program will terminate")
         
         def start_traces(cell: Cell, edgetype: EdgeType) -> None:
             edge = cell.edges[edgetype] 
@@ -230,6 +243,7 @@ class TopoMap:
                 else:
                     pass
 
+        # find all open contours (open contours will always touch the edge)
         for cell in cellmap.cells[0]: 
             start_traces(cell, EdgeType.TOP)
         for row in cellmap.cells: 
@@ -239,6 +253,7 @@ class TopoMap:
         for row in cellmap.cells: 
             start_traces(row[0], EdgeType.LEFT)
 
+        # find all closed contours
         for row in cellmap.cells:
             for cell in row:
                 for height in range(cell.min_corner_height, cell.max_corner_height + 1):
@@ -249,3 +264,5 @@ class TopoMap:
                                 if isoline:
                                     self.isolines.append(isoline)
                                 break
+        
+        pass
