@@ -26,6 +26,9 @@ class Edge:
         for possible_height in range(self.min_corner(), self.max_corner() + 1):
             self.contours[possible_height] = None
 
+    def __repr__(self):
+        return f"Edge ({self.corner1})---({self.corner2}) with coordinates {self.coords!r}"
+
     def flip_edge(self) -> EdgeType:
         
         mapper = {
@@ -58,17 +61,20 @@ class Edge:
 
 class Cell:
     def __init__(self, edges, coords):
-        (tl, tr, br, bl) = edges
+        (self.tl, self.tr, self.br, self.bl) = edges
         self.edges = {
-            EdgeType.LEFT:   Edge(bl, tl, 0, None, EdgeType.LEFT),
-            EdgeType.TOP:    Edge(tl, tr, None, 1, EdgeType.TOP),
-            EdgeType.RIGHT:  Edge(br, tr, 1, None, EdgeType.RIGHT),
-            EdgeType.BOTTOM: Edge(bl, br, None, 0, EdgeType.BOTTOM)
+            EdgeType.LEFT:   Edge(self.bl, self.tl, 0, None, EdgeType.LEFT),
+            EdgeType.TOP:    Edge(self.tl, self.tr, None, 1, EdgeType.TOP),
+            EdgeType.RIGHT:  Edge(self.br, self.tr, 1, None, EdgeType.RIGHT),
+            EdgeType.BOTTOM: Edge(self.bl, self.br, None, 0, EdgeType.BOTTOM)
         }
         self.coords = Coordinates(*coords)
 
-        self.min_corner_height = min(tl, tr, bl, br)
-        self.max_corner_height = max(tl, tr, bl, br)
+        self.min_corner_height = min(self.tl, self.tr, self.bl, self.br)
+        self.max_corner_height = max(self.tl, self.tr, self.bl, self.br)
+
+    def __repr__(self) -> str:
+        return f"{self.tl}==={self.tr}---{self.bl}==={self.br} Cell at coordinates {self.coords!r}"""
 
     def get_possible_edges(self, edge):
         et = EdgeType
@@ -83,11 +89,17 @@ class Isoline:
         self.contour = []
         self.direction = 0
         self.closed = False
+    
+    def __repr__(self):
+        return "---".join([repr(cell[1]) for cell in self.contour])
 
 class Coordinates:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+    
+    def __repr__(self) -> str:
+        return f"({self.x}, {self.y})"
 
     def __eq__(self, other):
         if not isinstance(other, Coordinates):
@@ -97,9 +109,6 @@ class Coordinates:
 
     def get_list(self):
         return self.x, self.y
-
-    def __repr__(self):
-        return f"{self.x, self.y}"
 
 class CellMap:
     def __init__(self, heightmap):
@@ -127,6 +136,9 @@ class CellMap:
 
                 cell_row.append(cell)
             self.cells.append(cell_row)
+
+    def __str__(self):
+        return f"Cellmap with width {self.width} and height {self.height}"
 
 class TopoMap:
     def __init__(self, cellmap):
