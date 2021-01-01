@@ -2,6 +2,7 @@ import sys, os
 import logging
 
 from topomc.common import yaml_open
+from topomc.common.logger import Logger
 from topomc import heightmap
 from topomc import marching_squares
 from topomc import render
@@ -36,17 +37,17 @@ def run(args):
 
 
 
-    logging.info("Collecting chunks...")
+    Logger.log(logging.info, "Collecting chunks...")
     hmap = heightmap.Heightmap(world, *bounding_points)
-    logging.info("Done")
-    logging.info("Creating cell matrix...")
+    Logger.log(logging.info, "Done", t=False)
+    Logger.log(logging.info, "Creating cell matrix...")
     cellmap =   marching_squares.CellMap(hmap)
-    logging.info("Done")
-    logging.info("Tracing contours...")
+    Logger.log(logging.info, "Done", t=False)
+    Logger.log(logging.info, "Tracing contours...", t=False)
     topomap =   marching_squares.TopoMap(cellmap)
-    logging.info("Done")
-    logging.info("Rendering map...")
+    Logger.log(logging.info, "Done", t=False)
+    Logger.log(logging.info, "Rendering map...")
     map_render = render.MapRender(topomap)
     if args.debug: map_render.debug(hmap)
     else:          map_render.render()
-    logging.info("Done")
+    Logger.log(logging.info, "Done", t=False)

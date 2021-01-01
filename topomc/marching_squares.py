@@ -1,6 +1,6 @@
 # marching squares algorithm for generating contour data
 from typing import Tuple
-from topomc.common import progressbar
+from topomc.common.logger import Logger
 from enum import Enum
 import logging
 
@@ -74,7 +74,7 @@ class Cell:
         self.max_corner_height = max(self.tl, self.tr, self.bl, self.br)
 
     def __repr__(self) -> str:
-        return f"{self.tl}==={self.tr}---{self.bl}==={self.br} Cell at coordinates {self.coords!r}"""
+        return f"Cell {self.tl}==={self.tr}---{self.bl}==={self.br} at coordinates {self.coords!r}"""
 
     def get_possible_edges(self, edge):
         et = EdgeType
@@ -260,16 +260,14 @@ class TopoMap:
                     pass
 
         # find all open contours (open contours will always touch the edge)
-        for cell in cellmap.cells[0]: 
-            start_traces(cell, EdgeType.TOP)
-        for row in cellmap.cells: 
-            start_traces(row[len(row) - 1], EdgeType.RIGHT)
-        for cell in cellmap.cells[len(cellmap.cells) - 1]: 
-            start_traces(cell, EdgeType.BOTTOM)
-        for row in cellmap.cells: 
-            start_traces(row[0], EdgeType.LEFT)
+        Logger.log(logging.info, "Tracing open contours...", sub=1)
+        for cell in cellmap.cells[0]: start_traces(cell, EdgeType.TOP)
+        for row in cellmap.cells: start_traces(row[len(row) - 1], EdgeType.RIGHT)
+        for cell in cellmap.cells[len(cellmap.cells) - 1]: start_traces(cell, EdgeType.BOTTOM)
+        for row in cellmap.cells: start_traces(row[0], EdgeType.LEFT)
 
         # find all closed contours
+        Logger.log(logging.info, "Tracing closed contours...", sub=1)
         for row in cellmap.cells:
             for cell in row:
                 for height in range(cell.min_corner_height, cell.max_corner_height + 1):
@@ -280,5 +278,3 @@ class TopoMap:
                                 if isoline:
                                     self.isolines.append(isoline)
                                 break
-        
-        pass
