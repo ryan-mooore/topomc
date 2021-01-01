@@ -1,4 +1,5 @@
 # marching squares algorithm for generating contour data
+from typing import Tuple
 from topomc.common import progressbar
 from enum import Enum
 import logging
@@ -166,10 +167,10 @@ class TopoMap:
             
             return coords
 
-        def has_self_closed(isoline):
+        def has_self_closed(isoline, custom_check: Tuple=None):
             if isoline.closed:
                 if len(isoline.contour) > 3:
-                    if isoline.contour[1] == isoline.contour[-1]:
+                    if isoline.contour[1] == (custom_check if custom_check else isoline.contour[-1]):
                         return True
                     else:
                         return False
@@ -194,18 +195,26 @@ class TopoMap:
                 edge = cell.edges[edge.flip_edge()]
 
                 # trace
-                for _ in range(100000):
+                while True:
                     possible_edges = cell.get_possible_edges(edge.flip_edge())
                     for edge in possible_edges:
                         if edge.min_corner() <= height < edge.max_corner(): # a contour starts at this edge at this height
 
                             if edge.contours[height]: # found a contour already here
                                 if isoline.closed:
-                                    if not edge.contours[height] == isoline: # first check that it is not the start of a closed contour
-                                    #    print("found existing contour here") 
-                                        continue 
+                                    if edge.contours[height] == isoline: # found another part of the same contour
+                                        distance_from_edge = height - edge.min_corner()
+                                        point = distance_from_edge / edge.difference
+                                        if edge.direction == -1: point = 1 - point
+                                        point_coords = create_point_coords(edge, point)
+                                        if has_self_closed(isoline, custom_check=(point_coords, cell.coords)):
+                                            pass
+                                        else:
+                                            # have reached the same contour but not at the start.
+                                            continue
+                                    continue 
                                 else:
-                                    continue
+                                    continue # move on, don't want to cross contour
                             
                             # set both adjacent cells' edges to point to the current countour
                             edge.contours[height] = isoline
@@ -218,20 +227,17 @@ class TopoMap:
                             point_coords = create_point_coords(edge, point)
                             isoline.contour.append((point_coords, cell.coords))
 
-                            if has_self_closed(isoline):
+                            if has_self_closed(isoline) or has_hit_boundary(cell, edge):
                                 return isoline
-                            
-                            elif has_hit_boundary(cell, edge):
-                                return isoline
-
                             else:
                                 cell = hop_to_next_cell(cell, edge)
                                 break
                     else:
                         logging.critical(f"Routing Error at {cell.coords}")
                         break
-                else:
-                    logging.critical(f"routing error, program will terminate")
+                    if len(isoline.contour) > 50000:
+                        logging.critical(f"Critical routing error with isoline starting at {repr(isoline.contour[0][1])}. Aborting this isoline")
+                        break
         
         def start_traces(cell: Cell, edgetype: EdgeType) -> None:
             edge = cell.edges[edgetype] 
