@@ -5,37 +5,26 @@ from topomc.common.logger import Logger
 from enum import Enum
 import logging
 
-class EdgeName(Enum):
-    LEFT = "left"
-    TOP = "top"
-    BOTTOM = "bottom"
-    RIGHT = "right"
 
 class Edge:
-    __slots__ = ["corner1", "corner2", "cells", "coords", "type", "contours", "opposite"]
+    __slots__ = ["corner1", "corner2", "cells", "coords", "type", "contours", "orientation"]
 
+    class EdgeName(Enum):
+        LEFT = 0
+        TOP = 1
+        RIGHT = 2
+        BOTTOM = 3
     name = EdgeName
-    opposites = [
-        [name.LEFT, name.RIGHT],
-        [name.TOP, name.BOTTOM]
-    ]
 
     def min_corner(self) -> int: return min(self.corner1, self.corner2)
     def max_corner(self) -> int: return max(self.corner1, self.corner2)
 
-    def __init__(self, corner1: int, corner2: int, x: int, y: int, edgename) -> None:
+    def __init__(self, corner1: int, corner2: int, x: int, y: int, orientation) -> None:
         self.corner1 = corner1
         self.corner2 = corner2
         self.cells   = []
         self.coords  = Coordinates(x, y)
-
-        self.type = edgename
-
-        for pair in self.opposites:
-            if self.type in pair:
-                pair = pair.copy()
-                pair.remove(self.type)
-                self.opposite = pair[0]
+        self.orientation = orientation
 
         self.contours = {}
         for possible_height in range(self.min_corner(), self.max_corner() + 1):
@@ -68,12 +57,7 @@ class Cell:
 
     def __init__(self, corners: List[int], coords: Tuple[int]) -> None:
         self.corners = corners
-        self.edges = {
-            Edge.name.LEFT: None,
-            Edge.name.RIGHT: None,
-            Edge.name.BOTTOM: None,
-            Edge.name.TOP: None
-        }
+        self.edges = []
 
         self.coords = Coordinates(*coords)
 
@@ -107,8 +91,9 @@ class Coordinates:
         return self.x == other.x and self.y == other.y
 
 class CellMap:
-    def _link_edge(self, cell, edgename, edge):
-        e = cell.edges[edgename] = edge
+    def _link_edge(self, cell, edge):
+        e = edge
+        cell.edges.append(e)
         e.cells.append(cell)
 
     def __init__(self, heightmap):
@@ -129,12 +114,16 @@ class CellMap:
 
                 cell = Cell((tl, tr, br, bl), (x, z))
 
-                if x == 0: self._link_edge(cell, Edge.name.LEFT, Edge(bl, tl, 0, None, Edge.name.LEFT))
-                else:      self._link_edge(cell, Edge.name.LEFT, cell_row[x - 1].edges[Edge.name.RIGHT])
-                if z == 0: self._link_edge(cell, Edge.name.TOP,  Edge(tl, tr, None, 1, Edge.name.TOP))
-                else:      self._link_edge(cell, Edge.name.TOP,  self.cellmap[z - 1][x].edges[Edge.name.BOTTOM])
-                self._link_edge(cell, Edge.name.RIGHT,  Edge(br, tr, 1, None, Edge.name.RIGHT))
-                self._link_edge(cell, Edge.name.BOTTOM, Edge(bl, br, None, 0, Edge.name.BOTTOM))
+                # left
+                if x == 0: self._link_edge(cell, Edge(bl, tl, 0, None, True))
+                else:      self._link_edge(cell, cell_row[x - 1].edges[Edge.name.RIGHT.value])
+                # top
+                if z == 0: self._link_edge(cell, Edge(tl, tr, None, 1, False))
+                else:      self._link_edge(cell, self.cellmap[z - 1][x].edges[Edge.name.BOTTOM.value])
+                # right
+                self._link_edge(cell, Edge(br, tr, 1, None, True))
+                # bottom
+                self._link_edge(cell, Edge(bl, br, None, 0, False))
 
                 cell_row.append(cell)
 
@@ -187,12 +176,9 @@ class TopoMap:
 
                 # trace
                 while True:
-                    edges ={**cell.edges}
-                    for key, value in edges.items():
-                        if value is edge:
-                            del edges[key]
-                            break
-                    edges = [value for _, value in sorted(edges.items(), key=lambda e: int(e != edge.opposite))] # sort by adjacent first, then opposite (to avoid crossover)
+                    edges = [*cell.edges]
+                    edges.remove(edge)
+                    edges.sort(key=lambda e: e.orientation != edge.orientation) # sort by adjacent first, then opposite (to avoid crossover)
                     for edge in edges:
                         if height_within_difference(height, edge):
                             if edge.contours[height]: # if a contour at the same height exists
@@ -230,17 +216,17 @@ class TopoMap:
 
         # find all open contours (open contours will always touch the edge)
         Logger.log(logging.info, "Tracing open contours...", sub=1)
-        for cell in cellmap.cellmap[0]: start_traces(cell, Edge.name.TOP)
-        for row in cellmap.cellmap: start_traces(row[len(row) - 1], Edge.name.RIGHT)
-        for cell in cellmap.cellmap[len(cellmap.cellmap) - 1]: start_traces(cell, Edge.name.BOTTOM)
-        for row in cellmap.cellmap: start_traces(row[0], Edge.name.LEFT)
+        for cell in cellmap.cellmap[0]: start_traces(cell, Edge.name.TOP.value)
+        for row in cellmap.cellmap: start_traces(row[len(row) - 1], Edge.name.RIGHT.value)
+        for cell in cellmap.cellmap[len(cellmap.cellmap) - 1]: start_traces(cell, Edge.name.BOTTOM.value)
+        for row in cellmap.cellmap: start_traces(row[0], Edge.name.LEFT.value)
 
         # find all closed contours
         Logger.log(logging.info, "Tracing closed contours...", sub=1)
         for row in cellmap.cellmap:
             for cell in row:
                 for height in range(min(*cell.corners), max(*cell.corners) + 1):
-                    for edge in cell.edges.values():
+                    for edge in cell.edges:
                         if height_within_difference(height, edge):
                             if not edge.contours[height]:
                                 isoline = trace_from_here(cell, edge, height, closed=True)
