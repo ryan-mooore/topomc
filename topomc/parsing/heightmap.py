@@ -1,6 +1,6 @@
-from topomc.marching_squares import Coordinates
+from topomc.algorithms.marching_squares import Coordinates
 from topomc.common import decode, progressbar, yaml_open
-from topomc import chunk
+from topomc.parsing import chunk
 
 # builtin chunk heightmap options
 tags = [

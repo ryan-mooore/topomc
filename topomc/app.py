@@ -1,10 +1,10 @@
-import sys, os
+import sys
 import logging
+from topomc.symbols.contour import Contour
 
 from topomc.common import yaml_open
 from topomc.common.logger import Logger
-from topomc import heightmap
-from topomc import marching_squares
+from topomc.parsing import heightmap
 from topomc import render
 
 def run(args):
@@ -40,14 +40,18 @@ def run(args):
     Logger.log(logging.info, "Collecting chunks...")
     hmap = heightmap.Heightmap(world, *bounding_points)
     Logger.log(logging.info, "Done", t=False)
-    Logger.log(logging.info, "Creating cell matrix...")
-    cellmap =   marching_squares.CellMap(hmap)
-    Logger.log(logging.info, "Done", t=False)
-    Logger.log(logging.info, "Tracing contours...", t=False)
-    topomap =   marching_squares.TopoMap(cellmap)
-    Logger.log(logging.info, "Done", t=False)
-    Logger.log(logging.info, "Rendering map...")
-    map_render = render.MapRender(topomap)
-    if args.debug: map_render.debug(hmap)
-    else:          map_render.render()
+
+    symbols = []
+    contour = Contour()
+    symbols.append(contour)
+
+    Logger.log(logging.info, "BUILD STARTING", t=False)
+    for symbol in symbols:
+        symbol.build(hmap)
+    Logger.log(logging.info, "BUILD COMPLETED SUCCESSFULLY", t=False)
+
+    Logger.log(logging.info, "RENDER STARTING")
+    map_render = render.MapRender(len(hmap.heightmap[0]), len(hmap.heightmap))
+    if args.debug: map_render.debug(symbols)
+    else:          map_render.render(symbols)
     Logger.log(logging.info, "Done", t=False)
