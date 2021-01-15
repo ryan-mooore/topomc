@@ -19,6 +19,9 @@ class Symbol:
     def render(self, blockmap):
         raise NotImplementedError
 
+    def debug(self, blockmap):
+        raise NotImplementedError
+
     def __init__(self, type, color, linewidth) -> None:
         self.type = type
         self.color = color

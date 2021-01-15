@@ -7,7 +7,7 @@ from topomc.common.logger import Logger
 import logging
 from topomc.symbol import Symbol
 
-from topomc.common import progressbar, yaml_open
+from topomc.common import yaml_open
 
 class MapRender:
     def __init__(self, width, height):
@@ -41,11 +41,9 @@ class MapRender:
             if symbol.type == Symbol.type.LINEAR:
                 renders = symbol.render()
                 for x, y in renders:
-                    plt.plot(x, y, symbol.color, linewidth=symbol.linewidth / 3)
+                    plt.plot(x,y, symbol.color, linewidth=symbol.linewidth / 3)
 
         Logger.log(logging.info, "Loading matplotlib window...", t=False)
-        print()
-
 
         plt.axis("off")
 
@@ -55,6 +53,7 @@ class MapRender:
         axes.set_aspect(1)
         axes.set_xlim(0, self.width)
         axes.set_ylim(0, self.height)
+        axes.invert_xaxis()
 
         scale_ratio = yaml_open.get("scale")
         divisor, scale = scale_ratio.split(":")
@@ -77,26 +76,9 @@ class MapRender:
 
         plt.show()
 
-    def debug(self, heightmap):
-        plt.figure("Preview")
-
-        for value, isoline in enumerate(self.topomap.isolines):
-            isoline.vertices = []
-            for point in isoline.contour:
-                (contour_coords, cell_coords) = point
-                isoline.vertices.append((cell_coords.x + contour_coords.x,
-                cell_coords.y + 1 - contour_coords.y))
-            
-
-            x = [vertice[0] for vertice in isoline.vertices]
-            y = [vertice[1] for vertice in isoline.vertices]
+    def debug(self, symbol):
+        plt.figure(f"Debugging chunk {'x'} {'z'}")
         
-            plt.plot(x, y, linewidth=1, marker="o", label=value)
-            try:
-                plt.text(x[0], y[0], value, color="#D15C00", size="20")
-            except:
-                pass
-
         axes = plt.gca()
         graph = plt.gcf()
 
@@ -108,13 +90,9 @@ class MapRender:
         graph.set_size_inches(8, 8)
         plt.xticks(range(0, 15))
         plt.yticks(range(0, 15))
-        # graph.canvas.toolbar.pack_forget()
-        #plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
         plt.grid(color='#000', linestyle='-', linewidth=1, which="both")
 
-        for y, row in enumerate(heightmap.heightmap):
-            for x, cell in enumerate(row):
-                plt.text(x, y, cell)
+        symbol.debug(plt.plot, plt.text)
 
         logging.debug(f"App: Debugging chunk")
         logging.info("Render: Loading matplotlib window...")

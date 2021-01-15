@@ -1,5 +1,7 @@
 import sys
 import logging
+
+from numpy.lib.utils import byte_bounds
 from topomc.symbols.contour import Contour
 
 from topomc.common import yaml_open
@@ -7,7 +9,7 @@ from topomc.common.logger import Logger
 from topomc.parsing import heightmap
 from topomc import render
 
-def run(args):
+def parse_args(args):
     try:
         bounding_points = x1, z1, x2, z2 = args.x1, args.z1, args.x2, args.z2
     except ValueError:
@@ -35,7 +37,10 @@ def run(args):
     or not isinstance(contour_offset, int):
         logging.critical("App: Contour interval/offset must be an integer")
 
+    return bounding_points, contour_interval, contour_offset, world
 
+def run(args):
+    bounding_points, contour_interval, contour_offset, world = parse_args(args)
 
     Logger.log(logging.info, "Collecting chunks...")
     hmap = heightmap.Heightmap(world, *bounding_points)
@@ -44,7 +49,6 @@ def run(args):
     symbols = []
     contour = Contour()
     symbols.append(contour)
-
     Logger.log(logging.info, "BUILD STARTING", t=False)
     for symbol in symbols:
         symbol.build(hmap)
@@ -52,6 +56,6 @@ def run(args):
 
     Logger.log(logging.info, "RENDER STARTING", t=False)
     map_render = render.MapRender(len(hmap.heightmap[0]), len(hmap.heightmap))
-    if args.debug: map_render.debug(symbols)
+    if args.debug: map_render.debug(symbols[0])
     else:          map_render.render(symbols)
     Logger.log(logging.info, "Done", t=False)

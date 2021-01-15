@@ -1,13 +1,16 @@
 # marching squares algorithm for generating contour data
 
 from typing import List, Tuple
+import math
+import matplotlib.path as mplpath
+from scipy.spatial import ConvexHull
 from topomc.common.logger import Logger
 from enum import Enum
 import logging
 
 
 class Edge:
-    __slots__ = ["corner1", "corner2", "cells", "coords", "type", "contours", "orientation"]
+    __slots__ = ["corner1", "corner2", "cells", "axis_pos", "type", "contours", "axis"]
 
     class EdgeName(Enum):
         LEFT = 0
@@ -19,16 +22,16 @@ class Edge:
     def min_corner(self) -> int: return min(self.corner1, self.corner2)
     def max_corner(self) -> int: return max(self.corner1, self.corner2)
 
-    def __init__(self, corner1: int, corner2: int, x: int, y: int, orientation) -> None:
+    def __init__(self, corner1: int, corner2: int, axis_pos:int, axis) -> None:
         self.corner1 = corner1
         self.corner2 = corner2
         self.cells   = []
-        self.coords  = Coordinates(x, y)
-        self.orientation = orientation
+        self.axis_pos = axis_pos
+        self.axis = axis
 
         self.contours = {}
         for possible_height in range(self.min_corner(), self.max_corner() + 1):
-            self.contours[possible_height] = None
+            self.contours[possible_height] = {}
 
     def __repr__(self) -> str:
         return f"{'Vertical' if self.type in self.opposites[0] else 'Horizontal'}\
@@ -68,8 +71,10 @@ class Cell:
 class Isoline:
     def __init__(self) -> None:
         self.contour:List[Tuple[float]] = []
-        self.direction = 0
+        self.vertices = []
+        self.downslope = None
         self.closed = False
+        self.extremum = False
     
     def __repr__(self) -> str:
         return "---".join([repr(cell[1]) for cell in self.contour])
@@ -82,7 +87,10 @@ class Coordinates:
         self.y = y
     
     def __repr__(self) -> str:
-        return f"({self.x}, {self.y})"
+        return f"(x={self.x}, y={self.y})"
+
+    def to_tuple(self):
+        return (self.x, self.y)
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Coordinates):
@@ -115,15 +123,15 @@ class CellMap:
                 cell = Cell((tl, tr, br, bl), (x, z))
 
                 # left
-                if x == 0: self._link_edge(cell, Edge(bl, tl, 0, None, True))
+                if x == 0: self._link_edge(cell, Edge(bl, tl, 0, "y"))
                 else:      self._link_edge(cell, cell_row[x - 1].edges[Edge.name.RIGHT.value])
                 # top
-                if z == 0: self._link_edge(cell, Edge(tl, tr, None, 1, False))
+                if z == 0: self._link_edge(cell, Edge(tl, tr, 0, "x"))
                 else:      self._link_edge(cell, self.cellmap[z - 1][x].edges[Edge.name.BOTTOM.value])
                 # right
-                self._link_edge(cell, Edge(br, tr, 1, None, True))
+                self._link_edge(cell, Edge(br, tr, cell.coords.x + 1, "y"))
                 # bottom
-                self._link_edge(cell, Edge(bl, br, None, 0, False))
+                self._link_edge(cell, Edge(bl, br, cell.coords.y + 1, "x"))
 
                 cell_row.append(cell)
 
@@ -143,58 +151,92 @@ class TopoMap:
             cells = [*edge.cells]
             cells.remove(cell)
             return cells[0]
-
-        def create_point_coords(edge: Edge, point: float) -> Coordinates:
-            coords = Coordinates(edge.coords.x, edge.coords.y)
-            if coords.x == None: coords.x = point
-            if coords.y == None: coords.y = point
-            return coords
-
-        def has_self_closed(isoline, custom_check: Tuple=None):
-            if isoline.closed:
-                if isoline.contour[0] == (custom_check if custom_check else isoline.contour[-1]):
-                    return True
-                else:
-                    return False
         
-        def get_local_coords(height, edge):
+        def get_point_pos(height, edge):
             point = (height - edge.min_corner() + 1) / (edge.difference + 1)
             if edge.direction == -1: point = 1 - point
-            return create_point_coords(edge, point)
+            return point
 
         def height_within_difference(height, edge):
             return edge.min_corner() <= height < edge.max_corner() # a contour starts at this edge at this height
+
+        def find_direction(first, second):
+            if len(first.cells) == 1:
+                if first.axis == 'x' and first.cells[0].coords.y == 0:
+                    return 'left' if first.direction == -1 else 'right'
+                elif first.axis == 'x' and first.cells[0].coords.y == self.height - 1:
+                    return 'left' if first.direction == 1 else 'right'
+                elif first.axis == 'y' and first.cells[0].coords.x == 0:
+                    return 'left' if first.direction == -1 else 'right'
+                elif first.axis == 'y' and first.cells[0].coords.x == self.width - 1:
+                    return 'left' if first.direction == 1 else 'right'
+                else:
+                    logging.critical("error")
+                    return None
+            else:
+                if first.axis == 'x':
+                    if first.cells[0] in second.cells: # moving up
+                        return 'left' if first.direction == 1 else 'right'
+                    else:
+                        return 'left' if first.direction == -1 else 'right'
+                if first.axis == 'y':
+                    if first.cells[0] in second.cells: # moving left
+                        return 'left' if first.direction == 1 else 'right'
+                    else:
+                        return 'left' if first.direction == -1 else 'right'
+
+
+        def add_point(isoline, height, edge, cell_coords):
+            # local_coords = get_local_coords(height, edge)
+            # isoline.contour.append((local_coords, cell_coords))
+            if edge.axis == "x":
+                vertice = Coordinates(
+                    cell_coords.x + get_point_pos(height, edge),
+                    edge.axis_pos # on an x axis edge so y is a known and whole number
+                )
+            else: # edge.axis == "y":
+                vertice = Coordinates(
+                    edge.axis_pos, # on an y axis edge so x is a known and whole number
+                    cell_coords.y + 1 - get_point_pos(height, edge)
+                )
+            
+            if hasattr(isoline, "edge_for_finding_direction"):
+                isoline.downslope = find_direction(isoline.edge_for_finding_direction, edge)
+                del isoline.edge_for_finding_direction
+
+            isoline.vertices.append(vertice)
 
         def trace_from_here(cell, edge, height, closed=False) -> Isoline:
             if height_within_difference(height, edge):
                 isoline = Isoline() # create contour
                 if closed:
                     isoline.closed = True # this contour will not touch the edge; therefore must be closed
-                else:
-                    edge.contours[height] = isoline
-                    isoline.contour.append((get_local_coords(height, edge), cell.coords))
+                    isoline.extremum = None # add possibility for contour to be extremum
+                edge.contours[height]["isoline"] = isoline
+                edge.contours[height]["start"] = True
+                add_point(isoline, height, edge, cell.coords)
+                isoline.edge_for_finding_direction = edge
 
                 # trace
                 while True:
                     edges = [*cell.edges]
                     edges.remove(edge)
-                    edges.sort(key=lambda e: e.orientation == edge.orientation) # sort by adjacent first, then opposite (to avoid crossover)
+                    edges.sort(key=lambda e: e.axis == edge.axis) # sort by adjacent first, then opposite (to avoid crossover)
                     for edge in edges:
                         if height_within_difference(height, edge):
                             if edge.contours[height]: # if a contour at the same height exists
-                                if isoline.closed and edge.contours[height] == isoline: # we only need to consider this edge if the isoline needs to be closed and is the same one we are tracing
-                                        coords = get_local_coords(height, edge) # create the coordinates as if we have traced to it
-                                        if has_self_closed(isoline, custom_check=(coords, cell.coords)): # do they match the start of the loop?
-                                            isoline.contour.append((coords, cell.coords)) # if yes we have closed the contour and we are done
-                                            return isoline
-                                            # if no then we have reached the same contour but haven't looped back to the start yet. Try another edge
+                                if isoline.closed and edge.contours[height]["isoline"] == isoline: # we only need to consider this edge if the isoline needs to be closed and is the same one we are tracing
+                                    if "start" in edge.contours[height]:
+                                        add_point(isoline, height, edge, cell.coords)
+                                        return isoline
+                                        # if no then we have reached the same contour but haven't looped back to the start yet. Try another edge
                                 continue # if the contour does not need to be closed we don't care. we can't go to this edge. Try another edge
                             else:
                                 pass
                                 # no existing contour, easy trace to this edge
 
-                            edge.contours[height] = isoline # mark the edge as visited
-                            isoline.contour.append((get_local_coords(height, edge), cell.coords)) # and add the coordinates to the contour
+                            edge.contours[height]["isoline"] = isoline # mark the edge as visited
+                            add_point(isoline, height, edge, cell.coords) # and add the coordinates to the contour
 
                             if len(edge.cells) == 1: # if the boundary has been hit the contour is complete
                                 return isoline
@@ -233,3 +275,37 @@ class TopoMap:
                                 if isoline:
                                     self.isolines.append(isoline)
                                 break
+
+        def check_isoline(isoline):
+            for test_isoline in self.isolines:
+                if test_isoline.closed and test_isoline is not isoline:
+
+                    path = mplpath.Path([c.to_tuple() for c in isoline.vertices])
+                    # TODO consider contains_path
+                    if path.contains_point((test_isoline.vertices[0].to_tuple())): # if any of the test isoline's vertices are inside the current one
+                        isoline.extremum = False # the current one is not an extremum
+                        return check_isoline(test_isoline) # move to next one
+                        
+            isoline.extremum = True # no isolines could be found inside current one
+            hull = ConvexHull([(c.x, c.y) for c in isoline.vertices])
+            angles = []
+            for index, vertice in enumerate(isoline.vertices):
+                if index in hull.vertices:
+                    angles.append(vertice)
+                if len(angles) == 3: break
+            a, b, c = angles
+
+            angle = math.atan2(c.y -b.y, c.x -b.x) - math.atan2(a.y-b.y, a.x-b.x)
+            if angle < math.pi:
+                isoline.orientation = "anti"
+            else: # angle > math.pi:
+                isoline.orientation = "clock"
+            return
+
+        # find extremus
+        Logger.log(logging.info, "Finding maxima and minima...", sub=1)
+        for isoline in self.isolines:
+            # TODO improve efficiency of this by searching gridwise - will always land on
+            # outer contour first and don't have to worry about annoying cases
+            if isoline.closed and isoline.extremum == None:
+                check_isoline(isoline)
