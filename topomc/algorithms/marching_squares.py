@@ -65,8 +65,7 @@ class Cell:
         self.coords = Coordinates(*coords)
 
     def __repr__(self) -> str:
-        return f"Cell {self.corners[0]}==={self.corners[1]}---\
-                      {self.corners[2]}==={self.corners[3]} at coordinates {self.coords!r}"
+        return f"Cell {self.corners[0]}==={self.corners[1]}---{self.corners[2]}==={self.corners[3]} at coordinates {self.coords!r}"
 
 class Isoline:
     def __init__(self) -> None:
@@ -278,7 +277,7 @@ class TopoMap:
 
         def check_isoline(isoline):
             for test_isoline in self.isolines:
-                if test_isoline.closed and test_isoline is not isoline:
+                if test_isoline.closed and test_isoline.extremum == None and test_isoline is not isoline:
 
                     path = mplpath.Path([c.to_tuple() for c in isoline.vertices])
                     # TODO consider contains_path
@@ -304,8 +303,10 @@ class TopoMap:
 
         # find extremus
         Logger.log(logging.info, "Finding maxima and minima...", sub=1)
-        for isoline in self.isolines:
-            # TODO improve efficiency of this by searching gridwise - will always land on
-            # outer contour first and don't have to worry about annoying cases
-            if isoline.closed and isoline.extremum == None:
-                check_isoline(isoline)
+        for row in cellmap.cellmap:
+            for cell in row:
+                for contour in cell.edges[0].contours.values(): # for every contour in cell
+                    if "isoline" in contour: # if it contains an isoline
+                        isoline = contour["isoline"]
+                        if isoline.closed and isoline.extremum == None:
+                            check_isoline(isoline) # check it
