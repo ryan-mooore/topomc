@@ -1,6 +1,8 @@
 import logging
 import math
+import copy
 from enum import Enum
+from topomc.common import yaml_open
 
 import matplotlib.path as mplpath
 from matplotlib import pyplot as plt
@@ -11,9 +13,7 @@ from topomc.common.logger import Logger
 from topomc.common.coordinates import Coordinates
 from topomc.symbol import Symbol
 
-smoothness = 1
 margin = 3
-tagline_len = 0.8
 taglines = True
 
 class Contour(Symbol):
@@ -27,14 +27,14 @@ class Contour(Symbol):
     def build(self, blockmap):
         self.blockmap = blockmap
         Logger.log(logging.info, "Creating cell matrix...")
-        self.cellmap = CellMap(blockmap)
+        cellmap = CellMap(blockmap)
         Logger.log(logging.info, "Done", t=False)
 
         Logger.log(logging.info, "Tracing contours...", t=False)
-        self.topomap = TopoMap(self.cellmap)
+        self.topomap = TopoMap(cellmap)
         
         self.p = []
-        if taglines:
+        if yaml_open.get("tagline length"):
             Logger.log(logging.info, "Creating taglines...", sub=1)
             for isoline in self.topomap.isolines:
                 if isinstance(isoline, Depression):
@@ -68,8 +68,8 @@ class Contour(Symbol):
                                 if theta < 0: theta += 2 * math.pi
                                 theta = math.pi - theta
                                 ang = theta + smallest_angle / 2
-                                newx = b.x + tagline_len * math.sin(math.pi - ang)
-                                newy = b.y + tagline_len * math.cos(math.pi - ang)
+                                newx = b.x + yaml_open.get("tagline length") * math.sin(math.pi - ang)
+                                newy = b.y + yaml_open.get("tagline length") * math.cos(math.pi - ang)
                                 new = Coordinates(newx, newy)
                                 points.append(([b.x, new.x], [b.y, new.y]))
                                 break
@@ -84,15 +84,15 @@ class Contour(Symbol):
         new_isolines = []
         isolines = self.topomap.isolines
         for isoline in isolines:
-            if isoline.height % 5:
+            if isoline.height % yaml_open.get("index"):
                 new_isolines.append(isoline)
             else:
                 index_isolines.append(isoline)
         
         self.topomap.isolines = new_isolines
-        topomap = TopoMap(self.cellmap)
-        topomap.isolines = index_isolines
-        return topomap
+        new_topomap = copy.deepcopy(self.topomap)
+        new_topomap.isolines = index_isolines
+        return new_topomap
 
 
     def smooth(self, isoline):
@@ -100,15 +100,15 @@ class Contour(Symbol):
         y = [vertice.y for vertice in isoline.vertices]
 
         try:
-            if smoothness:
+            if yaml_open.get("smoothness"):
                 if isinstance(isoline, ClosedIsoline):
                     x_start, x_end = x[0:margin], x[-margin:]
                     y_start, y_end = y[0:margin], y[-margin:]
                     x = x_end + x + x_start
                     y = y_end + y + y_start
 
-                x = gaussian_filter1d(x, smoothness)
-                y = gaussian_filter1d(y, smoothness)
+                x = gaussian_filter1d(x, yaml_open.get("smoothness"))
+                y = gaussian_filter1d(y, yaml_open.get("smoothness"))
 
                 if isinstance(isoline, ClosedIsoline):
                     x = x[margin:-margin + 1]
@@ -462,9 +462,10 @@ class TopoMap:
             isoline.extremum = True
 
         # find extremus
-        Logger.log(logging.info, "Finding maxima and minima...", sub=1)
-        isoline = None
-        for isoline in self.isolines:
-            if isinstance(isoline, ClosedIsoline):
-                if isoline.extremum == None:
-                    check_isoline(isoline) # check it
+        if yaml_open.get("tagline length"): # this step is only needed if taglines are on
+            Logger.log(logging.info, "Finding maxima and minima...", sub=1)
+            isoline = None
+            for isoline in self.isolines:
+                if isinstance(isoline, ClosedIsoline):
+                    if isoline.extremum == None:
+                        check_isoline(isoline) # check it

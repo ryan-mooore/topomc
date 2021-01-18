@@ -42,8 +42,10 @@ class MapRender:
                     plt.plot(x,y, symbol.color, linewidth=symbol.linewidth / 3) 
 
         for symbol in symbols:
+            Logger.log(logging.info, "Drawing contours...")
             _render(symbol)
         for child in children:
+            Logger.log(logging.info, "Drawing other objects...")
             _render(child)
             
         Logger.log(logging.info, "Loading matplotlib window...", t=False)
