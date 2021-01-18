@@ -1,4 +1,5 @@
 from enum import Enum
+from topomc.symbols import *
 
 class Symbol:
 
@@ -14,6 +15,9 @@ class Symbol:
         symbol.type = symbol_type
 
     def build(self, blockmap):
+        raise NotImplementedError
+
+    def build_child(self, child):
         raise NotImplementedError
 
     def render(self, blockmap):

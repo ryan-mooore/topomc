@@ -1,11 +1,9 @@
 from matplotlib import pyplot as plt
-from scipy.ndimage import gaussian_filter1d
-from scipy import interpolate
 import numpy as np
 import os
 from topomc.common.logger import Logger
 import logging
-from topomc.symbol import Symbol
+from topomc.symbol import Symbol as SSymbol
 
 from topomc.common import yaml_open
 
@@ -29,7 +27,7 @@ class MapRender:
                 else:
                     self.save_loc = save_loc + ".pdf" 
 
-    def render(self, symbols):
+    def render(self, symbols, children):
 
         plt.figure("Preview")
         self.get_settings()
@@ -37,12 +35,17 @@ class MapRender:
 
         max_len = max(np.floor(self.width / 16), np.floor(self.height / 16))
 
-        for symbol in symbols:
-            if symbol.type == Symbol.type.LINEAR:
+        def _render(symbol):
+           if symbol.type == SSymbol.type.LINEAR:
                 renders = symbol.render()
                 for x, y in renders:
-                    plt.plot(x,y, symbol.color, linewidth=symbol.linewidth / 3)
+                    plt.plot(x,y, symbol.color, linewidth=symbol.linewidth / 3) 
 
+        for symbol in symbols:
+            _render(symbol)
+        for child in children:
+            _render(child)
+            
         Logger.log(logging.info, "Loading matplotlib window...", t=False)
 
         plt.axis("off")
@@ -92,7 +95,7 @@ class MapRender:
         plt.yticks(range(0, 15))
         plt.grid(color='#000', linestyle='-', linewidth=1, which="both")
 
-        symbol.debug(plt.plot, plt.text)
+        symbol.debug()
 
         logging.debug(f"App: Debugging chunk")
         logging.info("Render: Loading matplotlib window...")

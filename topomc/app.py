@@ -1,8 +1,8 @@
 import sys
 import logging
-
-from numpy.lib.utils import byte_bounds
+from topomc.symbol import Symbol
 from topomc.symbols.contour import Contour
+from topomc.symbols.contour_subclasses.indexcontour import IndexContour
 
 from topomc.common import yaml_open
 from topomc.common.logger import Logger
@@ -40,22 +40,31 @@ def parse_args(args):
     return bounding_points, contour_interval, contour_offset, world
 
 def run(args):
+
+    curr_symbol = None
+
     bounding_points, contour_interval, contour_offset, world = parse_args(args)
 
     Logger.log(logging.info, "Collecting chunks...")
     hmap = heightmap.Heightmap(world, *bounding_points)
     Logger.log(logging.info, "Done", t=False)
 
-    symbols = []
-    contour = Contour()
-    symbols.append(contour)
+    symbols = [Symbol_SC() for Symbol_SC in Symbol.__subclasses__()]
+    symbol_children = []
+
     Logger.log(logging.info, "BUILD STARTING", t=False)
     for symbol in symbols:
         symbol.build(hmap)
+        for Child in symbol.__class__.__subclasses__():
+            child = Child(symbol.build_child())
+            child.build()
+            symbol_children.append(child)
     Logger.log(logging.info, "BUILD COMPLETED SUCCESSFULLY", t=False)
 
     Logger.log(logging.info, "RENDER STARTING", t=False)
     map_render = render.MapRender(len(hmap.heightmap[0]), len(hmap.heightmap))
-    if args.debug: map_render.debug(symbols[0])
-    else:          map_render.render(symbols)
+    if args.debug:
+        map_render.debug(curr_symbol())
+    else:
+        map_render.render(symbols, symbol_children)
     Logger.log(logging.info, "Done", t=False)

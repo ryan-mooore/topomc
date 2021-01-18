@@ -1,4 +1,4 @@
-from topomc.algorithms.marching_squares import Coordinates
+from topomc.common.coordinates import Coordinates
 from topomc.common import decode, progressbar, yaml_open
 from topomc.parsing import chunk
 
