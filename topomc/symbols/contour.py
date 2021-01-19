@@ -1,13 +1,12 @@
-import logging
 import math
 
 from matplotlib import pyplot as plt
-from topomc.common import yaml_open
+from topomc import app
 from topomc.common.coordinates import Coordinates
-from topomc.common.logger import Logger
 from topomc.processes.topomap import ClosedIsoline, Hill, OpenIsoline, TopoMap
 from topomc.render import MapRender
 from topomc.symbol import Symbol
+
 
 class Contour(Symbol):
     def __init__(self, processes):
@@ -21,10 +20,11 @@ class Contour(Symbol):
 
     def render(self):
         to_render = []
-        interval = yaml_open.get("interval")
+        interval = app.settings["Interval"]
+        smoothness = app.settings["Smoothness"]
         for isoline in self.topomap.isolines:
             if isoline.height % interval:
-                to_render.append(MapRender.smoothen(isoline.vertices, is_closed=isinstance(isoline, ClosedIsoline)))
+                to_render.append(MapRender.smoothen(isoline.vertices, smoothness, is_closed=isinstance(isoline, ClosedIsoline)))
         return to_render
 
     def debug(self):

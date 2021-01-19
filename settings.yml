@@ -1,5 +1,5 @@
 #------ Config ------#
-Saves path: C:\Users\ryan\AppData\Roaming\.minecraft\saves # Path to local minecraft saves directory
+Saves path: '%appdata%\.minecraft\saves' # Path to local minecraft saves directory
 World: topomc15    # Name of world to map
 PDF save location: # Leave this blank to avoid saving to anywhere
 

@@ -1,11 +1,11 @@
 import logging
 import sys
-from time import time
+
+import yaml
 
 from topomc import render
-from topomc.common import yaml_open
 from topomc.common.logger import Logger
-from topomc.parsing.blockmap import Blockmap
+from topomc.parsing.blockmap import BlockMap
 
 from topomc.process import Process
 from topomc.symbol import Symbol
@@ -13,10 +13,17 @@ from topomc.symbol import Symbol
 from topomc.processes import *
 from topomc.symbols import *
 
+try:
+    with open("settings.yml", "r") as stream:
+        settings = yaml.full_load(stream)
+except Exception as e:
+    Logger.log(logging.critical, f"settings.yml is incorrectly formatted or missing")
+    raise e
 
 def parse_args(args):
     try:
         bounding_points = x1, z1, x2, z2 = args.x1, args.z1, args.x2, args.z2
+        settings["Bounding points"] = bounding_points
     except ValueError:
         logging.critical("App: no co-ordinates for world specified")
         sys.exit()
@@ -24,34 +31,19 @@ def parse_args(args):
         logging.critical("App: Invalid co-ordinates")
         sys.exit()
 
-    if args.world:
-        logging.info("App: Using explicitly defined world")
-        world = args.world
-    else:
-        world = yaml_open.get("world")
+    if args.world:    settings["World"] = args.world
+    if args.interval: settings["Interval"] = args.interval
 
-    if args.interval:
-        contour_interval = args.interval
-        logging.info("App: Using explicitly defined contour interval")
-    else:
-        contour_interval = yaml_open.get("interval")
-
-    contour_offset = yaml_open.get("phase")
-
-    if not isinstance(contour_interval, int) \
-    or not isinstance(contour_offset, int):
-        logging.critical("App: Contour interval/offset must be an integer")
-
-    return bounding_points, contour_interval, contour_offset, world
+    return settings
 
 def run(args):
 
     curr_symbol = None
 
-    bounding_points, contour_interval, contour_offset, world = parse_args(args)
+    settings = parse_args(args)
 
     Logger.log(logging.info, "Collecting chunks...")
-    blockmap = Blockmap(world, *bounding_points)
+    blockmap = BlockMap(settings["World"], *settings["Bounding points"])
 
     Logger.log(logging.info, "Preparing to process chunk data...", time_it=False)
     processes = []

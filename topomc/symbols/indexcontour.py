@@ -1,7 +1,8 @@
-from topomc.symbol import Symbol
-from topomc.render import MapRender
-from topomc.common import yaml_open
+from topomc import app
 from topomc.processes.topomap import ClosedIsoline, TopoMap
+from topomc.render import MapRender
+from topomc.symbol import Symbol
+
 
 class IndexContour(Symbol):
     def __init__(self, processes):
@@ -15,8 +16,9 @@ class IndexContour(Symbol):
     
     def render(self):
         to_render = []
-        interval = yaml_open.get("interval")
+        interval = app.settings["Interval"]
+        smoothness = app.settings["Smoothness"]
         for isoline in self.topomap.isolines:
             if isoline.height % interval == 0:
-                to_render.append(MapRender.smoothen(isoline.vertices, is_closed=isinstance(isoline, ClosedIsoline)))
+                to_render.append(MapRender.smoothen(isoline.vertices, smoothness, is_closed=isinstance(isoline, ClosedIsoline)))
         return to_render

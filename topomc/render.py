@@ -5,20 +5,20 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.ndimage.filters import gaussian_filter1d
 
-from topomc.common import yaml_open
-from topomc.symbol import Symbol
+from topomc import app
 from topomc.common.coordinates import Coordinates
 from topomc.common.logger import Logger
+from topomc.symbol import Symbol
 
 MARGIN = 3
-smoothing_level = yaml_open.get("smoothness")
 
 class MapRender:
+
     def __init__(self, width, height):
         self.width = width
         self.height = height
 
-        plt.figure(f"Map of {yaml_open.get('world')}")
+        plt.figure(f"Map of {app.settings['World']}")
 
         self.get_settings()
         self.get_save_loc()
@@ -26,10 +26,10 @@ class MapRender:
         self.max_len = max(np.floor(self.width / 16), np.floor(self.height / 16))
 
     def get_settings(self):
-        self.smoothness = yaml_open.get("smoothness")
-        self.contour_index = yaml_open.get("index")
-        self.save_loc = yaml_open.get("pdf save location")
-        self.line_width = yaml_open.get("line width")
+        self.smoothness = app.settings["Smoothness"]
+        self.contour_index = app.settings["Index"]
+        self.save_loc = app.settings["PDF save location"]
+        self.line_width = app.settings["Line width"]
 
     def get_save_loc(self):
         if self.save_loc:
@@ -41,18 +41,18 @@ class MapRender:
                     self.save_loc = save_loc + ".pdf" 
 
     @staticmethod
-    def smoothen(iist, is_closed=True):
+    def smoothen(iist, smoothness, is_closed=True):
         x, y = Coordinates.transpose_list(iist)
 
-        if smoothing_level:
+        if smoothness:
             if is_closed:
                 x_start, x_end = x[0:MARGIN], x[-MARGIN:]
                 y_start, y_end = y[0:MARGIN], y[-MARGIN:]
                 x = x_end + x + x_start
                 y = y_end + y + y_start
 
-            x = gaussian_filter1d(x, smoothing_level)
-            y = gaussian_filter1d(y, smoothing_level)
+            x = gaussian_filter1d(x, smoothness)
+            y = gaussian_filter1d(y, smoothness)
 
             if is_closed:
                 x = x[MARGIN:-MARGIN + 1]
@@ -85,7 +85,7 @@ class MapRender:
         axes.set_ylim(0, self.height)
         axes.invert_xaxis()
 
-        scale_ratio = yaml_open.get("scale")
+        scale_ratio = app.settings["Scale"]
         divisor, scale = scale_ratio.split(":")
         scale = int(scale) / int(divisor)
 
@@ -98,7 +98,7 @@ class MapRender:
             line.set_linewidth(
                 line.get_linewidth() * 2**(4 - np.log2(self.max_len)))
 
-        window_size = yaml_open.get("preview size")
+        window_size = app.settings["Preview size"]
         graph.set_size_inches(8 * window_size, 8 * window_size)
         if graph.canvas.toolbar:
             graph.canvas.toolbar.pack_forget()
@@ -133,7 +133,7 @@ class MapRender:
         Logger.log(logging.info, "Showing preview...", time_it=False)
         print()
 
-        save_loc = yaml_open.get("pdf save location")
+        save_loc = app.settings["PDF save location"]
         if save_loc:
             save_loc = os.path.normpath(save_loc)
             if not save_loc.endswith(".pdf"):

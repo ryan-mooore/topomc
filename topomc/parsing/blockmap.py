@@ -1,7 +1,6 @@
-import logging
-from topomc.common.logger import Logger
+from topomc import app
+from topomc.common import decode
 from topomc.common.coordinates import Coordinates
-from topomc.common import decode, progressbar, yaml_open
 from topomc.parsing.chunkparser import ChunkParser
 
 # builtin chunk heightmap options
@@ -55,7 +54,7 @@ class ChunkTile:
             self.anvil_file.data, tags[1]
         )
 
-        surface_blocks = yaml_open.get("surface blocks")
+        surface_blocks = app.settings["Surface blocks"]
 
         # generate heightmap
         self.heightmap = []
@@ -89,7 +88,7 @@ class ChunkTile:
         
         return (min_height, max_height)
 
-class Blockmap:
+class BlockMap:
 
     def __init__(self, world, chunk_x1, chunk_z1, chunk_x2, chunk_z2):
         

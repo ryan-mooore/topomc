@@ -1,5 +1,6 @@
 import logging
-import time 
+import time
+
 
 class Logger:
 
@@ -8,6 +9,8 @@ class Logger:
 
     @classmethod
     def log(self, level, msg, sub=0, time_it=True):
+        if level is not logging.info: time_it=False
+
         curr_time = time.perf_counter()
         
         if self.time_next:

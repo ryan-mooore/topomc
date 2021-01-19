@@ -2,6 +2,7 @@ from enum import Enum
 
 from topomc.common.coordinates import Coordinates
 
+
 class CellMap:
     def _link_edge(self, cell, edge):
         e = edge

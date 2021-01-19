@@ -1,8 +1,8 @@
 import math
 
-from topomc.common import yaml_open
+from topomc import app
 from topomc.common.coordinates import Coordinates
-from topomc.processes.topomap import ClosedIsoline, Depression, TopoMap
+from topomc.processes.topomap import Depression, TopoMap
 from topomc.render import MapRender
 from topomc.symbol import Symbol
 
@@ -19,12 +19,15 @@ class Tagline(Symbol):
     
     def render(self):
         to_render = []
+        length = app.settings["Tagline length"]
+        smoothness = app.settings["Smoothness"]
+
         for isoline in self.topomap.isolines:
             if isinstance(isoline, Depression):
                 if isoline.extremum:
                     smallest_angle = math.pi
                     vertices = []
-                    x, y = MapRender.smoothen(isoline.vertices)
+                    x, y = MapRender.smoothen(isoline.vertices, smoothness)
                     for a, b in zip(x, y):
                         vertices.append(Coordinates(a, b))
 
@@ -50,7 +53,7 @@ class Tagline(Symbol):
                             if theta < 0: theta += 2 * math.pi
                             theta = math.pi - theta
                             ang = theta + smallest_angle / 2
-                            normal = TopoMap.create_normal(b, ang, yaml_open.get("tagline length"))
+                            normal = TopoMap.create_normal(b, ang, length)
                             to_render.append(Coordinates.transpose_list(normal))
                             break
         return to_render

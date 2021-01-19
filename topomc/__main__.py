@@ -1,15 +1,17 @@
-from topomc import app
-import sys, argparse, logging
+import argparse
+import logging
+import sys
 
-logging.basicConfig(format='(%(levelname)s) %(message)s', level=10)
+from topomc import app
+from topomc.common.logger import Logger
 
 version = sys.version_info
 
 if version.major == 2:
-    logging.critical("Main: Unsupported Python version")
+    Logger.log(logging.critical, "Unsupported Python version")
     sys.exit()
 if version.major == 3 and version.minor < 7:
-    logging.critical("Main: Unsupported Python version")
+    Logger.log(logging.critical, "Unsupported Python version")
     sys.exit()
 
 parser = argparse.ArgumentParser(description="Generate a map")

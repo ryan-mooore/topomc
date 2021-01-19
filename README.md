@@ -15,6 +15,7 @@ TopoMC is a python project that converts minecraft chunks into a topographical m
  - [ ] Quick render
  - [ ] Improve tagline algorithm
  - [ ] Small depression / knoll
+ - [ ] Better validation
 
 ## How it Works
 

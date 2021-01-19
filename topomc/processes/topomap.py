@@ -1,14 +1,13 @@
 import logging
 import math
-from topomc.process import Process
 
 import matplotlib.path as mplpath
 from scipy.spatial import ConvexHull
-from topomc.common import yaml_open
+from topomc import app
 from topomc.common.coordinates import Coordinates
 from topomc.common.logger import Logger
+from topomc.process import Process
 from topomc.processes.helpers.cellmap import CellMap, Edge
-from topomc.render import MapRender
 
 
 class Isoline:
@@ -230,7 +229,7 @@ class TopoMap(Process):
             isoline.extremum = True
 
         # find extremus
-        if yaml_open.get("tagline length"): # this step is only needed if taglines are on
+        if app.settings["Tagline length"]: # this step is only needed if taglines are o]
             Logger.log(logging.info, "Finding maxima and minima...", sub=2)
             isoline = None
             for isoline in self.isolines:

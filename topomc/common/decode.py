@@ -1,5 +1,3 @@
-
-
 def unstream(data, bits_per_value, int_size):
     """
     This function is a pythonic adaptation of Reddit user bxny5's unstream

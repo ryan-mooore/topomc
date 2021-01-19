@@ -1,6 +1,8 @@
-from enum import Enum
-from topomc.common.logger import Logger
 import logging
+from enum import Enum
+
+from topomc.common.logger import Logger
+
 
 class Symbol:
     class SymbolType(Enum):

@@ -4,14 +4,15 @@ import os
 import sys
 
 import anvil
-from topomc.common import yaml_open
+from topomc import app
+
 
 class ChunkParser:
 
     def __init__(self, world):
         self.world = world
         
-        saves_path = yaml_open.get("saves path")
+        saves_path = app.settings["Saves path"]
         saves_path = os.path.normcase(saves_path)
         if saves_path.startswith("~"):
             saves_path = os.path.expanduser(saves_path)
