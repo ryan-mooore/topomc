@@ -90,6 +90,10 @@ class TopoMap(Process):
         self.height = self.cellmap.height
 
     def process(self):
+
+        interval = app.settings["Interval"]
+        phase    = app.settings["Phase"]
+
         def traverse(cell, edge):
             cells = [*edge.cells]
             cells.remove(cell)
@@ -184,16 +188,17 @@ class TopoMap(Process):
                                 break # go to next cell
                     else:
                         # this should never occur. if it does it means that there were no edges to trace to and the contour has to end prematurely
-                        logging.critical(f"Routing Error at {cell.coords}")
+                        Logger.log(logging.error, f"Routing Error at {cell.coords}")
                         break # do not draw the contour
         
         def start_traces(cell, edgename):
             edge = cell.edges[edgename] 
             for height in range(edge.min_corner(), edge.max_corner() + 1): # start a trace for every height in the cell
-                if not edge.contours[height]: # check that a contour hasn't already been traced to here 
-                    isoline = trace_from_here(cell, cell.edges[edgename], height, OpenIsoline) #  and start the trace
-                    if isoline: # check that the contour is actually a line
-                        self.isolines.append(isoline) # add the contour
+                if height % (interval + phase) == 0: # check contour is at correct interval
+                    if not edge.contours[height]: # check that a contour hasn't already been traced to here 
+                        isoline = trace_from_here(cell, cell.edges[edgename], height, OpenIsoline) #  and start the trace
+                        if isoline: # check that the contour is actually a line
+                            self.isolines.append(isoline) # add the contour
 
         # find all open contours (open contours will always touch the edge)
         Logger.log(logging.info, "Tracing open contours...", sub=2)

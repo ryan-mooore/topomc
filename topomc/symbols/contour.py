@@ -22,8 +22,9 @@ class Contour(Symbol):
         to_render = []
         interval = app.settings["Interval"]
         smoothness = app.settings["Smoothness"]
+        index = app.settings["Index"]
         for isoline in self.topomap.isolines:
-            if isoline.height % interval:
+            if isoline.height % index:
                 to_render.append(MapRender.smoothen(isoline.vertices, smoothness, is_closed=isinstance(isoline, ClosedIsoline)))
         return to_render
 

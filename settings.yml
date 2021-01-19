@@ -10,7 +10,7 @@ Scale: 1:1000    # Scale of map for PDF output
 Preview size: 1    # Size of preview window
 
 #------ Contours ------#
-Interval: 5    # Height distance between drawn contours
+Interval: 1    # Height distance between drawn contours
 Phase: 0    # What height the first contour is drawn at
 Index: 5    # The amount of standard contours for each index contour. Set to 0 to turn off
 Smoothness: 1    # Intensity of Gaussian1D smoothing level (sigma). Set to 0 to turn off

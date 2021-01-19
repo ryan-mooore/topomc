@@ -17,7 +17,7 @@ try:
     with open("settings.yml", "r") as stream:
         settings = yaml.full_load(stream)
 except Exception as e:
-    Logger.log(logging.critical, f"settings.yml is incorrectly formatted or missing")
+    Logger.log(logging.critical, f"Settings.yml is incorrectly formatted or missing")
     raise e
 
 def parse_args(args):
@@ -25,10 +25,10 @@ def parse_args(args):
         bounding_points = x1, z1, x2, z2 = args.x1, args.z1, args.x2, args.z2
         settings["Bounding points"] = bounding_points
     except ValueError:
-        logging.critical("App: no co-ordinates for world specified")
+        Logger.log(logging.critical, "No co-ordinates for world specified")
         sys.exit()
     if x1 > x2 or z1 > z2:
-        logging.critical("App: Invalid co-ordinates")
+        Logger.log(logging.critical, "Invalid co-ordinates")
         sys.exit()
 
     if args.world:    settings["World"] = args.world
