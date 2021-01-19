@@ -1,5 +1,6 @@
 import logging
 import sys
+from time import time
 
 from topomc import render
 from topomc.common import yaml_open
@@ -51,17 +52,22 @@ def run(args):
 
     Logger.log(logging.info, "Collecting chunks...")
     blockmap = Blockmap(world, *bounding_points)
-    Logger.log(logging.info, "Done", time_it=False)
 
-    Logger.log(logging.info, "STARTING PROCESSES", time_it=False)
-    processes = [Process_SC(blockmap) for Process_SC in Process.__subclasses__()]
+    Logger.log(logging.info, "Preparing to process chunk data...", time_it=False)
+    processes = []
+    for Process_SC in Process.__subclasses__():
+        Logger.log(logging.info, f"Preparing {Process_SC.__name__} process...", sub=1)
+        processes.append(Process_SC(blockmap))
+
+    Logger.log(logging.info, "Processing chunk data...", time_it=False)
     for process in processes:
+        Logger.log(logging.info, f"Running {process.__class__.__name__} process...", sub=1)
         process.process()
-    Logger.log(logging.info, "PROCESSES COMPLETED SUCCESSFULLY", time_it=False)
     
+    Logger.log(logging.info, "Creating symbols...")
     symbols = [Symbol_SC(processes) for Symbol_SC in Symbol.__subclasses__()]
 
-    Logger.log(logging.info, "RENDER STARTING", time_it=False)
+    Logger.log(logging.info, "Creating render instance...")
     map_render = render.MapRender(
         len(blockmap.heightmap[0]),
         len(blockmap.heightmap)
@@ -71,7 +77,9 @@ def run(args):
         curr_symbol = symbols[0] # TODO add support to debug symbols
         map_render.debug(curr_symbol)
     else:
+        Logger.log(logging.info, "Rendering symbols...", time_it=False)
         for symbol in symbols:
             map_render.plot(symbol)
+        
+        Logger.log(logging.info, "Drawing map...")
         map_render.show()
-    Logger.log(logging.info, "Done", time_it=False)

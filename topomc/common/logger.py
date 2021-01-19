@@ -20,6 +20,7 @@ class Logger:
         print(f"({level.__name__.upper()})", ("    "*sub) + msg, end="")
         self.prev_time = curr_time
     
+    @classmethod
     def log_done(self, sub=0):
         self.log(logging.info, "Done", sub=sub, time_it=False)
 

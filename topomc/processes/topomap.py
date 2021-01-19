@@ -84,9 +84,8 @@ class TopoMap(Process):
         self.isolines = []
         self.taglines = []
 
-        Logger.log(logging.info, "Creating cell matrix...")
+        Logger.log(logging.info, "Creating cell matrix...", sub=2)
         self.cellmap = CellMap(blockmap)
-        Logger.log(logging.info, "Done", time_it=False)
 
         self.width =  self.cellmap.width
         self.height = self.cellmap.height
@@ -198,14 +197,14 @@ class TopoMap(Process):
                         self.isolines.append(isoline) # add the contour
 
         # find all open contours (open contours will always touch the edge)
-        Logger.log(logging.info, "Tracing open contours...", sub=1)
+        Logger.log(logging.info, "Tracing open contours...", sub=2)
         for cell in self.cellmap.cellmap[0]: start_traces(cell, Edge.name.TOP.value)
         for row in self.cellmap.cellmap: start_traces(row[len(row) - 1], Edge.name.RIGHT.value)
         for cell in self.cellmap.cellmap[len(self.cellmap.cellmap) - 1]: start_traces(cell, Edge.name.BOTTOM.value)
         for row in self.cellmap.cellmap: start_traces(row[0], Edge.name.LEFT.value)
 
         # find all closed contours
-        Logger.log(logging.info, "Tracing closed contours...", sub=1)
+        Logger.log(logging.info, "Tracing closed contours...", sub=2)
         for row in self.cellmap.cellmap:
             for cell in row:
                 for height in range(min(*cell.corners), max(*cell.corners) + 1):
@@ -232,7 +231,7 @@ class TopoMap(Process):
 
         # find extremus
         if yaml_open.get("tagline length"): # this step is only needed if taglines are on
-            Logger.log(logging.info, "Finding maxima and minima...", sub=1)
+            Logger.log(logging.info, "Finding maxima and minima...", sub=2)
             isoline = None
             for isoline in self.isolines:
                 if isinstance(isoline, ClosedIsoline):

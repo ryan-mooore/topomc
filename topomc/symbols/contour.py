@@ -25,8 +25,6 @@ class Contour(Symbol):
         for isoline in self.topomap.isolines:
             if isoline.height % interval:
                 to_render.append(MapRender.smoothen(isoline.vertices, is_closed=isinstance(isoline, ClosedIsoline)))
-        for tagline in self.topomap.taglines:
-            to_render.append(Coordinates.transpose_list(tagline))
         return to_render
 
     def debug(self):

@@ -11,6 +11,7 @@ from topomc.common.coordinates import Coordinates
 from topomc.common.logger import Logger
 
 MARGIN = 3
+smoothing_level = yaml_open.get("smoothness")
 
 class MapRender:
     def __init__(self, width, height):
@@ -43,28 +44,27 @@ class MapRender:
     def smoothen(iist, is_closed=True):
         x, y = Coordinates.transpose_list(iist)
 
-        try:
-            if yaml_open.get("smoothness"):
-                if is_closed:
-                    x_start, x_end = x[0:MARGIN], x[-MARGIN:]
-                    y_start, y_end = y[0:MARGIN], y[-MARGIN:]
-                    x = x_end + x + x_start
-                    y = y_end + y + y_start
+        if smoothing_level:
+            if is_closed:
+                x_start, x_end = x[0:MARGIN], x[-MARGIN:]
+                y_start, y_end = y[0:MARGIN], y[-MARGIN:]
+                x = x_end + x + x_start
+                y = y_end + y + y_start
 
-                x = gaussian_filter1d(x, yaml_open.get("smoothness"))
-                y = gaussian_filter1d(y, yaml_open.get("smoothness"))
+            x = gaussian_filter1d(x, smoothing_level)
+            y = gaussian_filter1d(y, smoothing_level)
 
-                if is_closed:
-                    x = x[MARGIN:-MARGIN + 1]
-                    y = y[MARGIN:-MARGIN + 1]
-            return x, y
-
-        except Exception as e: Logger.log(logging.error, e)
+            if is_closed:
+                x = x[MARGIN:-MARGIN + 1]
+                y = y[MARGIN:-MARGIN + 1]
+        return x, y
 
     def plot(self, symbol):
 
         if symbol.type == Symbol.type.LINEAR:
+            Logger.log(logging.info, f"Building {symbol.__class__.__name__} symbol...", sub=1)
             renders = symbol.render()
+            Logger.log(logging.info, f"Rendering {symbol.__class__.__name__} symbol...", sub=1)
             if renders:
                 for x, y in renders:
                     plt.plot(x,y, symbol.color, linewidth=symbol.linewidth / 3) 
@@ -104,8 +104,11 @@ class MapRender:
             graph.canvas.toolbar.pack_forget()
         plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
-        Logger.log(logging.info, "Loading matplotlib window...", time_it=False)
+
+        Logger.log_done()
+        Logger.log(logging.info, "Showing preview...", time_it=False)
         plt.show()
+        Logger.log_done()
 
 
     def debug(self, symbol):
@@ -127,9 +130,7 @@ class MapRender:
 
         symbol.debug()
 
-        Logger.log(logging.debug, f"App: Debugging chunk", time_it=False)
-        Logger.log(logging.info, "Render: Loading matplotlib window...", time_it=False)
-        logging.disable(logging.DEBUG)
+        Logger.log(logging.info, "Showing preview...", time_it=False)
         print()
 
         save_loc = yaml_open.get("pdf save location")

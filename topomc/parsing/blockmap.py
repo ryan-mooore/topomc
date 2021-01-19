@@ -1,3 +1,5 @@
+import logging
+from topomc.common.logger import Logger
 from topomc.common.coordinates import Coordinates
 from topomc.common import decode, progressbar, yaml_open
 from topomc.parsing.chunkparser import ChunkParser
