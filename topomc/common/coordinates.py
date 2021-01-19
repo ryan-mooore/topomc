@@ -8,6 +8,10 @@ class Coordinates:
     def __repr__(self) -> str:
         return f"(x={self.x}, y={self.y})"
 
+    @staticmethod
+    def transpose_list(iist):
+        return [vertice.x for vertice in iist], [vertice.y for vertice in iist]
+
     def to_tuple(self):
         return (self.x, self.y)
 

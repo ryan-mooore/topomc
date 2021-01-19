@@ -1,8 +1,8 @@
 from enum import Enum
-from topomc.symbols import *
+from topomc.common.logger import Logger
+import logging
 
 class Symbol:
-
     class SymbolType(Enum):
         POINT = 0
         LINEAR = 1
@@ -14,19 +14,17 @@ class Symbol:
         symbol = Symbol()
         symbol.type = symbol_type
 
-    def build(self, blockmap):
-        raise NotImplementedError
-
-    def build_child(self, child):
-        raise NotImplementedError
-
     def render(self, blockmap):
         raise NotImplementedError
 
     def debug(self, blockmap):
+        Logger.log(logging.critical, f"debugging is not supported for {self.__class__.__name__}")
         raise NotImplementedError
 
-    def __init__(self, type, color, linewidth) -> None:
+    def __init__(self, processes, klass):
+        return next(proc for proc in processes if isinstance(proc, klass))
+
+    def set_properties(self, type=None, color=None, linewidth=None):
         self.type = type
         self.color = color
         self.linewidth = linewidth

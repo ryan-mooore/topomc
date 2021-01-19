@@ -1,13 +1,10 @@
-# core
-import math
-import os, sys
 import logging
-# dependencies
+import math
+import os
+import sys
+
 import anvil
-
-# files
 from topomc.common import yaml_open
-
 
 def chunkpos_to_regionpos(chunk):
     return int(math.floor(chunk / 32))

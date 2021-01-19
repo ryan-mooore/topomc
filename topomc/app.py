@@ -1,12 +1,14 @@
 import sys
 import logging
+from topomc.process import Process
 from topomc.symbol import Symbol
 from topomc.symbols.contour import Contour
-from topomc.symbols.contour_subclasses.indexcontour import IndexContour
+from topomc.symbols.indexcontour import IndexContour
 
 from topomc.common import yaml_open
 from topomc.common.logger import Logger
-from topomc.parsing import heightmap
+from topomc.preprocesses import heightmap
+from topomc.processes.topomap import TopoMap
 from topomc import render
 
 def parse_args(args):
@@ -46,25 +48,28 @@ def run(args):
     bounding_points, contour_interval, contour_offset, world = parse_args(args)
 
     Logger.log(logging.info, "Collecting chunks...")
-    hmap = heightmap.Heightmap(world, *bounding_points)
+    blockmap = heightmap.Heightmap(world, *bounding_points)
     Logger.log(logging.info, "Done", t=False)
 
-    symbols = [Symbol_SC() for Symbol_SC in Symbol.__subclasses__()]
-    symbol_children = []
-
-    Logger.log(logging.info, "BUILD STARTING", t=False)
-    for symbol in symbols:
-        symbol.build(hmap)
-        for Child in symbol.__class__.__subclasses__():
-            child = Child(symbol.build_child())
-            child.build()
-            symbol_children.append(child)
-    Logger.log(logging.info, "BUILD COMPLETED SUCCESSFULLY", t=False)
+    Logger.log(logging.info, "STARTING PROCESSES", t=False)
+    processes = [Process_SC(blockmap) for Process_SC in Process.__subclasses__()]
+    for process in processes:
+        process.process()
+    Logger.log(logging.info, "PROCESSES COMPLETED SUCCESSFULLY", t=False)
+    
+    symbols = [Symbol_SC(processes) for Symbol_SC in Symbol.__subclasses__()]
 
     Logger.log(logging.info, "RENDER STARTING", t=False)
-    map_render = render.MapRender(len(hmap.heightmap[0]), len(hmap.heightmap))
+    map_render = render.MapRender(
+        len(blockmap.heightmap[0]),
+        len(blockmap.heightmap)
+    )
+
     if args.debug:
-        map_render.debug(curr_symbol())
+        curr_symbol = symbols[0] # TODO add support to debug symbols
+        map_render.debug(curr_symbol)
     else:
-        map_render.render(symbols, symbol_children)
+        for symbol in symbols:
+            map_render.plot(symbol)
+        map_render.show()
     Logger.log(logging.info, "Done", t=False)

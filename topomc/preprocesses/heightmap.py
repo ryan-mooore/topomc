@@ -1,6 +1,6 @@
 from topomc.common.coordinates import Coordinates
 from topomc.common import decode, progressbar, yaml_open
-from topomc.parsing import chunk
+from topomc.preprocesses import chunk
 
 # builtin chunk heightmap options
 tags = [
@@ -133,6 +133,9 @@ class Heightmap:
 
             self.start_coords = Coordinates(chunk_x1 * 16, chunk_z1 * 16)
             self.end_coords = Coordinates(chunk_x2 * 16, chunk_z2 * 16)
+        
+        self.width =  len(self.heightmap[0])
+        self.height = len(self.heightmap)
 
     def get_extremes(self):
         min_height = 0xFF
