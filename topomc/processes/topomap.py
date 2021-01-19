@@ -86,7 +86,7 @@ class TopoMap(Process):
 
         Logger.log(logging.info, "Creating cell matrix...")
         self.cellmap = CellMap(blockmap)
-        Logger.log(logging.info, "Done", t=False)
+        Logger.log(logging.info, "Done", time_it=False)
 
         self.width =  self.cellmap.width
         self.height = self.cellmap.height
@@ -238,38 +238,3 @@ class TopoMap(Process):
                 if isinstance(isoline, ClosedIsoline):
                     if isoline.extremum == None:
                         check_isoline(isoline) # check it
-        
-            Logger.log(logging.info, "Creating taglines...", sub=1)
-            for isoline in self.isolines:
-                if isinstance(isoline, Depression):
-                    if isoline.extremum:
-                        smallest_angle = math.pi
-                        vertices = []
-                        x, y = MapRender.smoothen(isoline.vertices)
-                        for a, b in zip(x, y):
-                            vertices.append(Coordinates(a, b))
-
-                        def get_angle_at_index(vertices, index):
-                            a = vertices[index - 1] if index != 0 else vertices[-2]
-                            b = vertice
-                            c = vertices[index + 1] if index != len(vertices) - 1 else vertices[1]
-                            angle = self.perp_ang(b, c) - self.perp_ang(a, b)
-                            if angle < 0: angle += 2 * math.pi
-                            return angle, a, b, c
-
-                        for index, vertice in enumerate(vertices):
-                            
-                            curr_angle, *_ = get_angle_at_index(vertices, index)
-                            if curr_angle < smallest_angle:
-                                smallest_angle = curr_angle
-                        
-                        for index, vertice in enumerate(vertices):
-                        
-                            angle, a, b, c = get_angle_at_index(vertices, index)
-                            if angle == smallest_angle:
-                                theta = math.atan2(a.x - b.x, a.y - b.y)
-                                if theta < 0: theta += 2 * math.pi
-                                theta = math.pi - theta
-                                ang = theta + smallest_angle / 2
-                                normal = self.create_normal(b, ang, yaml_open.get("tagline length"))
-                                break

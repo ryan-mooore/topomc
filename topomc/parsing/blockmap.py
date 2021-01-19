@@ -1,6 +1,6 @@
 from topomc.common.coordinates import Coordinates
 from topomc.common import decode, progressbar, yaml_open
-from topomc.preprocesses import chunk
+from topomc.parsing.chunkparser import ChunkParser
 
 # builtin chunk heightmap options
 tags = [
@@ -16,7 +16,7 @@ STREAM_BITS_PER_VALUE = 9
 STREAM_INT_SIZE = 64
 
 class ChunkTile:
-    def __init__(self, world, chunk_x, chunk_z):
+    def __init__(self, chunk_parser, chunk_x, chunk_z):
         
         def get_chunktag_heightmap(anvil, tag="MOTION_BLOCKING_NO_LEAVES"):
             try:
@@ -48,8 +48,7 @@ class ChunkTile:
 
             return chunktag_heightmap_deepened
 
-
-        self.anvil_file = chunk.load(world, chunk_x, chunk_z)
+        self.anvil_file = chunk_parser.load_at(chunk_x, chunk_z)
         self.chunktag_heightmap = get_chunktag_heightmap(
             self.anvil_file.data, tags[1]
         )
@@ -87,9 +86,8 @@ class ChunkTile:
         max_height = max(*point_heights)
         
         return (min_height, max_height)
-                
 
-class Heightmap:
+class Blockmap:
 
     def __init__(self, world, chunk_x1, chunk_z1, chunk_x2, chunk_z2):
         
@@ -116,13 +114,14 @@ class Heightmap:
 
         self.chunk_tiles = []
         self.heightmap = []
+        self.chunk_parser = ChunkParser(world)
 
         # + 1 because ending chunks are inclusive
         for z in range(chunk_z1, chunk_z2 + 1):
             chunk_row = []
             chunk_tile_row = []
             for x in range(chunk_x1, chunk_x2 + 1):
-                chunk_tile = ChunkTile(world, x, z)
+                chunk_tile = ChunkTile(self.chunk_parser, x, z)
                 chunk_row = horizontal_append(chunk_row, chunk_tile.heightmap)
                 
                 chunk_tile.coords = Coordinates(x - chunk_x1, z - chunk_z1)

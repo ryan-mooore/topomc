@@ -17,41 +17,12 @@ class MapRender:
         self.width = width
         self.height = height
 
-        plt.figure("Map")
+        plt.figure(f"Map of {yaml_open.get('world')}")
 
         self.get_settings()
         self.get_save_loc()
 
         self.max_len = max(np.floor(self.width / 16), np.floor(self.height / 16))
-        
-        plt.axis("off")
-
-        axes = plt.gca()
-        graph = plt.gcf()
-
-        axes.set_aspect(1)
-        axes.set_xlim(0, self.width)
-        axes.set_ylim(0, self.height)
-        axes.invert_xaxis()
-
-        scale_ratio = yaml_open.get("scale")
-        divisor, scale = scale_ratio.split(":")
-        scale = int(scale) / int(divisor)
-
-        if self.save_loc:
-            # units * 100(metres) / scale * inch conversion
-            graph.set_size_inches(self.width * 100 / scale * 0.393701, self.height * 100 / scale * 0.393701)
-            graph.savefig(self.save_loc)
-
-        for line in axes.lines:
-            line.set_linewidth(
-                line.get_linewidth() * 2**(4 - np.log2(self.max_len)))
-
-        window_size = yaml_open.get("preview size")
-        graph.set_size_inches(8 * window_size, 8 * window_size)
-        if graph.canvas.toolbar:
-            graph.canvas.toolbar.pack_forget()
-        plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
     def get_settings(self):
         self.smoothness = yaml_open.get("smoothness")
@@ -103,7 +74,37 @@ class MapRender:
             raise NotImplementedError
 
     def show(self):
-        Logger.log(logging.info, "Loading matplotlib window...", t=False)
+        
+        plt.axis("off")
+
+        axes = plt.gca()
+        graph = plt.gcf()
+
+        axes.set_aspect(1)
+        axes.set_xlim(0, self.width)
+        axes.set_ylim(0, self.height)
+        axes.invert_xaxis()
+
+        scale_ratio = yaml_open.get("scale")
+        divisor, scale = scale_ratio.split(":")
+        scale = int(scale) / int(divisor)
+
+        if self.save_loc:
+            # units * 100(metres) / scale * inch conversion
+            graph.set_size_inches(self.width * 100 / scale * 0.393701, self.height * 100 / scale * 0.393701)
+            graph.savefig(self.save_loc)
+
+        for line in axes.lines:
+            line.set_linewidth(
+                line.get_linewidth() * 2**(4 - np.log2(self.max_len)))
+
+        window_size = yaml_open.get("preview size")
+        graph.set_size_inches(8 * window_size, 8 * window_size)
+        if graph.canvas.toolbar:
+            graph.canvas.toolbar.pack_forget()
+        plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+
+        Logger.log(logging.info, "Loading matplotlib window...", time_it=False)
         plt.show()
 
 
@@ -126,8 +127,8 @@ class MapRender:
 
         symbol.debug()
 
-        Logger.log(logging.debug, f"App: Debugging chunk")
-        Logger.log(logging.info, "Render: Loading matplotlib window...")
+        Logger.log(logging.debug, f"App: Debugging chunk", time_it=False)
+        Logger.log(logging.info, "Render: Loading matplotlib window...", time_it=False)
         logging.disable(logging.DEBUG)
         print()
 

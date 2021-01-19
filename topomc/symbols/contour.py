@@ -9,8 +9,6 @@ from topomc.processes.topomap import ClosedIsoline, Hill, OpenIsoline, TopoMap
 from topomc.render import MapRender
 from topomc.symbol import Symbol
 
-margin = 3
-
 class Contour(Symbol):
     def __init__(self, processes):
         self.topomap = super().__init__(processes, klass=TopoMap)

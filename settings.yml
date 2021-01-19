@@ -15,7 +15,7 @@ Phase: 0    # What height the first contour is drawn at
 Index: 5    # The amount of standard contours for each index contour. Set to 0 to turn off
 Smoothness: 1    # Intensity of Gaussian1D smoothing level (sigma). Set to 0 to turn off
 Line width: 1
-Tagline length: 0 # Length of slope lines. Set to 0 to turn off
+Tagline length: 1 # Length of slope lines. Set to 0 to turn off
 
 #------ Blocks ------#
 Surface blocks:    # Blocks considered 'ground level'
