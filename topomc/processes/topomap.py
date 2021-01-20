@@ -1,5 +1,6 @@
 import logging
 import math
+from itertools import islice
 
 import matplotlib.path as mplpath
 from scipy.spatial import ConvexHull
@@ -125,9 +126,9 @@ class TopoMap(Process):
                         return 'left' if first.direction == -1 else 'right'
                 if first.axis == 'y':
                     if first.cells[0] in second.cells: # moving left
-                        return 'left' if first.direction == 1 else 'right'
-                    else:
                         return 'left' if first.direction == -1 else 'right'
+                    else:
+                        return 'left' if first.direction == 1 else 'right'
 
 
         def add_point(isoline, height, edge, cell_coords):
@@ -141,7 +142,7 @@ class TopoMap(Process):
             else: # edge.axis == "y":
                 vertice = Coordinates(
                     edge.axis_pos, # on an y axis edge so x is a known and whole number
-                    cell_coords.y + 1 - get_point_pos(height, edge)
+                    cell_coords.y + get_point_pos(height, edge)
                 )
             
             if hasattr(isoline, "edge_for_finding_direction"):
@@ -211,33 +212,43 @@ class TopoMap(Process):
         Logger.log(logging.info, "Tracing closed contours...", sub=2)
         for row in self.cellmap.cellmap:
             for cell in row:
-                for height in range(min(*cell.corners), max(*cell.corners) + 1):
-                    for edge in cell.edges:
-                        if height_within_difference(height, edge):
+                for edge in cell.edges:
+                    if edge.direction == 1:
+                        for height in range(edge.corner1, edge.corner2):
                             if not edge.contours[height]:
                                 isoline = trace_from_here(cell, edge, height, ClosedIsoline)
                                 if isoline:
                                     self.isolines.append(isoline)
-                                break
+                    if edge.direction == -1:
+                        for height in range(edge.corner1 - 1, edge.corner2 - 1, -1):
+                            if not edge.contours[height]:
+                                isoline = trace_from_here(cell, edge, height, ClosedIsoline)
+                                if isoline:
+                                    self.isolines.append(isoline)
 
-        def check_isoline(isoline):
-            for test_isoline in self.isolines:
+        def check_isoline(isoline, index, sub):
+            i = index
+            for test_isoline in islice(self.isolines, index + 1, None):
+                index += 1
                 if isinstance(test_isoline, ClosedIsoline):
-
+                    Logger.log(logging.debug, f"{i} testing {index}", sub=sub)
                     path = mplpath.Path([c.to_tuple() for c in isoline.vertices])
                     # TODO consider contains_path
                     if path.contains_point((test_isoline.vertices[0].to_tuple())): # if any of the test isoline's vertices are inside the current one
                         isoline.extremum = False # the current one is not an extremum
-                        return check_isoline(test_isoline) # move to next one
+                        Logger.log(logging.debug, index, sub=sub)
+                        return check_isoline(test_isoline, index, sub) # move to next one
                     else:
                         pass
             isoline.extremum = True
+            Logger.log(logging.debug, "Done", sub=sub)
 
         # find extremus
         if app.settings["Tagline length"]: # this step is only needed if taglines are o]
             Logger.log(logging.info, "Finding maxima and minima...", sub=2)
             isoline = None
-            for isoline in self.isolines:
+            for index, isoline in list(enumerate(self.isolines)):
                 if isinstance(isoline, ClosedIsoline):
                     if isoline.extremum == None:
-                        check_isoline(isoline) # check it
+                        Logger.log(logging.debug, index, sub=3)
+                        check_isoline(isoline, index, 3) # check it

@@ -28,13 +28,13 @@ class CellMap:
                 cell = Cell((tl, tr, br, bl), (x, z))
 
                 # left
-                if x == 0: self._link_edge(cell, Edge(bl, tl, 0, "y"))
+                if x == 0: self._link_edge(cell, Edge(tl, bl, 0, "y"))
                 else:      self._link_edge(cell, cell_row[x - 1].edges[Edge.name.RIGHT.value])
                 # top
                 if z == 0: self._link_edge(cell, Edge(tl, tr, 0, "x"))
                 else:      self._link_edge(cell, self.cellmap[z - 1][x].edges[Edge.name.BOTTOM.value])
                 # right
-                self._link_edge(cell, Edge(br, tr, cell.coords.x + 1, "y"))
+                self._link_edge(cell, Edge(tr, br, cell.coords.x + 1, "y"))
                 # bottom
                 self._link_edge(cell, Edge(bl, br, cell.coords.y + 1, "x"))
 
@@ -102,4 +102,4 @@ class Cell:
         self.coords = Coordinates(*coords)
 
     def __repr__(self) -> str:
-        return f"Cell {self.corners[0]}==={self.corners[1]}---{self.corners[2]}==={self.corners[3]} at coordinates {self.coords!r}"
+        return f"Cell {self.corners[0]}==={self.corners[1]}---{self.corners[3]}==={self.corners[2]} at coordinates {self.coords!r}"

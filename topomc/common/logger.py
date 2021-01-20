@@ -1,6 +1,6 @@
 import logging
 import time
-
+from topomc import app
 
 class Logger:
 
@@ -9,6 +9,7 @@ class Logger:
 
     @classmethod
     def log(self, level, msg, sub=0, time_it=True):
+        if getattr(logging, level.__name__.upper()) < app.settings["Logging level"]: return
         if level is not logging.info: time_it=False
 
         curr_time = time.perf_counter()
@@ -20,7 +21,7 @@ class Logger:
             print()
         
         if not time_it: self.time_next = False
-        print(f"({level.__name__.upper()})", ("    "*sub) + msg, end="")
+        print(f"({level.__name__.upper()})", ("    "*sub) + str(msg), end="")
         self.prev_time = curr_time
     
     @classmethod
