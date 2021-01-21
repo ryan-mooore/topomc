@@ -19,7 +19,7 @@ class IndexContour(Symbol):
         interval = app.settings["Interval"]
         index = app.settings["Index"]
         smoothness = app.settings["Smoothness"]
-        for isoline in self.topomap.isolines:
+        for isoline in self.topomap.closed_isolines + self.topomap.open_isolines:
             if isoline.height % index == 0:
                 to_render.append(MapRender.smoothen(isoline.vertices, smoothness, is_closed=isinstance(isoline, ClosedIsoline)))
         return to_render

@@ -1,6 +1,8 @@
+import logging
 from enum import Enum
 
 from topomc.common.coordinates import Coordinates
+from topomc.common.logger import Logger
 
 
 class CellMap:
@@ -15,6 +17,8 @@ class CellMap:
         self.width  = len(heightmap.heightmap[0]) - 1
         self.height = len(heightmap.heightmap)    - 1
 
+        Logger.log(logging.info, "Creating cell matrix...", sub=3)
+        
         for z in range(self.height):
             cell_row = []
             for x in range(self.width):

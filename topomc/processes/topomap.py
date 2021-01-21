@@ -1,6 +1,7 @@
 import logging
 import math
 from itertools import islice
+from topomc.processes.helpers.topograph import TopoGraph
 
 import matplotlib.path as mplpath
 from scipy.spatial import ConvexHull
@@ -59,12 +60,14 @@ class Depression(ClosedIsoline):
         self.vertices = isoline.vertices
         self.height = isoline.height
         self.extremum = None
+        self.contains = []
 
 class Hill(ClosedIsoline):
     def __init__(self, isoline):
         self.vertices = isoline.vertices
         self.height = isoline.height
         self.extremum = None
+        self.contains = []
 
 
 class TopoMap(Process):
@@ -81,10 +84,10 @@ class TopoMap(Process):
 
     def __init__(self, blockmap):
         super().__init__(blockmap)
-        self.isolines = []
-        self.taglines = []
+        self.open_isolines = []
+        self.closed_isolines = []
 
-        Logger.log(logging.info, "Creating cell matrix...", sub=2)
+        Logger.log(logging.info, "Running CellMap subprocess...", sub=2, time_it=False)
         self.cellmap = CellMap(blockmap)
 
         self.width =  self.cellmap.width
@@ -199,7 +202,7 @@ class TopoMap(Process):
                     if not edge.contours[height]: # check that a contour hasn't already been traced to here 
                         isoline = trace_from_here(cell, cell.edges[edgename], height, OpenIsoline) #  and start the trace
                         if isoline: # check that the contour is actually a line
-                            self.isolines.append(isoline) # add the contour
+                            self.open_isolines.append(isoline)
 
         # find all open contours (open contours will always touch the edge)
         Logger.log(logging.info, "Tracing open contours...", sub=2)
@@ -218,37 +221,17 @@ class TopoMap(Process):
                             if not edge.contours[height]:
                                 isoline = trace_from_here(cell, edge, height, ClosedIsoline)
                                 if isoline:
-                                    self.isolines.append(isoline)
+                                    self.closed_isolines.append(isoline)
                     if edge.direction == -1:
                         for height in range(edge.corner1 - 1, edge.corner2 - 1, -1):
                             if not edge.contours[height]:
                                 isoline = trace_from_here(cell, edge, height, ClosedIsoline)
                                 if isoline:
-                                    self.isolines.append(isoline)
+                                    self.closed_isolines.append(isoline)
 
-        def check_isoline(isoline, index, sub):
-            i = index
-            for test_isoline in islice(self.isolines, index + 1, None):
-                index += 1
-                if isinstance(test_isoline, ClosedIsoline):
-                    Logger.log(logging.debug, f"{i} testing {index}", sub=sub)
-                    path = mplpath.Path([c.to_tuple() for c in isoline.vertices])
-                    # TODO consider contains_path
-                    if path.contains_point((test_isoline.vertices[0].to_tuple())): # if any of the test isoline's vertices are inside the current one
-                        isoline.extremum = False # the current one is not an extremum
-                        Logger.log(logging.debug, index, sub=sub)
-                        return check_isoline(test_isoline, index, sub) # move to next one
-                    else:
-                        pass
-            isoline.extremum = True
-            Logger.log(logging.debug, "Done", sub=sub)
 
         # find extremus
-        if app.settings["Tagline length"]: # this step is only needed if taglines are o]
-            Logger.log(logging.info, "Finding maxima and minima...", sub=2)
-            isoline = None
-            for index, isoline in list(enumerate(self.isolines)):
-                if isinstance(isoline, ClosedIsoline):
-                    if isoline.extremum == None:
-                        Logger.log(logging.debug, index, sub=3)
-                        check_isoline(isoline, index, 3) # check it
+        if app.settings["Tagline length"]: # this step is only needed if taglines are on
+            Logger.log(logging.info, "Running TopoGraph subprocess...", sub=2, time_it=False)
+            self.topograph = TopoGraph(self)
+            pass

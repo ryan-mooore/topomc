@@ -2,7 +2,7 @@
 Saves path: '%appdata%\.minecraft\saves' # Path to local minecraft saves directory
 World: topomc15    # Name of world to map
 PDF save location: # Leave this blank to avoid saving to anywhere
-Logging level: 10
+Logging level: 20
 
 #------ Map ------#
 Scale: 1:1000    # Scale of map for PDF output
