@@ -43,7 +43,7 @@ class LinearSymbol(Symbol):
         plt.plot(*Coordinates.to_list(line), color=self.color, linewidth=self.linewidth)
 
 class PointSymbol(Symbol):
-    def set_properties(self, color, pointsize, icon=None):
+    def set_properties(self, color, pointsize=1, icon=None):
         self.color = color
         if icon:
             self.icon = icon
@@ -54,10 +54,12 @@ class PointSymbol(Symbol):
             )
             doc.unlink()
 
+            for vertice in icon.vertices:
+                vertice[1] = -vertice[1]
             icon.vertices -= icon.vertices.mean(axis=0)
             self.icon = icon
 
-        self.pointsize = pointsize * 8
+        self.pointsize = pointsize * 5
 
     def plot(self, point):
         plt.plot(point.x, point.y, color=self.color, marker=self.icon, markersize=self.pointsize)

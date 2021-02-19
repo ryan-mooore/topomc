@@ -50,6 +50,9 @@ class Tagline(LinearSymbol):
                     theta = math.pi - theta
                     ang = theta + smallest_angle / 2
                     normal = TopoMap.create_normal(b, ang, length)
+                    for point in normal:
+                        point.x += 0.5
+                        point.y += 0.5
                     self.plot(normal)
                     break
 

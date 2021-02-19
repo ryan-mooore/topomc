@@ -18,4 +18,7 @@ class Contour(LinearSymbol):
         smoothness = app.settings["Smoothness"]
         for isoline in self.topomap.closed_isolines + self.topomap.open_isolines:
             if isoline.height % index == 0 and len(isoline.vertices) >= 12:
+                for vertice in isoline.vertices:
+                    vertice.x += 0.5
+                    vertice.y += 0.5 
                 self.plot(MapRender.smoothen(isoline.vertices, smoothness, is_closed=isinstance(isoline, ClosedIsoline)))

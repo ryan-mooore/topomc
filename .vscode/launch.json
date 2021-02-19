@@ -9,7 +9,7 @@
       "type": "python",
       "request": "launch",
       "module": "topomc",
-      "args":  ["-D", "0", "0"],
+      "args":  ["0", "0", "5", "5"],
       "console": "internalConsole"
     }
   ]
