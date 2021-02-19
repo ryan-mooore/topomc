@@ -5,32 +5,29 @@ from topomc import app
 from topomc.common.coordinates import Coordinates
 from topomc.processes.topomap import ClosedIsoline, Hill, OpenIsoline, TopoMap
 from topomc.render import MapRender
-from topomc.symbol import Symbol
+from topomc.symbol import LinearSymbol
 
 
-class Contour(Symbol):
+class Contour(LinearSymbol):
     def __init__(self, processes):
         self.topomap = super().__init__(processes, klass=TopoMap)
 
         self.set_properties(
-            type=Symbol.SymbolType.LINEAR,
-            color="#D15C00",
+            color="#BA5E1A",
             linewidth=1
         )
 
     def render(self):
-        to_render = []
         interval = app.settings["Interval"]
         smoothness = app.settings["Smoothness"]
         index = app.settings["Index"]
         for isoline in self.topomap.closed_isolines + self.topomap.open_isolines:
-            if isoline.height % index:
-                to_render.append(MapRender.smoothen(isoline.vertices, smoothness, is_closed=isinstance(isoline, ClosedIsoline)))
-        return to_render
+            if isoline.height % index and len(isoline.vertices) >= 12:
+                self.plot(MapRender.smoothen(isoline.vertices, smoothness, is_closed=isinstance(isoline, ClosedIsoline)))
 
     def debug(self):
         for value, isoline in enumerate(self.topomap.isolines):
-            x, y = Coordinates.transpose_list(isoline.vertices)
+            x, y = Coordinates.to_list(isoline.vertices)
 
             plt.plot(x[0], y[0], "go") # plot green line at start of contour
             if isinstance(isoline, ClosedIsoline):
@@ -52,7 +49,7 @@ class Contour(Symbol):
                     normal_ang += math.pi
 
                 normal = TopoMap.create_normal(point_middle, normal_ang, 0.2)
-                plt.plot(*Coordinates.transpose_list(normal), color="#000") # plot tags
+                plt.plot(*Coordinates.to_list(normal), color="#000") # plot tags
 
             plt.plot(x, y, linewidth=1, color="#000") # plot isoline
             plt.text(x[0], y[0], value, color="g")

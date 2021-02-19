@@ -31,7 +31,7 @@ class ChunkTile:
                 data_stream = \
                     anvil.tags[INDEX_OF_HEIGHTMAPS].tags[INDEX_OF_TAG]
             except Exception:
-                raise Exception("Unloaded chunk(s)!")
+                raise Exception(f"Unloaded chunk {chunk_x} {chunk_z}")
 
             chunktag_heightmap = decode.unstream(
                 data_stream, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE

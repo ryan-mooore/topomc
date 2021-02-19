@@ -8,7 +8,7 @@ from topomc.common.logger import Logger
 from topomc.parsing.blockmap import BlockMap
 
 from topomc.process import Process
-from topomc.symbol import Symbol
+from topomc.symbol import AreaSymbol, LinearSymbol, PointSymbol, Symbol
 
 from topomc.processes import *
 from topomc.symbols import *
@@ -18,7 +18,7 @@ try:
         settings = yaml.full_load(stream)
 except Exception as e:
     Logger.log(logging.critical, f"Settings.yml is incorrectly formatted or missing")
-    raise e
+    raise e 
 
 def parse_args(args):
     try:
@@ -57,7 +57,11 @@ def run(args):
         process.process()
     
     Logger.log(logging.info, "Creating symbols...")
-    symbols = [Symbol_SC(processes) for Symbol_SC in Symbol.__subclasses__()]
+    symbols = [Symbol_SC(processes) for Symbol_SC in 
+        AreaSymbol.__subclasses__() +
+        LinearSymbol.__subclasses__() +
+        PointSymbol.__subclasses__()
+    ]
 
     Logger.log(logging.info, "Creating render instance...")
     map_render = render.MapRender(
@@ -71,7 +75,8 @@ def run(args):
     else:
         Logger.log(logging.info, "Rendering symbols...", time_it=False)
         for symbol in symbols:
-            map_render.plot(symbol)
+            Logger.log(logging.info, f"Building {symbol.__class__.__name__} symbol...", sub=1)
+            symbol.render()
         
-        Logger.log(logging.info, "Drawing map...")
+        Logger.log(logging.info, "Rendering map...")
         map_render.show()

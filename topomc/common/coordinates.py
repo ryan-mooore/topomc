@@ -9,8 +9,12 @@ class Coordinates:
         return f"(x={self.x}, y={self.y})"
 
     @staticmethod
-    def transpose_list(iist):
+    def to_list(iist):
         return [vertice.x for vertice in iist], [vertice.y for vertice in iist]
+    
+    @staticmethod
+    def from_list(xlist, ylist):
+        return [Coordinates(x, y) for x, y in zip(xlist, ylist)]
 
     def to_tuple(self):
         return (self.x, self.y)

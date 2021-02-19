@@ -1,25 +1,21 @@
 from topomc import app
 from topomc.processes.topomap import ClosedIsoline, TopoMap
 from topomc.render import MapRender
-from topomc.symbol import Symbol
+from topomc.symbol import LinearSymbol
 
 
-class IndexContour(Symbol):
+class Contour(LinearSymbol):
     def __init__(self, processes):
         self.topomap = super().__init__(processes, klass=TopoMap)
 
         self.set_properties(
-            type=Symbol.SymbolType.LINEAR,
-            color="#D15C00",
+            color="#BA5E1A",
             linewidth=2
         )
     
     def render(self):
-        to_render = []
-        interval = app.settings["Interval"]
         index = app.settings["Index"]
         smoothness = app.settings["Smoothness"]
         for isoline in self.topomap.closed_isolines + self.topomap.open_isolines:
-            if isoline.height % index == 0:
-                to_render.append(MapRender.smoothen(isoline.vertices, smoothness, is_closed=isinstance(isoline, ClosedIsoline)))
-        return to_render
+            if isoline.height % index == 0 and len(isoline.vertices) >= 12:
+                self.plot(MapRender.smoothen(isoline.vertices, smoothness, is_closed=isinstance(isoline, ClosedIsoline)))

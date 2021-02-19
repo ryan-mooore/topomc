@@ -1,5 +1,5 @@
 #------ Config ------#
-Saves path: '%appdata%\.minecraft\saves' # Path to local minecraft saves directory
+Saves path: ~/Library/Application Support/minecraft/saves/ # Path to local minecraft saves directory
 World: topomc15    # Name of world to map
 PDF save location: # Leave this blank to avoid saving to anywhere
 Logging level: 20
@@ -17,6 +17,7 @@ Index: 5    # The amount of standard contours for each index contour. Set to 0 t
 Smoothness: 1    # Intensity of Gaussian1D smoothing level (sigma). Set to 0 to turn off
 Line width: 1
 Tagline length: 1 # Length of slope lines. Set to 0 to turn off
+Small features: yes
 
 #------ Blocks ------#
 Surface blocks:    # Blocks considered 'ground level'

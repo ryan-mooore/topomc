@@ -8,7 +8,6 @@ from scipy.ndimage.filters import gaussian_filter1d
 from topomc import app
 from topomc.common.coordinates import Coordinates
 from topomc.common.logger import Logger
-from topomc.symbol import Symbol
 
 MARGIN = 3
 
@@ -42,7 +41,7 @@ class MapRender:
 
     @staticmethod
     def smoothen(iist, smoothness, is_closed=True):
-        x, y = Coordinates.transpose_list(iist)
+        x, y = Coordinates.to_list(iist)
 
         if smoothness:
             if is_closed:
@@ -57,24 +56,9 @@ class MapRender:
             if is_closed:
                 x = x[MARGIN:-MARGIN + 1]
                 y = y[MARGIN:-MARGIN + 1]
-        return x, y
-
-    def plot(self, symbol):
-
-        if symbol.type == Symbol.type.LINEAR:
-            Logger.log(logging.info, f"Building {symbol.__class__.__name__} symbol...", sub=1)
-            renders = symbol.render()
-            Logger.log(logging.info, f"Rendering {symbol.__class__.__name__} symbol...", sub=1)
-            if renders:
-                for x, y in renders:
-                    plt.plot(x,y, symbol.color, linewidth=symbol.linewidth / 3) 
-        if symbol.type == Symbol.type.AREA:
-            raise NotImplementedError
-        if symbol.type == Symbol.type.POINT:
-            raise NotImplementedError
+        return Coordinates.from_list(x, y)
 
     def show(self):
-        
         plt.axis("off")
 
         axes = plt.gca()
@@ -101,7 +85,10 @@ class MapRender:
         window_size = app.settings["Preview size"]
         graph.set_size_inches(8 * window_size, 8 * window_size)
         if graph.canvas.toolbar:
-            graph.canvas.toolbar.pack_forget()
+            try:
+                graph.canvas.toolbar.pack_forget()
+            except AttributeError:
+                pass
         plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
 
