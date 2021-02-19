@@ -26,7 +26,7 @@ class Contour(LinearSymbol):
                 self.plot(MapRender.smoothen(isoline.vertices, smoothness, is_closed=isinstance(isoline, ClosedIsoline)))
 
     def debug(self):
-        for value, isoline in enumerate(self.topomap.isolines):
+        for value, isoline in enumerate(self.topomap.closed_isolines + self.topomap.open_isolines):
             x, y = Coordinates.to_list(isoline.vertices)
 
             plt.plot(x[0], y[0], "go") # plot green line at start of contour

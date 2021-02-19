@@ -67,7 +67,7 @@ class MapRender:
         axes.set_aspect(1)
         axes.set_xlim(0, self.width)
         axes.set_ylim(0, self.height)
-        axes.invert_xaxis()
+        axes.invert_yaxis()
 
         scale_ratio = app.settings["Scale"]
         divisor, scale = scale_ratio.split(":")

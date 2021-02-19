@@ -1,6 +1,4 @@
-.venv
-debug.pdf
-kartnormen_2017-internasjonal.pdf
+kartnormen_2017-internasjonal.*
 
 **/__pycache__
 **.pyc

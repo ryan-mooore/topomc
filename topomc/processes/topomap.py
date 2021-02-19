@@ -118,9 +118,9 @@ class TopoMap(Process):
                 elif first.axis == 'x' and first.cells[0].coords.y == self.height - 1:
                     return 'left' if first.direction == 1 else 'right'
                 elif first.axis == 'y' and first.cells[0].coords.x == 0:
-                    return 'left' if first.direction == -1 else 'right'
-                elif first.axis == 'y' and first.cells[0].coords.x == self.width - 1:
                     return 'left' if first.direction == 1 else 'right'
+                elif first.axis == 'y' and first.cells[0].coords.x == self.width - 1:
+                    return 'left' if first.direction == -1 else 'right'
             else:
                 if first.axis == 'x':
                     if first.cells[0] in second.cells: # moving up

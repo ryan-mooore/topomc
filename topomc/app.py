@@ -70,7 +70,7 @@ def run(args):
     )
 
     if args.debug:
-        curr_symbol = symbols[0] # TODO add support to debug symbols
+        curr_symbol = symbols[2] # TODO add support to debug symbols
         map_render.debug(curr_symbol)
     else:
         Logger.log(logging.info, "Rendering symbols...", time_it=False)
