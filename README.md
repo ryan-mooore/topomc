@@ -5,18 +5,23 @@
 
 TopoMC is a python project that converts minecraft chunks into a topographical map. **Please note that at the moment this project only works for 1.15 and below due to Mojang changing the way that chunk heightmaps are encoded.** Feel free to create a PR to implement a new decoding algorithm that can handle 1.16 chunks
 
-# TODO LIST:
+# TODO:
  - [ ] Support 1.16
- - [x] Create taglines
- - [x] Implement index contours
- - [x] Setting to enable / disable taglines
- - [x] Refactoring
- - [x] Improve tagline algorithm
- - [ ] Fix contour interval
+ - [ ] Improve tagline algorithm
  - [ ] Improve chunk parsing efficiency
- - [ ] Quick render
- - [x] Small depression / knoll
  - [ ] Better validation
+ - [ ] Auto sampling level
+ - [ ] Symbol type inheritance
+ - [ ] Refactor TopoGraph class
+ - [ ] Rewrite README
+
+# TO FIX:
+ - [ ] Steep feature edge case
+ - [ ] Contour interval
+ - [ ] Point symbol scaling
+
+# Ideas
+ - [ ] Quick render
 
 ## How it Works
 
