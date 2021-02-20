@@ -22,7 +22,10 @@ class Contour(LinearSymbol):
         smoothness = app.settings["Smoothness"]
         index = app.settings["Index"]
         for isoline in self.topomap.closed_isolines + self.topomap.open_isolines:
-            if isoline.height % index and len(isoline.vertices) >= 12:
+            if isoline.height % index:
+                if isinstance(isoline, ClosedIsoline):
+                    if isoline.small_feature == True:
+                        continue
                 for vertice in isoline.vertices:
                     vertice.x += 0.5
                     vertice.y += 0.5 

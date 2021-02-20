@@ -56,18 +56,7 @@ class Tagline(LinearSymbol):
                     self.plot(normal)
                     break
 
-        def search(isoline):
-            if isoline.contains:
-                extreme = True
-                for new_isoline in isoline.contains:
-                    if len(new_isoline.vertices) >= 12 and isinstance(new_isoline, Depression):
-                        search(new_isoline)
-                        extreme = False
-                if extreme: create_tagline(isoline)
-            else:
-                if len(isoline.vertices) >= 12 and isinstance(isoline, Depression):
+        for isoline in self.topomap.closed_isolines:
+            if isinstance(isoline, Depression) and not isoline.small_feature:
+                if isoline.last_large_depression:
                     create_tagline(isoline)
-
-        for isoline in self.topomap.topograph.base:
-            search(isoline)
-                

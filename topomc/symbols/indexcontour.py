@@ -4,7 +4,7 @@ from topomc.render import MapRender
 from topomc.symbol import LinearSymbol
 
 
-class Contour(LinearSymbol):
+class IndexContour(LinearSymbol):
     def __init__(self, processes):
         self.topomap = super().__init__(processes, klass=TopoMap)
 
@@ -17,7 +17,10 @@ class Contour(LinearSymbol):
         index = app.settings["Index"]
         smoothness = app.settings["Smoothness"]
         for isoline in self.topomap.closed_isolines + self.topomap.open_isolines:
-            if isoline.height % index == 0 and len(isoline.vertices) >= 12:
+            if isoline.height % index == 0:
+                if isinstance(isoline, ClosedIsoline):
+                    if isoline.small_feature == True:
+                        continue
                 for vertice in isoline.vertices:
                     vertice.x += 0.5
                     vertice.y += 0.5 

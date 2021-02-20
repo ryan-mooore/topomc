@@ -17,7 +17,8 @@ Index: 5    # The amount of standard contours for each index contour. Set to 0 t
 Smoothness: 1    # Intensity of Gaussian1D smoothing level (sigma). Set to 0 to turn off
 Line width: 1
 Tagline length: 1 # Length of slope lines. Set to 0 to turn off
-Small features: yes
+Small features threshold: 14 # defines the amount of vertices a contour needs to have to be considered "small". Set to 0 to turn off
+Steep features threshold: 3 # defines the steepness of a small depression or knoll before it becomes a pit or earth hill.
 
 #------ Blocks ------#
 Surface blocks:    # Blocks considered 'ground level'
