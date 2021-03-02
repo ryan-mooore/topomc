@@ -16,6 +16,7 @@ env = "*"
 matplotlib = "*"
 ipykernel = "*"
 matplotlib-label-lines = "*"
+svgpath2mpl = "*"
 
 [requires]
 python_version = "3.8"

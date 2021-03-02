@@ -14,11 +14,12 @@ TopoMC is a python project that converts minecraft chunks into a topographical m
  - [ ] Symbol type inheritance
  - [ ] Refactor TopoGraph class
  - [ ] Rewrite README
+ - [ ] Symbol scaling follows IOF spec
 
 # TO FIX:
  - [ ] Steep feature edge case
  - [ ] Contour interval
- - [ ] Point symbol scaling
+ - [x] Point symbol scaling
 
 # Ideas
  - [ ] Quick render

@@ -3,6 +3,7 @@ from topomc.processes.topomap import Depression, Hill, TopoMap
 from topomc.symbol import PointSymbol
 from topomc import app
 
+
 class EarthHill(PointSymbol):
     def __init__(self, processes):
         self.topomap = super().__init__(processes, klass=TopoMap)

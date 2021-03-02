@@ -1,6 +1,7 @@
 import logging
 import sys
 
+import numpy as np
 import yaml
 
 from topomc import render
@@ -18,9 +19,11 @@ try:
         settings = yaml.full_load(stream)
 except Exception as e:
     Logger.log(logging.critical, f"Settings.yml is incorrectly formatted or missing")
-    raise e 
+    raise e
 
-def parse_args(args):
+
+def create_settings(args):
+
     try:
         bounding_points = x1, z1, x2, z2 = args.x1, args.z1, args.x2, args.z2
         settings["Bounding points"] = bounding_points
@@ -36,11 +39,10 @@ def parse_args(args):
 
     return settings
 
+
 def run(args):
 
-    curr_symbol = None
-
-    settings = parse_args(args)
+    settings = create_settings(args)
 
     Logger.log(logging.info, "Collecting chunks...")
     blockmap = BlockMap(settings["World"], *settings["Bounding points"])
@@ -55,9 +57,13 @@ def run(args):
     for process in processes:
         Logger.log(logging.info, f"Running {process.__class__.__name__} process...", sub=1)
         process.process()
-    
+
+    height = len(blockmap.heightmap[0])
+    width = len(blockmap.heightmap)
+    max_len = max(np.floor(width / 16), np.floor(height / 16))
+
     Logger.log(logging.info, "Creating symbols...")
-    symbols = [Symbol_SC(processes) for Symbol_SC in 
+    symbols = [Symbol_SC(processes) for Symbol_SC in
         AreaSymbol.__subclasses__() +
         LinearSymbol.__subclasses__() +
         PointSymbol.__subclasses__()
@@ -65,8 +71,8 @@ def run(args):
 
     Logger.log(logging.info, "Creating render instance...")
     map_render = render.MapRender(
-        len(blockmap.heightmap[0]),
-        len(blockmap.heightmap)
+        height,
+        width
     )
 
     if args.debug:
@@ -77,6 +83,6 @@ def run(args):
         for symbol in symbols:
             Logger.log(logging.info, f"Building {symbol.__class__.__name__} symbol...", sub=1)
             symbol.render()
-        
+
         Logger.log(logging.info, "Rendering map...")
         map_render.show()

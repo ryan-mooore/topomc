@@ -78,9 +78,12 @@ class MapRender:
             graph.set_size_inches(self.width * 100 / scale * 0.393701, self.height * 100 / scale * 0.393701)
             graph.savefig(self.save_loc)
 
-        for line in axes.lines:
+        for line in axes.get_lines():
             line.set_linewidth(
                 line.get_linewidth() * 2**(4 - np.log2(self.max_len)))
+        for line in [line for line in axes.get_lines() if line.get_marker() != "None"]:
+            line.set_markersize(
+                line.get_markersize() * 2**(4 - np.log2(self.max_len)))
 
         window_size = app.settings["Preview size"]
         graph.set_size_inches(8 * window_size, 8 * window_size)

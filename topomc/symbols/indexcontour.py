@@ -6,7 +6,7 @@ from topomc.symbol import LinearSymbol
 
 class IndexContour(LinearSymbol):
     def __init__(self, processes):
-        self.topomap = super().__init__(processes, klass=TopoMap)
+        self.topomap = super().__init__(processes, TopoMap)
 
         self.set_properties(
             color="#BA5E1A",
