@@ -10,7 +10,7 @@ def unstream(data, bits_per_value, int_size):
     value = 0
 
     for byte in data:
-        for num in range(int_size):
+        for num in range(int_size): # int_size-1, to support 1.16+
             bit = (byte >> num) & 0x01
             value = (bit << bl) | value
             bl += 1
@@ -18,4 +18,5 @@ def unstream(data, bits_per_value, int_size):
                 result.append(value)
                 value = 0
                 bl = 0
+        # or bl = 0   
     return result
