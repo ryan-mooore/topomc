@@ -54,7 +54,7 @@ class ChunkParser:
 
         try:
             chunk = anvil.Chunk.from_region(region, chunkx, chunkz)
-            version_tag = region.chunk_data(chunkx, chunky)[VERSION_TAG_INDEX]
+            version_tag = region.chunk_data(chunkx, chunkz)[VERSION_TAG_INDEX]
         except Exception:
             Logger.log(logging.critical, f"Chunk: Chunk {chunkx, chunkz} is not loaded or corrupt")
             sys.exit()
