@@ -1,23 +1,21 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
+name = "pypi"
 
 [packages]
-frozendict = ">=1.2"
-anvil-parser = ">=0.1.1"
-NBT = "*"
-PyYAML = ">=5.0"
-scipy = "*"
 numpy = "*"
-env = "*"
 matplotlib = "*"
-ipykernel = "*"
-matplotlib-label-lines = "*"
-svgpath2mpl = "*"
+pyyaml = "*"
+anvil-parser = "*"
+nbt = "*"
+frozendict = "*"
+
+[dev-packages]
+black = "*"
 
 [requires]
-python_version = "3.8"
-tkinter = "*"
+python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true
