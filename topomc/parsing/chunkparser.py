@@ -7,6 +7,7 @@ import anvil
 from topomc import app
 from topomc.common.logger import Logger
 
+VERSION_TAG_INDEX = 1
 
 class ChunkParser:
 
@@ -53,8 +54,9 @@ class ChunkParser:
 
         try:
             chunk = anvil.Chunk.from_region(region, chunkx, chunkz)
+            version_tag = region.chunk_data(chunkx, chunkz)[VERSION_TAG_INDEX]
         except Exception:
             Logger.log(logging.critical, f"Chunk: Chunk {chunkx, chunkz} is not loaded or corrupt")
             sys.exit()
 
-        return chunk
+        return chunk, version_tag
