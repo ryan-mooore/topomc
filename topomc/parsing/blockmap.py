@@ -19,7 +19,7 @@ STREAM_INT_SIZE = 64
 class ChunkTile:
     def __init__(self, chunk_parser, chunk_x, chunk_z):
         
-        def get_chunktag_heightmap(anvil, tag="MOTION_BLOCKING_NO_LEAVES"):
+        def get_chunktag_heightmap(anvil, version_tag, tag="MOTION_BLOCKING_NO_LEAVES"):
             try:
                 tags.index(tag)
             except Exception:
@@ -34,7 +34,7 @@ class ChunkTile:
                 raise Exception(f"Unloaded chunk {chunk_x} {chunk_z}")
 
             chunktag_heightmap = decode.unstream(
-                data_stream, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE
+                data_stream, version_tag, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE
             )
 
             chunktag_heightmap_deepened = []
@@ -49,9 +49,9 @@ class ChunkTile:
 
             return chunktag_heightmap_deepened
 
-        self.anvil_file = chunk_parser.load_at(chunk_x, chunk_z)
+        self.anvil_file, self.version_tag = chunk_parser.load_at(chunk_x, chunk_z)
         self.chunktag_heightmap = get_chunktag_heightmap(
-            self.anvil_file.data, tags[1]
+            self.anvil_file.data, self.version_tag, tags[1]
         )
 
         surface_blocks = app.settings["Surface blocks"]
