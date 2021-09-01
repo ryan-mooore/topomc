@@ -22,7 +22,7 @@ class MapRender:
         world,
         smoothness=1,
         contour_index=5,
-        save_location=None,
+        save_location=".",
         scale="1:1000",
         preview_size=1,
     ):
@@ -42,10 +42,10 @@ class MapRender:
     def get_save_loc(self, loc):
         self.save_loc = None
         if loc:
-            save_loc = os.path.normpath(loc)
+            save_loc = os.path.abspath(loc)
             if not save_loc.endswith(".pdf"):
-                if save_loc.endswith(os.sep):
-                    self.save_loc = save_loc + "map.pdf"
+                if os.path.isdir(save_loc):
+                    self.save_loc = save_loc + os.sep + "map.pdf"
                 else:
                     self.save_loc = save_loc + ".pdf"
 
@@ -88,7 +88,7 @@ class MapRender:
                 self.width * 100 / scale * 0.393701,
                 self.height * 100 / scale * 0.393701,
             )
-            graph.savefig(self.save_loc)
+            graph.savefig(self.save_loc, format="pdf")
 
         for line in axes.get_lines():
             line.set_linewidth(line.get_linewidth() * 2 ** (4 - np.log2(self.max_len)))
@@ -133,6 +133,6 @@ class MapRender:
         print()
 
         if self.save_loc:
-            graph.savefig(self.save_loc)
+            graph.savefig(self.save_loc, format="pdf")
 
         plt.show()

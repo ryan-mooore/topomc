@@ -1,28 +1,10 @@
 # TopoMC
 
-![Standard](images/example1.png) ![Amplified](images/example2.png)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/d90304987654468f977e8f8abb2a384b)](https://www.codacy.com/gh/ryan-mooore/topomc/dashboard?utm_source=github.com&utm_medium=referral&utm_content=ryan-mooore/topomc&utm_campaign=Badge_Grade)![Lines of code](https://img.shields.io/tokei/lines/github/ryan-mooore/topomc) [![Todo](https://img.shields.io/badge/todo-9-orange)](todo.md)
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/805c61e9222146e2830f0920560d6e4d)](https://www.codacy.com/manual/ryan-mooore/topomc?utm_source=github.com&utm_medium=referral&utm_content=ryan-mooore/topomc&utm_campaign=Badge_Grade)
+TopoMC is a Python script and library that uses the data from your Minecraft worlds to create beautiful topographical maps.
 
-# TODO:
-
-- [ ] Improve tagline algorithm
-- [ ] Improve chunk parsing efficiency
-- [ ] Better validation
-- [ ] Auto sampling level
-- [ ] Symbol type inheritance
-- [ ] Refactor TopoGraph class
-- [ ] Rewrite README
-- [ ] Symbol scaling follows IOF spec
-
-# TO FIX:
-
-- [ ] Steep feature edge case
-- [ ] Contour interval
-
-# Ideas
-
-- [ ] Quick render
+![Hill](images/map1.png)![Detail](images/map2.png)![Big scale](images/map3.png)
 
 ## How it Works
 
