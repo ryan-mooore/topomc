@@ -1,5 +1,6 @@
-kartnormen_2017-internasjonal.*
+kartnormen*
 .vscode
+/settings.yml
 
 **/__pycache__
 **.pyc

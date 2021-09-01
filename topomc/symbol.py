@@ -10,11 +10,16 @@ from topomc.common.logger import Logger
 
 
 class Symbol:
-    def render(self, blockmap):
+    settings = []
+
+    def render(self, settings):
         raise NotImplementedError
 
-    def debug(self, blockmap):
-        Logger.log(logging.critical, f"debugging is not supported for {self.__class__.__name__}")
+    def debug(self, settings):
+        Logger.log(
+            logging.critical,
+            f"debugging is not supported for {self.__class__.__name__}",
+        )
         raise NotImplementedError
 
     def __init__(self, processes, klass):
@@ -34,15 +39,18 @@ class AreaSymbol(Symbol):
         self.borderwidth = borderwidth / 3
 
     def plot(self, area):
-        plt.fill(*Coordinates.to_list(area), facecolor=self.fillcolor, edgecolor=self.bordercolor,
-                 linewidth=self.borderwidth)
+        plt.fill(
+            *Coordinates.to_list(area),
+            facecolor=self.fillcolor,
+            edgecolor=self.bordercolor,
+            linewidth=self.borderwidth,
+        )
 
 
 class LinearSymbol(Symbol):
     def set_properties(self, color, linewidth):
         self.color = color
         self.linewidth = linewidth / 3
-
 
     def plot(self, line):
         plt.plot(*Coordinates.to_list(line), color=self.color, linewidth=self.linewidth)
@@ -55,9 +63,15 @@ class PointSymbol(Symbol):
             self.icon = icon
         else:
             doc = minidom.parse(
-                path.join(path.dirname(__file__), "assets", "symbols", f"{self.__class__.__name__}.svg"))
+                path.join(
+                    path.dirname(__file__),
+                    "assets",
+                    "symbols",
+                    f"{self.__class__.__name__}.svg",
+                )
+            )
             icon = parse_path(
-                [p.getAttribute('d') for p in doc.getElementsByTagName('path')][0]
+                [p.getAttribute("d") for p in doc.getElementsByTagName("path")][0]
             )
             doc.unlink()
 
@@ -69,4 +83,11 @@ class PointSymbol(Symbol):
         self.pointsize = pointsize * 2
 
     def plot(self, point):
-        plt.plot(point.x, point.y, color=self.color, marker=self.icon, markersize=self.pointsize, linewidth=0)
+        plt.plot(
+            point.x,
+            point.y,
+            color=self.color,
+            marker=self.icon,
+            markersize=self.pointsize,
+            linewidth=0,
+        )

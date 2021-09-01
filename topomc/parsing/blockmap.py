@@ -1,24 +1,43 @@
-from topomc import app
 from topomc.common import decode
 from topomc.common.coordinates import Coordinates
 from topomc.parsing.chunkparser import ChunkParser
 
 # builtin chunk heightmap options
-tags = [
-    "OCEAN_FLOOR",
-    "MOTION_BLOCKING_NO_LEAVES",
-    "MOTION_BLOCKING",
-    "WORLD_SURFACE"
-]
+tags = ["OCEAN_FLOOR", "MOTION_BLOCKING_NO_LEAVES", "MOTION_BLOCKING", "WORLD_SURFACE"]
 
 # game consts
 INDEX_OF_HEIGHTMAPS = 6
 STREAM_BITS_PER_VALUE = 9
 STREAM_INT_SIZE = 64
 
+# surface blocks
+DEFAULT_SURFACE = [
+    "grass_block",
+    "grass_path",
+    "dirt",
+    "coarse_dirt",
+    "farmland",
+    "sand",
+    "sandstone",
+    "red_sand",
+    "red_sandstone",
+    "clay",
+    "podzol",
+    "mycelium",
+    "stone",
+    "granite",
+    "diorite",
+    "andesite",
+    "gravel",
+    "coal_ore",
+    "iron_ore",
+    "gold_ore",
+    "water",
+]
+
+
 class ChunkTile:
-    def __init__(self, chunk_parser, chunk_x, chunk_z):
-        
+    def __init__(self, chunk_parser, chunk_x, chunk_z, surface_blocks=DEFAULT_SURFACE):
         def get_chunktag_heightmap(anvil, version_tag, tag="MOTION_BLOCKING_NO_LEAVES"):
             try:
                 tags.index(tag)
@@ -26,10 +45,9 @@ class ChunkTile:
                 raise Exception("Invalid tag")
 
             INDEX_OF_TAG = tags.index(tag)
-            
+
             try:
-                data_stream = \
-                    anvil.tags[INDEX_OF_HEIGHTMAPS].tags[INDEX_OF_TAG]
+                data_stream = anvil.tags[INDEX_OF_HEIGHTMAPS].tags[INDEX_OF_TAG]
             except Exception:
                 raise Exception(f"Unloaded chunk {chunk_x} {chunk_z}")
 
@@ -54,11 +72,9 @@ class ChunkTile:
             self.anvil_file.data, self.version_tag, tags[1]
         )
 
-        surface_blocks = app.settings["Surface blocks"]
-
         # generate heightmap
         self.heightmap = []
-
+        self.surface_blocks = surface_blocks
 
         # TODO:
         # implement generator
@@ -85,15 +101,23 @@ class ChunkTile:
         point_heights = [point_height for row in self.heightmap for point_height in row]
         min_height = min(*point_heights)
         max_height = max(*point_heights)
-        
+
         return (min_height, max_height)
 
-class BlockMap:
 
-    def __init__(self, world, chunk_x1, chunk_z1, chunk_x2, chunk_z2):
-        
+class BlockMap:
+    def __init__(
+        self,
+        world,
+        chunk_x1,
+        chunk_z1,
+        chunk_x2,
+        chunk_z2,
+        surface_blocks=DEFAULT_SURFACE,
+        saves_path=None,
+    ):
         def horizontal_append(map1, map2):
-        # append if map contains content
+            # append if map contains content
             if map1:
                 for index, row in enumerate(map2):
                     map1[index].extend(row)
@@ -112,19 +136,19 @@ class BlockMap:
                 map1 = map2
             return map1
 
-
         self.chunk_tiles = []
         self.heightmap = []
-        self.chunk_parser = ChunkParser(world)
+
+        self.chunk_parser = ChunkParser(world, saves_path=saves_path)
 
         # + 1 because ending chunks are inclusive
         for z in range(chunk_z1, chunk_z2 + 1):
             chunk_row = []
             chunk_tile_row = []
             for x in range(chunk_x1, chunk_x2 + 1):
-                chunk_tile = ChunkTile(self.chunk_parser, x, z)
+                chunk_tile = ChunkTile(self.chunk_parser, x, z, surface_blocks)
                 chunk_row = horizontal_append(chunk_row, chunk_tile.heightmap)
-                
+
                 chunk_tile.coords = Coordinates(x - chunk_x1, z - chunk_z1)
                 chunk_tile_row.append(chunk_tile)
 
@@ -133,8 +157,8 @@ class BlockMap:
 
             self.start_coords = Coordinates(chunk_x1 * 16, chunk_z1 * 16)
             self.end_coords = Coordinates(chunk_x2 * 16, chunk_z2 * 16)
-        
-        self.width =  len(self.heightmap[0])
+
+        self.width = len(self.heightmap[0])
         self.height = len(self.heightmap)
 
     def get_extremes(self):
@@ -144,9 +168,17 @@ class BlockMap:
         if len(self.chunk_tiles) == 1 and len(self.chunk_tiles[0]) == 1:
             return self.chunk_tiles[0][0].get_extremes()
         else:
-            min_heights = [chunk_tile.get_extremes()[0] for row in self.chunk_tiles for chunk_tile in row]
+            min_heights = [
+                chunk_tile.get_extremes()[0]
+                for row in self.chunk_tiles
+                for chunk_tile in row
+            ]
             min_height = min(*min_heights)
-            max_heights = [chunk_tile.get_extremes()[1] for row in self.chunk_tiles for chunk_tile in row]
+            max_heights = [
+                chunk_tile.get_extremes()[1]
+                for row in self.chunk_tiles
+                for chunk_tile in row
+            ]
             max_height = max(*max_heights)
 
         return (min_height, max_height)

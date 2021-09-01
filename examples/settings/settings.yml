@@ -1,11 +1,9 @@
 ---
 #------ Config ------#
 Saves path:
-  "/Applications/MultiMC.app/Contents/MacOS/instances/TOPOMC 1.17/.minecraft/saves"
-  # Path to local minecraft saves directory
-World: New World # Name of world to map
+  "/Applications/MultiMC.app/Contents/MacOS/instances/1.17/.minecraft/saves"
+  # Path to local minecraft saves directory if using a 3rd party launcher
 PDF save location: # Leave this blank to avoid saving to anywhere
-Logging level: 20
 
 #------ Map ------#
 Scale: 1:1000 # Scale of map for PDF output

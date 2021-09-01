@@ -3,6 +3,7 @@ import sys
 from topomc.common.logger import Logger
 import yaml
 
+
 def get(key):
     try:
         with open("settings.yml", "r") as stream:
@@ -14,13 +15,18 @@ def get(key):
         Logger.log(logging.critical, f"The setting {key} was not found in settings.yml")
         raise KeyError
     except Exception as e:
-        Logger.log(logging.critical, f"settings.yml is incorrectly formatted or missing")
+        Logger.log(
+            logging.critical, f"settings.yml is incorrectly formatted or missing"
+        )
         raise e
+
 
 def get_all():
     try:
         with open("settings.yml", "r") as stream:
             return yaml.full_load(stream)
     except Exception as e:
-        Logger.log(logging.critical, f"settings.yml is incorrectly formatted or missing")
-        raise e 
+        Logger.log(
+            logging.critical, f"settings.yml is incorrectly formatted or missing"
+        )
+        raise e
