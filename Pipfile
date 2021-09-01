@@ -10,6 +10,8 @@ pyyaml = "*"
 anvil-parser = "*"
 nbt = "*"
 frozendict = "*"
+svgpath2mpl = "*"
+scipy = {version = "*", markers = "platform_system!='Darwin' or platform_machine!= 'arm64'"}
 
 [dev-packages]
 black = "*"

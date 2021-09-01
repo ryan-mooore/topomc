@@ -33,16 +33,15 @@ In order to smooth the isolines, the 1d guassian filter function from `scipy.ndi
 ### Installation
 
 1. Clone the repo
-2. If you have pipenv, just run `pipenv install`. If not make sure all [dependencies](Pipfile) are installed.
+2. If you have pipenv, just run `pipenv install && pipenv shell`. If not make sure all [dependencies](Pipfile) are installed.
 
 ### Synopsis
 
 python -m topomc **x1 z1 x2 z2** \[--world **worldname**\] \[--debug\] \[--settings **path/to/settings.yml**\]
 
-- (`x1`, `z1`) - Top left chunk limit
-- (`x2`, `z2`) - Bottom right chunk limit
-  - All chunks within these arguments will be bounded and shown on the map.
-  - Both co-ordinates are inclusive.
+- (`x1`, `z1`) - Top left chunk
+- (`x2`, `z2`) - Bottom right chunk
+  - All chunks between these chunks will be included and shown on the map.
 
 ### Options
 
