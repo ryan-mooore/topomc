@@ -26,7 +26,8 @@ class Tagline(LinearSymbol):
             def get_angle_at_index(vertices, index):
                 a = vertices[index - 1] if index != 0 else vertices[-2]
                 b = vertice
-                c = vertices[index + 1] if index != len(vertices) - 1 else vertices[1]
+                c = vertices[index +
+                             1] if index != len(vertices) - 1 else vertices[1]
                 angle = TopoMap.perp_ang(b, c) - TopoMap.perp_ang(b, a)
                 if angle < 0:
                     angle += 2 * math.pi

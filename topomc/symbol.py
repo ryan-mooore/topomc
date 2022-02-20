@@ -26,7 +26,8 @@ class Symbol:
         return next(proc for proc in processes if isinstance(proc, klass))
 
     def set_properties(self):
-        raise NotImplementedError("Cannot set properties of unspecified symbol type")
+        raise NotImplementedError(
+            "Cannot set properties of unspecified symbol type")
 
     def plot(self):
         raise NotImplementedError("Cannot plot unspecified symbol type")
@@ -53,7 +54,10 @@ class LinearSymbol(Symbol):
         self.linewidth = linewidth / 3
 
     def plot(self, line):
-        plt.plot(*Coordinates.to_list(line), color=self.color, linewidth=self.linewidth)
+        plt.plot(
+            *Coordinates.to_list(line),
+            color=self.color,
+            linewidth=self.linewidth)
 
 
 class PointSymbol(Symbol):
@@ -70,9 +74,8 @@ class PointSymbol(Symbol):
                     f"{self.__class__.__name__}.svg",
                 )
             )
-            icon = parse_path(
-                [p.getAttribute("d") for p in doc.getElementsByTagName("path")][0]
-            )
+            icon = parse_path([p.getAttribute("d")
+                               for p in doc.getElementsByTagName("path")][0])
             doc.unlink()
 
             for vertice in icon.vertices:

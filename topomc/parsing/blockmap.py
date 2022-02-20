@@ -3,7 +3,11 @@ from topomc.common.coordinates import Coordinates
 from topomc.parsing.chunkparser import ChunkParser
 
 # builtin chunk heightmap options
-tags = ["OCEAN_FLOOR", "MOTION_BLOCKING_NO_LEAVES", "MOTION_BLOCKING", "WORLD_SURFACE"]
+tags = [
+    "OCEAN_FLOOR",
+    "MOTION_BLOCKING_NO_LEAVES",
+    "MOTION_BLOCKING",
+    "WORLD_SURFACE"]
 
 # game consts
 INDEX_OF_HEIGHTMAPS = 6
@@ -37,8 +41,16 @@ DEFAULT_SURFACE = [
 
 
 class ChunkTile:
-    def __init__(self, chunk_parser, chunk_x, chunk_z, surface_blocks=DEFAULT_SURFACE):
-        def get_chunktag_heightmap(anvil, version_tag, tag="MOTION_BLOCKING_NO_LEAVES"):
+    def __init__(
+            self,
+            chunk_parser,
+            chunk_x,
+            chunk_z,
+            surface_blocks=DEFAULT_SURFACE):
+        def get_chunktag_heightmap(
+                anvil,
+                version_tag,
+                tag="MOTION_BLOCKING_NO_LEAVES"):
             try:
                 tags.index(tag)
             except Exception:
@@ -52,8 +64,7 @@ class ChunkTile:
                 raise Exception(f"Unloaded chunk {chunk_x} {chunk_z}")
 
             chunktag_heightmap = decode.unstream(
-                data_stream, version_tag, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE
-            )
+                data_stream, version_tag, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE)
 
             chunktag_heightmap_deepened = []
             row = []
@@ -67,7 +78,8 @@ class ChunkTile:
 
             return chunktag_heightmap_deepened
 
-        self.anvil_file, self.version_tag = chunk_parser.load_at(chunk_x, chunk_z)
+        self.anvil_file, self.version_tag = chunk_parser.load_at(
+            chunk_x, chunk_z)
         self.chunktag_heightmap = get_chunktag_heightmap(
             self.anvil_file.data, self.version_tag, tags[1]
         )
@@ -98,7 +110,8 @@ class ChunkTile:
         min_height = 0xFF
         max_height = 0x00
 
-        point_heights = [point_height for row in self.heightmap for point_height in row]
+        point_heights = [
+            point_height for row in self.heightmap for point_height in row]
         min_height = min(*point_heights)
         max_height = max(*point_heights)
 

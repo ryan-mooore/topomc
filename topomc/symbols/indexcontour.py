@@ -15,7 +15,7 @@ class IndexContour(LinearSymbol):
         for isoline in self.topomap.closed_isolines + self.topomap.open_isolines:
             if isoline.height % index == 0:
                 if isinstance(isoline, ClosedIsoline):
-                    if isoline.small_feature == True:
+                    if isoline.small_feature:
                         continue
                 for vertice in isoline.vertices:
                     vertice.x += 0.5

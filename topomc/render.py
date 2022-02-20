@@ -13,7 +13,12 @@ MARGIN = 3
 
 class MapRender:
 
-    settings = ["smoothness", "contour_index", "save_location", "scale", "preview_size"]
+    settings = [
+        "smoothness",
+        "contour_index",
+        "save_location",
+        "scale",
+        "preview_size"]
 
     def __init__(
         self,
@@ -37,7 +42,13 @@ class MapRender:
 
         plt.figure(f"Map of {self.world}")
 
-        self.max_len = max(np.floor(self.width / 16), np.floor(self.height / 16))
+        self.max_len = max(
+            np.floor(
+                self.width /
+                16),
+            np.floor(
+                self.height /
+                16))
 
     def get_save_loc(self, loc):
         self.save_loc = None
@@ -64,8 +75,8 @@ class MapRender:
             y = gaussian_filter1d(y, smoothness)
 
             if is_closed:
-                x = x[MARGIN : -MARGIN + 1]
-                y = y[MARGIN : -MARGIN + 1]
+                x = x[MARGIN: -MARGIN + 1]
+                y = y[MARGIN: -MARGIN + 1]
         return Coordinates.from_list(x, y)
 
     def show(self):
@@ -91,8 +102,10 @@ class MapRender:
             graph.savefig(self.save_loc, format="pdf")
 
         for line in axes.get_lines():
-            line.set_linewidth(line.get_linewidth() * 2 ** (4 - np.log2(self.max_len)))
-        for line in [line for line in axes.get_lines() if line.get_marker() != "None"]:
+            line.set_linewidth(line.get_linewidth() * 2 **
+                               (4 - np.log2(self.max_len)))
+        for line in [
+                line for line in axes.get_lines() if line.get_marker() != "None"]:
             line.set_markersize(
                 line.get_markersize() * 2 ** (4 - np.log2(self.max_len))
             )

@@ -19,7 +19,7 @@ class Contour(LinearSymbol):
         for isoline in self.topomap.closed_isolines + self.topomap.open_isolines:
             if isoline.height % index:
                 if isinstance(isoline, ClosedIsoline):
-                    if isoline.small_feature == True:
+                    if isoline.small_feature:
                         continue
                 for vertice in isoline.vertices:
                     vertice.x += 0.5
@@ -40,9 +40,9 @@ class Contour(LinearSymbol):
 
             plt.plot(x[0], y[0], "go")  # plot green line at start of contour
             if isinstance(isoline, ClosedIsoline):
-                plt.plot(
-                    x[len(x) - 2], y[len(y) - 2], "ro"
-                )  # add red point 1 point away from end so points are not on top of each other
+                # add red point 1 point away from end so points are not on top
+                # of each other
+                plt.plot(x[len(x) - 2], y[len(y) - 2], "ro")
             else:
                 plt.plot(
                     x[len(x) - 1], y[len(y) - 1], "ro"
@@ -63,7 +63,9 @@ class Contour(LinearSymbol):
                     normal_ang += math.pi
 
                 normal = TopoMap.create_normal(point_middle, normal_ang, 0.2)
-                plt.plot(*Coordinates.to_list(normal), color="#000")  # plot tags
+                plt.plot(
+                    *Coordinates.to_list(normal),
+                    color="#000")  # plot tags
 
             plt.plot(x, y, linewidth=1, color="#000")  # plot isoline
             plt.text(x[0], y[0], value, color="g")

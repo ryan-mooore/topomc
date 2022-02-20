@@ -88,13 +88,21 @@ class TopoMap(Process):
         return math.atan2(point2.y - point1.y, point2.x - point1.x)
 
     def __init__(
-        self, blockmap, interval=1, phase=0, tag_length=1, small_features_threshold=14
-    ):
+            self,
+            blockmap,
+            interval=1,
+            phase=0,
+            tag_length=1,
+            small_features_threshold=14):
         super().__init__(blockmap)
         self.open_isolines = []
         self.closed_isolines = []
 
-        Logger.log(logging.info, "Running CellMap subprocess...", sub=2, time_it=False)
+        Logger.log(
+            logging.info,
+            "Running CellMap subprocess...",
+            sub=2,
+            time_it=False)
         self.cellmap = CellMap(blockmap)
 
         self.width = self.cellmap.width
@@ -180,22 +188,26 @@ class TopoMap(Process):
                 while True:
                     edges = [*cell.edges]
                     edges.remove(edge)
-                    edges.sort(
-                        key=lambda e: e.axis == edge.axis
-                    )  # sort by adjacent first, then opposite (to avoid crossover)
+                    # sort by adjacent first, then opposite (to avoid
+                    # crossover)
+                    edges.sort(key=lambda e: e.axis == edge.axis)
                     for edge in edges:
                         if height_within_difference(height, edge):
                             if edge.contours[
                                 height
                             ]:  # if a contour at the same height exists
-                                if (
-                                    isinstance(isoline, ClosedIsoline)
-                                    and edge.contours[height]["isoline"] == isoline
-                                ):  # we only need to consider this edge if the isoline needs to be closed and is the same one we are tracing
+                                # we only need to consider this edge if the
+                                # isoline needs to be closed and is the same
+                                # one we are tracing
+                                if (isinstance(isoline, ClosedIsoline)
+                                        and edge.contours[height]["isoline"] == isoline):
                                     if "start" in edge.contours[height]:
-                                        add_point(isoline, height, edge, cell.coords)
+                                        add_point(
+                                            isoline, height, edge, cell.coords)
                                         return (isoline := isoline.get_type())
-                                        # if no then we have reached the same contour but haven't looped back to the start yet. Try another edge
+                                        # if no then we have reached the same
+                                        # contour but haven't looped back to
+                                        # the start yet. Try another edge
                                 continue  # if the contour does not need to be closed we don't care. we can't go to this edge. Try another edge
                             else:
                                 pass
@@ -213,11 +225,15 @@ class TopoMap(Process):
                             ):  # if the boundary has been hit the contour is complete
                                 return isoline
                             else:
-                                cell = traverse(cell, edge)  # otherwise trace again!
+                                # otherwise trace again!
+                                cell = traverse(cell, edge)
                                 break  # go to next cell
                     else:
-                        # this should never occur. if it does it means that there were no edges to trace to and the contour has to end prematurely
-                        Logger.log(logging.error, f"Routing Error at {cell.coords}")
+                        # this should never occur. if it does it means that
+                        # there were no edges to trace to and the contour has
+                        # to end prematurely
+                        Logger.log(
+                            logging.error, f"Routing Error at {cell.coords}")
                         break  # do not draw the contour
 
         def start_traces(cell, edgename):
@@ -228,12 +244,11 @@ class TopoMap(Process):
                 if (
                     height % (self.interval + self.phase) == 0
                 ):  # check contour is at correct interval
-                    if not edge.contours[
-                        height
-                    ]:  # check that a contour hasn't already been traced to here
+                    # check that a contour hasn't already been traced to here
+                    if not edge.contours[height]:
                         isoline = trace_from_here(
                             cell, cell.edges[edgename], height, OpenIsoline
-                        )  #  and start the trace
+                        )  # and start the trace
                         if isoline:  # check that the contour is actually a line
                             self.open_isolines.append(isoline)
 
@@ -262,7 +277,8 @@ class TopoMap(Process):
                                 if isoline:
                                     self.closed_isolines.append(isoline)
                     if edge.direction == -1:
-                        for height in range(edge.corner1 - 1, edge.corner2 - 1, -1):
+                        for height in range(
+                                edge.corner1 - 1, edge.corner2 - 1, -1):
                             if not edge.contours[height]:
                                 isoline = trace_from_here(
                                     cell, edge, height, ClosedIsoline
@@ -273,8 +289,10 @@ class TopoMap(Process):
         # find extremus
         if self.tag_length:  # this step is only needed if taglines are on
             Logger.log(
-                logging.info, "Running TopoGraph subprocess...", sub=2, time_it=False
-            )
+                logging.info,
+                "Running TopoGraph subprocess...",
+                sub=2,
+                time_it=False)
             self.topograph = TopoGraph(
                 self, small_features_threshold=self.small_features_threshold
             )

@@ -21,11 +21,11 @@ def _print(iteration, total, prefix="", suffix=""):
         .format(100 * (iteration / float(total)))
     filled_length = int(length * iteration // total)
     bar = fill * filled_length + empty * (length - filled_length)
-    
+
     print(
         f"{print_end}{prefix} {bar} {percent}% {iteration}/{total} {suffix}",
         end=print_end
-        )
+    )
 
     if iteration == 1:
         global start

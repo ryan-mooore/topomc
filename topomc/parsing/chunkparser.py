@@ -10,7 +10,7 @@ from topomc.common.logger import Logger
 VERSION_TAG_INDEX = 1
 
 DEFAULT_SAVES = {
-    "windows": "%appdata%\.minecraft\saves",
+    "windows": "%appdata%\\.minecraft\\saves",
     "darwin": "~/Library/Application Support/minecraft/saves",
     "linux": "~/.minecraft/saves/",
 }
@@ -28,14 +28,18 @@ class ChunkParser:
             saves_path = os.path.expanduser(saves_path)
         saves_path = os.path.expandvars(saves_path)
         if not os.path.isdir(saves_path):
-            Logger.log(logging.critical, f"App: Could not read path: {saves_path}")
+            Logger.log(
+                logging.critical,
+                f"App: Could not read path: {saves_path}")
             raise NotADirectoryError
 
         self.world_path = os.path.join(saves_path, self.world)
 
         # test to see whether world exists
         if not os.path.isdir(self.world_path):
-            Logger.log(logging.critical, "Chunk: Specified world save does not exist!")
+            Logger.log(
+                logging.critical,
+                "Chunk: Specified world save does not exist!")
             Logger.log(logging.info, "Chunk: Available worlds:")
             for world in os.listdir(saves_path):
                 if not world[2:-2].endswith("UNDO"):

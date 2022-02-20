@@ -1,44 +1,53 @@
 import logging
 import sys
+import types
 from argparse import ArgumentParser
 
 import numpy as np
 import yaml
 
-from topomc import render
+from topomc import render, symbols
 from topomc.common.logger import Logger
 from topomc.parsing.blockmap import BlockMap
 from topomc.process import Process
-from topomc.processes import *
 from topomc.symbol import AreaSymbol, LinearSymbol, PointSymbol
-from topomc.symbols import *
+
+print([mod for mod in symbols.__dict__.values()
+      if isinstance(mod, types.ModuleType)])
 
 
-def main(settings):
+def main(settings) -> None:
     Logger.log(logging.info, "Collecting chunks...")
-
     blockmap = BlockMap(
         settings["world"],
         *settings["bounding_points"],
         **{k: v for k, v in settings.items() if k in ["surface_blocks", "saves_path"]},
     )
 
-    Logger.log(logging.info, "Preparing to process chunk data...", time_it=False)
+    Logger.log(
+        logging.info,
+        "Preparing to process chunk data...",
+        time_it=False)
     processes = []
-    for Process_SC in Process.__subclasses__():
-        Logger.log(logging.info, f"Preparing {Process_SC.__name__} process...", sub=1)
+    for process_sc in Process.__subclasses__():
+        Logger.log(
+            logging.info,
+            f"Preparing {process_sc.__name__} process...",
+            sub=1
+        )
         processes.append(
-            Process_SC(
+            process_sc(
                 blockmap,
-                **{k: v for k, v in settings.items() if k in Process_SC.settings},
+                **{k: v for k, v in settings.items() if k in process_sc.settings},
             )
         )
 
     Logger.log(logging.info, "Processing chunk data...", time_it=False)
     for process in processes:
         Logger.log(
-            logging.info, f"Running {process.__class__.__name__} process...", sub=1
-        )
+            logging.info,
+            f"Running {process.__class__.__name__} process...",
+            sub=1)
         process.process()
 
     height = len(blockmap.heightmap[0])
@@ -70,9 +79,11 @@ def main(settings):
         Logger.log(logging.info, "Rendering symbols...", time_it=False)
         for symbol in symbols:
             Logger.log(
-                logging.info, f"Building {symbol.__class__.__name__} symbol...", sub=1
-            )
-            symbol.render(**{k: v for k, v in settings.items() if k in symbol.settings})
+                logging.info,
+                f"Building {symbol.__class__.__name__} symbol...",
+                sub=1)
+            symbol.render(**{k: v for k, v in settings.items()
+                          if k in symbol.settings})
 
         Logger.log(logging.info, "Rendering map...")
         map_render.show()
@@ -83,6 +94,8 @@ def settings_init(args, file="settings.yml"):
         try:
             with open(file, "r") as stream:
                 settings = yaml.full_load(stream)
+                if not settings:
+                    settings = {}
         except FileNotFoundError as e:
             Logger.log(logging.critical, f"{file} could not be found")
             raise e
@@ -135,8 +148,11 @@ def parse_args(args):
         help="Brings up a debug view of selected chunks",
     )
     parser.add_argument(
-        "-V", "-v", "--verbose", action="store_true", help="Runs verbose output"
-    )
+        "-V",
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Runs verbose output")
     parser.add_argument(
         "-w",
         "--world",

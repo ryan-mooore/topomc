@@ -14,29 +14,35 @@ class CellMap:
     def __init__(self, heightmap):
         self.cellmap = []
 
-        self.width  = len(heightmap.heightmap[0]) - 1
-        self.height = len(heightmap.heightmap)    - 1
+        self.width = len(heightmap.heightmap[0]) - 1
+        self.height = len(heightmap.heightmap) - 1
 
         Logger.log(logging.info, "Creating cell matrix...", sub=3)
-        
+
         for z in range(self.height):
             cell_row = []
             for x in range(self.width):
                 hm = heightmap.heightmap
-                
-                tl = hm[z]    [x]      # top left
-                tr = hm[z]    [x + 1]  # top right
+
+                tl = hm[z][x]      # top left
+                tr = hm[z][x + 1]  # top right
                 br = hm[z + 1][x + 1]  # bottom right
                 bl = hm[z + 1][x]      # bottom left
 
                 cell = Cell((tl, tr, br, bl), (x, z))
 
                 # left
-                if x == 0: self._link_edge(cell, Edge(tl, bl, 0, "y"))
-                else:      self._link_edge(cell, cell_row[x - 1].edges[Edge.name.RIGHT.value])
+                if x == 0:
+                    self._link_edge(cell, Edge(tl, bl, 0, "y"))
+                else:
+                    self._link_edge(cell,
+                                    cell_row[x - 1].edges[Edge.name.RIGHT.value])
                 # top
-                if z == 0: self._link_edge(cell, Edge(tl, tr, 0, "x"))
-                else:      self._link_edge(cell, self.cellmap[z - 1][x].edges[Edge.name.BOTTOM.value])
+                if z == 0:
+                    self._link_edge(cell, Edge(tl, tr, 0, "x"))
+                else:
+                    self._link_edge(
+                        cell, self.cellmap[z - 1][x].edges[Edge.name.BOTTOM.value])
                 # right
                 self._link_edge(cell, Edge(tr, br, cell.coords.x + 1, "y"))
                 # bottom
@@ -51,7 +57,14 @@ class CellMap:
 
 
 class Edge:
-    __slots__ = ["corner1", "corner2", "cells", "axis_pos", "type", "contours", "axis"]
+    __slots__ = [
+        "corner1",
+        "corner2",
+        "cells",
+        "axis_pos",
+        "type",
+        "contours",
+        "axis"]
 
     class EdgeName(Enum):
         LEFT = 0
@@ -63,10 +76,15 @@ class Edge:
     def min_corner(self) -> int: return min(self.corner1, self.corner2)
     def max_corner(self) -> int: return max(self.corner1, self.corner2)
 
-    def __init__(self, corner1: int, corner2: int, axis_pos:int, axis) -> None:
+    def __init__(
+            self,
+            corner1: int,
+            corner2: int,
+            axis_pos: int,
+            axis) -> None:
         self.corner1 = corner1
         self.corner2 = corner2
-        self.cells   = []
+        self.cells = []
         self.axis_pos = axis_pos
         self.axis = axis
 
@@ -95,6 +113,7 @@ class Edge:
             return self.corner1 - self.corner2
         else:
             return 0
+
 
 class Cell:
     __slots__ = ["corners", "edges", "coords"]
