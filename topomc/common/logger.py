@@ -1,5 +1,6 @@
 import logging
 import time
+from typing import Callable
 
 
 class Logger:
@@ -7,7 +8,9 @@ class Logger:
     time_next = False
 
     @classmethod
-    def log(self, level, msg, sub=0, time_it=True):
+    def log(
+        self, level: Callable, msg: str, sub: int = 0, time_it: bool = True
+    ) -> None:
         if getattr(logging, level.__name__.upper()) < 20:
             return
         if level is not logging.info:
@@ -27,8 +30,8 @@ class Logger:
         self.prev_time = curr_time
 
     @classmethod
-    def log_done(self, sub=0):
+    def log_done(self, sub: int = 0) -> None:
         self.log(logging.info, "Done", sub=sub, time_it=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Custom Logger class"

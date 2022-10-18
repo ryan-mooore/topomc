@@ -1,32 +1,16 @@
 # TopoMC
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/d90304987654468f977e8f8abb2a384b)](https://www.codacy.com/gh/ryan-mooore/topomc/dashboard?utm_source=github.com&utm_medium=referral&utm_content=ryan-mooore/topomc&utm_campaign=Badge_Grade)![Lines of code](https://img.shields.io/tokei/lines/github/ryan-mooore/topomc) [![Todo](https://img.shields.io/badge/todo-9-orange)](todo.md)
+TopoMC is a collection of R and python scripts that use the data from your Minecraft worlds to create beautiful topographical maps.
 
-TopoMC is a Python script and library that uses the data from your Minecraft worlds to create beautiful topographical maps.
-
-![Hill](images/map1.png)![Detail](images/map2.png)![Big scale](images/map3.png)
+TopoMC is in the process of being completely overhauled though the use of spatial data packages in R. It if not currently in a functioning state. The original marching squares functionality, written in Python, has been moved to a separate directory, [vector-marching-squares](https://github.com/ryan-mooore/vector-marching-squares). Functionality has been preserved - the script will output a `.tif` file that can be imported into the new project to render the original result.
 
 ## How it Works
 
-Creating the topo map from the chunks, inside the chosen bounding co-ordinates, is a 4 step process:
-
-### 1. Reading Chunks
-
 Firstly the raw chunk data needs to be read and processed. This is done by opening the minecraft world save directory and reading the region files (`.mca`) for a world save. The data in these files is processed by the **anvil-parser** python library. This may change in the future.
-
-### 2. Creating a Heightmap
 
 Once the region data is decoded chunks can be iterated through. The chunk is split up into 64 columns of depth 256. A loop iterates through the column until it locates a ground block (can be changed by passing a custom settings file).
 
 To make this process faster and more efficient, the loop can take advantage of chunk-format heightmaps. To improve minecraft's performance, every chunk file contains precomputed heightmap data which contains info such as the first motion-blocking minecraft block from above. By starting the loop from the height precalculated by these heightmaps instead of y-256 every time a column is searched, efficiency is greatly improved.
-
-### 3. Marching Squares Algorithm
-
-After a heightmap has been created, it needs to be converted into coordinate data which is later used to draw lines that split up the height differences of the heightmap - or contours. To do this the heightmap is transformed into cells, with a height point in each corner. The difference between the corners is then used to decide where to place the points for the line to be drawn. This is called the [marching squares algorithm](https://en.wikipedia.org/wiki/Marching_squares).
-
-### 4. Generalization
-
-In order to smooth the isolines, the 1d guassian filter function from `scipy.ndimage` is used.
 
 ## Installation and running
 
@@ -34,6 +18,8 @@ In order to smooth the isolines, the 1d guassian filter function from `scipy.ndi
 
 1. Clone the repo
 2. If you have pipenv, just run `pipenv install && pipenv shell`. If not make sure all [dependencies](Pipfile) are installed.
+3. Run the script, which will output a `dem.tif` file in the root directory of the project.
+4. To generate a topographic map, the `.tif` file can be imported into a project such as [vector-marching-squares](https://github.com/ryan-mooore/vector-marching-squares)
 
 ### Synopsis
 
@@ -46,11 +32,15 @@ python -m topomc **x1 z1 x2 z2** \[--world **worldname**\] \[--debug\] \[--setti
 ### Options
 
 - `-w, --world` World name to map. If not specified the world named "_New World_" will attempt to be mapped
-- `-D, --debug ` Will open a preview in debug mode for the top left chunk specified with (**x1 z1**).
-- `--settings` Path to a `.yml` file with with more advanced settings like print scale, contour interval, changing the minecraft saves directory and `.pdf` save location. A file with all available settings and default values can be found as an example at [examples/settings/settings.yml](examples/settings/settings.yml)
+- `--settings` Path to a `.yml` file with with more advanced settings like if you have a non-standard minecraft saves directory.
+  Example settings.yml:
+
+```yml
+saves_path: "/Applications/MultiMC.app/Data/instances/topomc/.minecraft/saves"
+```
 
 ### Example
 
 `python -m topomc 0 0 5 5 --world MyWorld --settings MySettings.yml` (Assuming there is a valid world called _MyWorld_ and a settings file in the root directory of the project called _MySettings.yml_)
 
-By default, the script will output a `.pdf` file of the map at the scale `1:1000`. As well as this, a preview window will appear. Save location and map scale can be changed by passing a custom settings `.yml` file to `--settings`.
+By default, the script will output a `.dem` file of the elevation of the area.

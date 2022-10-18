@@ -1,4 +1,9 @@
-def unstream(data, version_tag, bits_per_value, int_size):
+from nbt.nbt import TAG_Long_Array, TAG_Int  # type: ignore
+
+
+def unstream(
+    data: TAG_Long_Array, version_tag: TAG_Int, bits_per_value: int, int_size: int
+) -> list[int]:
     """
     This function is a pythonic adaptation of Reddit user bxny5's unstream
     function for decoding minecraft chunkheightmap data, written in perl.

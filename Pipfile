@@ -10,12 +10,12 @@ pyyaml = "*"
 anvil-parser = "*"
 nbt = "*"
 frozendict = "*"
-svgpath2mpl = "*"
-scipy = {version = "*", markers = "platform_system!='Darwin' or platform_machine!= 'arm64'"}
+python-log-indenter = "*"
+pillow = "*"
 
 [dev-packages]
-mypy = "*"
-autopep8 = "*"
+types-pillow = "*"
+black = "*"
 
 [requires]
 python_version = "3.9"
