@@ -6,20 +6,42 @@ import yaml as yaml
 from topomc import convert_world
 
 
+SURFACE_BLOCKS = [
+    "grass_block",
+    "grass_path",
+    "dirt",
+    "coarse_dirt",
+    "farmland",
+    "sand",
+    "sandstone",
+    "red_sand",
+    "red_sandstone",
+    "clay",
+    "podzol",
+    "mycelium",
+    "stone",
+    "granite",
+    "diorite",
+    "andesite",
+    "gravel",
+    "coal_ore",
+    "iron_ore",
+    "gold_ore",
+    "water",
+]
+
+
 def settings_init(args: Namespace, filename: str = "settings.yml") -> dict:
+    settings = {"surface_blocks": SURFACE_BLOCKS}
     if filename:
         try:
             with open(filename, "r") as stream:
-                settings = yaml.full_load(stream)
-                if not settings:
-                    settings = {}
+                settings = settings | yaml.full_load(stream)
         except FileNotFoundError as e:
             print(f"{filename} could not be found")
             raise e
         except Exception as e:
             print(f"{filename} is incorrectly formatted")
-    else:
-        settings = {}
     for start, end in zip([args.x1, args.z1], [args.x2, args.z2]):
         if end is None:
             end = start

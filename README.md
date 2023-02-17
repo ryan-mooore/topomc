@@ -16,12 +16,12 @@ Once the region data is decoded chunks can be iterated through in order to find 
 
 1. Clone the repo
 2. If you have pipenv, just run `pipenv install && pipenv shell`. If not make sure all [dependencies](Pipfile) are installed.
-3. Run the script, which will output a `dem.tif` file in the root directory of the project.
+3. Run the scripts (as a module, using the `-m` flag), which will output a `dem.tif` file in the root directory of the project.
 4. To generate a topographic map, the `.tif` file can be imported into a project such as [vector-marching-squares](https://github.com/ryan-mooore/vector-marching-squares)
 
 ### Synopsis
 
-python topomc **x1 z1 x2 z2** \[--world **worldname**\] \[--debug\] \[--settings **path/to/settings.yml**\]
+python topomc -m **x1 z1 x2 z2** \[--world **worldname**\] \[--debug\] \[--settings **path/to/settings.yml**\]
 
 - (`x1`, `z1`) - Top left chunk
 - (`x2`, `z2`) - Bottom right chunk
@@ -34,9 +34,15 @@ python topomc **x1 z1 x2 z2** \[--world **worldname**\] \[--debug\] \[--settings
 Example settings.yml:
 
 ```yml
-saves_path: "/Applications/MultiMC.app/Data/instances/topomc/.minecraft/saves"
+saves path: "/Applications/MultiMC.app/Data/instances/topomc/.minecraft/saves"
+
+surface blocks:
+  - "grass_block"
+  - "grass_path"
+  - "dirt"
+  - "coarse_dirt"
 ```
 
 ### Example
 
-`python topomc 0 0 5 5 --world MyWorld --settings MySettings.yml` (Assuming there is a valid world called _MyWorld_ and a settings file in the root directory of the project called _MySettings.yml_)
+`python -m topomc 0 0 5 5 --world MyWorld --settings MySettings.yml` (Assuming there is a valid world called _MyWorld_ and a settings file in the root directory of the project called _MySettings.yml_)
