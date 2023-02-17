@@ -6,3 +6,4 @@ kartnormen*
 **.pyc
 
 *.tif
+/data

@@ -5,17 +5,11 @@ name = "pypi"
 
 [packages]
 numpy = "*"
-matplotlib = "*"
-pyyaml = "*"
+tifffile = "*"
 anvil-parser = "*"
-nbt = "*"
-frozendict = "*"
-python-log-indenter = "*"
-pillow = "*"
+pyyaml = "*"
 
 [dev-packages]
-types-pillow = "*"
-black = "*"
 
 [requires]
 python_version = "3.9"

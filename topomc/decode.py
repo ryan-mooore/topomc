@@ -1,5 +1,5 @@
 from nbt.nbt import TAG_Long_Array, TAG_Int  # type: ignore
-
+import numpy as np
 
 def unstream(
     data: TAG_Long_Array, version_tag: TAG_Int, bits_per_value: int, int_size: int
@@ -15,8 +15,9 @@ def unstream(
         legacy = False
 
     bl = 0
-    result = []
+    result = np.empty(256)
     value = 0
+    i = 0
 
     for byte in data:
         for num in range(int_size):
@@ -24,10 +25,11 @@ def unstream(
             value = (bit << bl) | value
             bl += 1
             if bl >= bits_per_value:
-                result.append(value)
+                result[i] = value
+                i += 1
+                if i == 256: return result.reshape((16, 16))
                 value = 0
                 bl = 0
         if not legacy:
             bl = 0
 
-    return result
