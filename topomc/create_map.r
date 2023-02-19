@@ -1,3 +1,11 @@
+library(tmap)
+library(sf)
+library(smoothr)
+library(terra)
+
+requireNamespace("smoothr")
+requireNamespace("terra")
+
 dem <- terra::rast("data/dem.tif")
 vegetation <- terra::rast("data/vegetation.tif")
 vegetation[vegetation == 0] <- NA
@@ -31,18 +39,18 @@ canopy <- terra::as.polygons(vegetation) |>
     terra::buffer(canopy_buffer) |>
     smoothr::smooth(method = "ksmooth", smoothness = canopy_smoothing)
 
-tmap::tmap_mode("view")
-tmap::tmap_options(check.and.fix = TRUE)
+tmap_mode("view")
+tmap_options(check.and.fix = TRUE)
 
-contours_tm <- tmap::tm_shape(sf::st_as_sf(contours)) + tmap::tm_lines(lwd = 1, col = "#D15C00")
-dem_tm <- tmap::tm_shape(dem) + tmap::tm_raster()
-vegetation_tm <- tmap::tm_shape(vegetation) + tmap::tm_raster()
-water_tm <- tmap::tm_shape(sf::st_as_sf(water)) + tmap::tm_fill(col = "#00FFFF") + tmap::tm_borders(col = "black")
-canopy_tm <- tmap::tm_shape(sf::st_as_sf(canopy)) + tmap::tm_fill(col = "#FFFFFF")
+contours_tm <- tm_shape(st_as_sf(contours)) + tm_lines(lwd = 1, col = "#D15C00")
+dem_tm <- tm_shape(dem) + tm_raster()
+vegetation_tm <- tm_shape(vegetation) + tm_raster()
+water_tm <- tm_shape(st_as_sf(water)) + tm_fill(col = "#00FFFF") + tm_borders(col = "black")
+canopy_tm <- tm_shape(st_as_sf(canopy)) + tm_fill(col = "#FFFFFF")
 
-map <- tmap::tm_view(set.zoom.limits = c(18, 25)) + tmap::tm_basemap(NULL) + tmap::tm_layout(bg.color = "#FFBA35") +
+map <- tm_view(set.zoom.limits = c(18, 25)) + tm_basemap(NULL) + tm_layout(bg.color = "#FFBA35") +
     canopy_tm +
     water_tm +
     contours_tm
 
-tmap::tmap_save(map, "map.html")
+tmap_save(map, "map.html")
