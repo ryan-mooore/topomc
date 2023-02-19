@@ -6,37 +6,6 @@ from tifffile import imwrite
 
 from topomc import decode
 
-DEFAULT_SAVES = {
-    "windows": "%appdata%\\.minecraft\\saves",
-    "darwin": "~/Library/Application Support/minecraft/saves",
-    "linux": "~/.minecraft/saves/",
-}
-
-
-SURFACE_BLOCKS = [
-    "grass_block",
-    "grass_path",
-    "dirt",
-    "coarse_dirt",
-    "farmland",
-    "sand",
-    "sandstone",
-    "red_sand",
-    "red_sandstone",
-    "clay",
-    "podzol",
-    "mycelium",
-    "stone",
-    "granite",
-    "diorite",
-    "andesite",
-    "gravel",
-    "coal_ore",
-    "iron_ore",
-    "gold_ore",
-    "water",
-]
-
 
 def region_at(world_path, rx, rz):
     return Region.from_file(path.join(

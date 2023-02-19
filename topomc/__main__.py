@@ -1,8 +1,9 @@
+import platform
 import subprocess
 import sys
 import webbrowser
 from argparse import ArgumentParser, Namespace
-from os import path
+from os import name, path
 
 import yaml as yaml
 
@@ -33,8 +34,17 @@ SURFACE_BLOCKS = [
 ]
 
 
+DEFAULT_SAVES = {
+    "windows": "%appdata%\\.minecraft\\saves",
+    "darwin": "~/Library/Application Support/minecraft/saves",
+    "linux": "~/.minecraft/saves/",
+}
+
+
 def settings_init(args: Namespace, filename: str = "settings.yml") -> dict:
-    settings = {"surface_blocks": SURFACE_BLOCKS}
+    settings = {
+        "surface_blocks": SURFACE_BLOCKS,
+        "saves_path": DEFAULT_SAVES[platform.system().lower()]}
     if filename:
         try:
             with open(filename, "r") as stream:
