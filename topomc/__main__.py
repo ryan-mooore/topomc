@@ -1,10 +1,12 @@
+import subprocess
 import sys
+import webbrowser
 from argparse import ArgumentParser, Namespace
+from os import path
 
 import yaml as yaml
 
 from topomc import convert_world
-
 
 SURFACE_BLOCKS = [
     "grass_block",
@@ -92,3 +94,5 @@ if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
     settings = settings_init(args, filename=args.settings)
     convert_world.to_tiffs(settings)
+    subprocess.run("Rscript topomc/create_map.R", shell=True)
+    webbrowser.open("file://" + path.realpath("map.html"))

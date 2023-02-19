@@ -1,9 +1,11 @@
-kartnormen*
 .vscode
-/settings.yml
 
 **/__pycache__
 **.pyc
 
-*.tif
-/data
+data
+settings.yml
+
+*.pdf
+map.html
+map_files

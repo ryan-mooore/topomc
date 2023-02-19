@@ -13,10 +13,37 @@ DEFAULT_SAVES = {
 }
 
 
-def region_at(rx, rz):
-    return Region.from_file(path.expanduser(path.join(
-        DEFAULT_SAVES["darwin"], "topomc", "region", f"r.{rx}.{rz}.mca"
-    )))
+SURFACE_BLOCKS = [
+    "grass_block",
+    "grass_path",
+    "dirt",
+    "coarse_dirt",
+    "farmland",
+    "sand",
+    "sandstone",
+    "red_sand",
+    "red_sandstone",
+    "clay",
+    "podzol",
+    "mycelium",
+    "stone",
+    "granite",
+    "diorite",
+    "andesite",
+    "gravel",
+    "coal_ore",
+    "iron_ore",
+    "gold_ore",
+    "water",
+]
+
+
+def region_at(world_path, rx, rz):
+    return Region.from_file(path.join(
+        world_path,
+        "region", 
+        f"r.{rx}.{rz}.mca"
+    ))
 
 
 def chunk_at(region, cx, cz):
@@ -100,6 +127,11 @@ def to_tiffs(settings):
     rx1, rx2 = cx1 // 32, cx2 // 32
     rz1, rz2 = cz1 // 32, cz2 // 32
 
+    world_path = path.expanduser(path.join(
+        settings["saves_path"],
+        settings["world"],
+    ))
+
     dem_matrix = []
     vegetation_matrix = []
     landcover_matrix = []
@@ -108,7 +140,7 @@ def to_tiffs(settings):
         vegetation_row = []
         landcover_row = []
         for rx in range(rx1, rx2 + 1):
-            region = region_at(rx, rz)
+            region = region_at(world_path, rx, rz)
             dem, vegetation, landcover = foreach_within_bound(iter_chunk, region, rx, rz, 32, cx1, cx2, cz1, cz2)
             dem_row.append(np.bmat(dem).tolist())
             vegetation_row.append(np.bmat(vegetation).tolist())
