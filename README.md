@@ -25,7 +25,7 @@ The final part of the script runs the R spatial processes which format the data 
 5. Run the scripts (as a module, using the `-m` flag), which will output the raw `.tif` files in the generated `data` folder
 6. The interactive map of the minecraft world will open in your web browser
 
-> Note: Currently the script only supports version 1.17 and below. Additionally, precomputed heightmaps sometimes are missing more than 256 blocks from world origin (0, 0). This causes the script to crash. This is a known issue and will be fixed in the future.
+> Note: Currently the script only supports version 1.17 and below. Additionally, the script can only work if all the bounded chunks have been loaded in game previously. This means you may have to open the world in game and walk around in order to the chunks you want to map.
 
 ### Synopsis
 
@@ -58,11 +58,3 @@ Surface blocks:
 ## Contributing
 
 Feel free to create a PR at any point, or add an issue if you have any problems or suggestions.
-
-### To do list
-
-- [ ] Add support for 1.19 (highest priority)
-- [ ] Prevent crash when heightmap data is missing
-- [ ] Add tree symbols to map
-- [ ] Research possibility of switching to different NBT library
-- [ ] Crop map edges to remove artefacts from smoothing
