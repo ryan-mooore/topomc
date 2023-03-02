@@ -41,16 +41,19 @@ canopy <- terra::as.polygons(vegetation) |>
 
 tmap_mode("view")
 tmap_options(check.and.fix = TRUE)
-
+print("RSCRIPT: Drawing features...")
 contours_tm <- tm_shape(st_as_sf(contours)) + tm_lines(lwd = 1, col = "#D15C00")
-dem_tm <- tm_shape(dem) + tm_raster()
+# print("Drawing dem...")
+# dem_tm <- tm_shape(dem) + tm_raster()
 vegetation_tm <- tm_shape(vegetation) + tm_raster()
 water_tm <- tm_shape(st_as_sf(water)) + tm_fill(col = "#00FFFF") + tm_borders(col = "black")
 canopy_tm <- tm_shape(st_as_sf(canopy)) + tm_fill(col = "#FFFFFF")
 
+print("RSCRIPT: Rendering map...")
 map <- tm_view(set.zoom.limits = c(18, 25)) + tm_basemap(NULL) + tm_layout(bg.color = "#FFBA35") +
     canopy_tm +
     water_tm +
     contours_tm
 
+print("RSCRIPT: Saving map...")
 tmap_save(map, "map.html")

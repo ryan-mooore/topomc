@@ -103,6 +103,10 @@ def parse_args(args: list[str]) -> Namespace:
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
     settings = settings_init(args, filename=args.settings)
+    print("MAIN: Creating tiffs...", end="")
     convert_world.to_tiffs(settings)
+    print()
+    print("MAIN: Processing data...")
     subprocess.run("Rscript topomc/create_map.R", shell=True)
+    print("MAIN: Opening map...")
     webbrowser.open("file://" + path.realpath("map.html"))

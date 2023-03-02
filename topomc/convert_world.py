@@ -26,7 +26,11 @@ def get_chunk_hm(region, chunk, cx, cz):
     STREAM_INT_SIZE = 64
 
     version_tag = region.chunk_data(cx, cz)[VERSION_TAG_INDEX]
-    data_stream = chunk.data.tags[INDEX_OF_HEIGHTMAPS].tags[2]
+    try:
+        data_stream = chunk.data.tags[INDEX_OF_HEIGHTMAPS].tags[2]
+    except IndexError:
+        return None
+    
 
     return decode.unstream(
         data_stream, version_tag, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE
@@ -74,8 +78,11 @@ def to_tiffs(settings):
         vegetation = 0
         landcover = 0
 
+        max_height = 255
+        if hm is not None:
+            max_height = int(hm[bz_relative, bx_relative] - 1)
 
-        for by in range(int(hm[bz_relative, bx_relative]) - 1, 0, -1):
+        for by in range(max_height, 0, -1):
             block = chunk.get_block(bx_relative, by, bz_relative).id
             if block in settings["surface_blocks"]:
                 dem = by
@@ -109,6 +116,7 @@ def to_tiffs(settings):
         vegetation_row = []
         landcover_row = []
         for rx in range(rx1, rx2 + 1):
+            print(".", end="")
             region = region_at(world_path, rx, rz)
             dem, vegetation, landcover = foreach_within_bound(iter_chunk, region, rx, rz, 32, cx1, cx2, cz1, cz2)
             dem_row.append(np.bmat(dem).tolist())
@@ -117,7 +125,6 @@ def to_tiffs(settings):
         dem_matrix.append(dem_row)
         vegetation_matrix.append(vegetation_row)
         landcover_matrix.append(landcover_row)
-
 
     try:
         mkdir("data")
