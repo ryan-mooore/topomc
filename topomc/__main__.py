@@ -6,6 +6,7 @@ from argparse import ArgumentParser, Namespace
 from os import name, path
 
 import yaml as yaml
+from yaml.scanner import ScannerError
 
 from topomc import convert_world
 
@@ -48,11 +49,11 @@ def settings_init(args: Namespace, filename: str = "settings.yml") -> dict:
     if filename:
         try:
             with open(filename, "r") as stream:
-                settings = settings | yaml.full_load(stream)
+                advanced_settings = yaml.full_load(stream)
+                settings = settings | advanced_settings
         except FileNotFoundError as e:
             print(f"{filename} could not be found")
-            raise e
-        except Exception as e:
+        except ScannerError as e:
             print(f"{filename} is incorrectly formatted")
     for start, end in zip([args.x1, args.z1], [args.x2, args.z2]):
         if end is None:
@@ -72,7 +73,7 @@ def settings_init(args: Namespace, filename: str = "settings.yml") -> dict:
 
     if args.world:
         settings["world"] = args.world
-    else:
+    elif not settings["world"]:
         settings["world"] = "New World"
 
     return settings

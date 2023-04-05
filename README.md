@@ -25,7 +25,7 @@ The final part of the script runs the R spatial processes which format the data 
 5. Run the scripts (as a module, using the `-m` flag), which will output the raw `.tif` files in the generated `data` folder
 6. The interactive map of the minecraft world will open in your web browser
 
-> Note: Currently the script only supports version 1.17 and below. Additionally, the script can only work if all the bounded chunks have been loaded in game previously. This means you may have to open the world in game and walk around in order to the chunks you want to map.
+> Note: Currently the script only supports version 1.17 and below. Additionally, the script can only work if all the bounded chunks have been loaded in game previously. This means you may have to open the world in game and walk around in order to load the chunks you want to map.
 
 ### Synopsis
 
