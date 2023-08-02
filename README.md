@@ -29,7 +29,7 @@ The final part of the script runs the R spatial processes which format the data 
 
 ### Synopsis
 
-python topomc -m **x1 z1 x2 z2** \[--world **worldname**\] \[--debug\] \[--settings **path/to/settings.yml**\]
+python -m topomc **x1 z1 x2 z2** \[--world **worldname**\] \[--debug\] \[--settings **path/to/settings.yml**\]
 
 - (`x1`, `z1`) - Top left chunk
 - (`x2`, `z2`) - Bottom right chunk
