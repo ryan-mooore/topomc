@@ -4,8 +4,7 @@ import numpy as np
 from anvil import Chunk, Region
 from tifffile import imwrite
 
-from topomc import decode
-
+V1_15 = 2230
 
 def region_at(world_path, rx, rz):
     return Region.from_file(path.join(
@@ -14,28 +13,27 @@ def region_at(world_path, rx, rz):
         f"r.{rx}.{rz}.mca"
     ))
 
+def get_chunk_hm(chunk):
+    result = np.empty(0x100)
 
-def chunk_at(region, cx, cz):
-    return Chunk.from_region(region, cx, cz)
+    bit_of_long = 0
+    curr_height = 0
+    block = 0
 
-
-def get_chunk_hm(region, chunk, cx, cz):
-    INDEX_OF_HEIGHTMAPS = 6
-    VERSION_TAG_INDEX = 1
-    STREAM_BITS_PER_VALUE = 9
-    STREAM_INT_SIZE = 64
-
-    version_tag = region.chunk_data(cx, cz)[VERSION_TAG_INDEX]
-    try:
-        data_stream = chunk.data.tags[INDEX_OF_HEIGHTMAPS].tags[2]
-    except IndexError:
-        return None
-    
-
-    return decode.unstream(
-        data_stream, version_tag, STREAM_BITS_PER_VALUE, STREAM_INT_SIZE
-    )
-
+    for long in chunk.data["Heightmaps"]["MOTION_BLOCKING"]:
+        for i in range(0x40):
+            bit = (long >> i) & 0x01
+            curr_height = (bit << bit_of_long) | curr_height
+            bit_of_long += 1
+            if bit_of_long >= 9:
+                result[block] = curr_height
+                block += 1
+                if block == 0x100:
+                    return result.reshape((16, 16))
+                curr_height = 0
+                bit_of_long = 0
+        if chunk.version > V1_15:
+            bit_of_long = 0
 
 def to_tiffs(settings):
     
@@ -64,8 +62,8 @@ def to_tiffs(settings):
 
 
     def iter_chunk(region, cx, cz):
-        chunk = chunk_at(region, cx, cz)
-        hm = get_chunk_hm(region, chunk, cx, cz)
+        chunk = Chunk.from_region(region, cx, cz)
+        hm = get_chunk_hm(chunk)
         return foreach_within_bound(iter_block, (chunk, hm), cx, cz, 16, bx1, bx2, bz1, bz2)
 
 

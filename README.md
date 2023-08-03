@@ -2,7 +2,7 @@
 
 ![](images/example.png)
 
-TopoMC is a collection of R and python scripts that use the data from your Minecraft worlds to create beautiful topographical maps. TopoMC currently only supports versions 1.17 and below, but adding support for the latest version is a priority and should be added soon™.
+TopoMC is a collection of R and python scripts that use the data from your Minecraft worlds to create beautiful topographical maps. TopoMC supports all Minecraft versions from 1.9 up to the current release (1.20.1), excluding 1.18-based versions.
 
 ## How it Works
 
@@ -35,7 +35,7 @@ This project uses **pipenv** and **renv** for Python and R dependency management
 4. Run the scripts (as a module using the `-m` flag, see below), which will output the raw `.tif` files in the generated `data` folder
 5. The interactive map of the minecraft world will open in your web browser
 
-> Note: Currently the script only supports version 1.17 and below. Additionally, the script can only work if all the bounded chunks have been loaded in game previously. This means you may have to open the world in game and walk around in order to load the chunks you want to map.
+> Note: All bounded chunks need to have been loaded in game previously. This means you may have to open the world in game and walk around in order to load the chunks you want to map.
 
 ### Synopsis
 
