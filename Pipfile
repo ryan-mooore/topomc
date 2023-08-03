@@ -6,8 +6,9 @@ name = "pypi"
 [packages]
 numpy = "*"
 tifffile = "*"
-anvil-parser = "*"
 pyyaml = "*"
+nbt = "*"
+anvil-parser = {git = "https://github.com/0xTiger/anvil-parser"}
 
 [dev-packages]
 

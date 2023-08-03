@@ -18,12 +18,22 @@ The final part of the script runs the R spatial processes which format the data 
 
 ### Installation
 
-1. Make sure you have Python >= 3.9 and R installed on your computer
+#### Requirements
+
+- Python >= 3.9
+  - **pipenv**
+- R >= 4.1.0
+  - **renv**
+
+This project uses **pipenv** and **renv** for Python and R dependency management, respectively. As long as you have these tools, the installation process should be painless
+
+#### Instructions
+
+1. Make sure you have all requirements installed
 2. Clone the repo
-3. If you have pipenv, just run `pipenv install && pipenv shell`. If not make sure all [dependencies](Pipfile) are installed
-4. The project uses `renv` for R dependency management. This should install the required R packages when the script is run - `terra`, `smoothr`, `sf`, and `tmap`. However if this does not work make sure to install these packages manually with `install.packages()`
-5. Run the scripts (as a module, using the `-m` flag), which will output the raw `.tif` files in the generated `data` folder
-6. The interactive map of the minecraft world will open in your web browser
+3. Run the install script (`chmod +x install.sh && ./install.sh`)
+4. Run the scripts (as a module using the `-m` flag, see below), which will output the raw `.tif` files in the generated `data` folder
+5. The interactive map of the minecraft world will open in your web browser
 
 > Note: Currently the script only supports version 1.17 and below. Additionally, the script can only work if all the bounded chunks have been loaded in game previously. This means you may have to open the world in game and walk around in order to load the chunks you want to map.
 

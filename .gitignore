@@ -1,13 +1,15 @@
 .vscode
+.venv
+renv
+.Rprofile
+
+data
+resources
 
 **/__pycache__
 **.pyc
 
-renv
-
-data
 settings.yml
 
-*.pdf
+Rplots.pdf
 map.html
-map_files
