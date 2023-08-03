@@ -5,6 +5,7 @@ from anvil import Chunk, Region
 from tifffile import imwrite
 
 V1_15 = 2230
+CROP_BUFFER = 16
 
 def region_at(world_path, rx, rz):
     return Region.from_file(path.join(
@@ -95,8 +96,10 @@ def to_tiffs(settings):
         return dem, vegetation, landcover
 
 
-    bx1, bx2 = settings["bounding_points"][0::2]
-    bz1, bz2 = settings["bounding_points"][1::2]
+    bx1 = settings["bounding_points"][0] - CROP_BUFFER
+    bz1 = settings["bounding_points"][1] - CROP_BUFFER
+    bx2 = settings["bounding_points"][2] + CROP_BUFFER
+    bz2 = settings["bounding_points"][3] + CROP_BUFFER
 
     cx1, cx2 = bx1 // 16, bx2 // 16
     cz1, cz2 = bz1 // 16, bz2 // 16
