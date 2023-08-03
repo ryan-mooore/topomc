@@ -2,7 +2,7 @@
 
 ![](images/example.png)
 
-TopoMC is a collection of R and python scripts that use the data from your Minecraft worlds to create beautiful topographical maps. TopoMC supports all Minecraft versions from 1.9 up to the current release (1.20.1), excluding 1.18-based versions.
+TopoMC is a collection of R and python scripts that use the data from your Minecraft worlds to create beautiful topographical maps. TopoMC supports all Minecraft versions from 1.9 up to the current release (1.20.1), excluding 1.18-based versions (for now).
 
 ## Installation and running
 
@@ -16,14 +16,14 @@ TopoMC is a collection of R and python scripts that use the data from your Minec
 ### Instructions
 
 1. Make sure you have all requirements installed
-2. Clone the repo and `cd` to `scripts` directory (you may need to set the file permissions to be executable, `chmod +x *`)y
+2. Clone the repo and `cd` to `scripts` directory (you may need to set the file permissions to be executable, `chmod +x *`)
 3. Run `./install` to install dependencies
 4. Run `./generate` to generate the required `.tif` files into the `data` folder
 5. Run `./map` to open the map of the Minecraft world in your web browser
 
-> Note: When running `./generate`, all bounded chunks need to have been loaded. This means you may have to open the world in-game and walk around in order to load the chunks you want to map.
+> NB: When running `./generate`, all bounded chunks need to have been loaded. This means you may have to open the world in-game and walk around in order to load the chunks you want to map.
 
-The map can be opened at any time without rerendering by opening the **map.html** file created in the root directory of the project.
+The map can be opened at any time without re-rendering by opening the **map.html** file created in the root directory of the project.
 
 ### Synopsis
 
@@ -35,7 +35,7 @@ The map can be opened at any time without rerendering by opening the **map.html*
 ### Options
 
 - `-w, --world` World to use. If not specified the world named "_New World_" will attempt to be mapped
-- `--settings` Path to a `.yml` file (relative to root directory of project, regardless of where you are running the scripts from) with more advanced settings like if you are using a third party launcher and have a non-standard minecraft saves directory.
+- `--settings` Path to a `.yml` file (relative to root directory of project, regardless of where you are running the scripts from) with more advanced settings like if you are using a third party launcher and have a non-standard minecraft saves directory
 
 Example settings.yml:
 
