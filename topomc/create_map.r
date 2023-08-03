@@ -23,6 +23,7 @@ contours <- dem |>
         to = max(dem[]),
         by = contour_interval
     )) |>
+    st_as_sf() |>
     smoothr::smooth(method = "ksmooth", smoothness = smoothing)
 
 water <- terra::classify(landcover, rcl = matrix(
@@ -31,33 +32,33 @@ water <- terra::classify(landcover, rcl = matrix(
         19, 21, 1,
         21, Inf, NA
     ), ncol = 3, nrow = 3, byrow = TRUE
-)) |>
+    )) |>
     terra::as.polygons() |>
+    st_as_sf() |>
     smoothr::smooth(method = "ksmooth", smoothness = smoothing)
 
 canopy <- terra::as.polygons(vegetation) |>
     terra::buffer(canopy_buffer) |>
+    st_as_sf() |>
     smoothr::smooth(method = "ksmooth", smoothness = canopy_smoothing)
 
 tmap_mode("view")
 tmap_options(check.and.fix = TRUE)
 print("RSCRIPT: Drawing features...")
-contours_tm <- tm_shape(st_as_sf(contours)) +
-    tm_lines(lwd = 1, col = "#D15C00")
-vegetation_tm <- tm_shape(vegetation) + tm_raster()
-water_tm <- tm_shape(st_as_sf(water)) +
-    tm_fill(col = "#00FFFF") +
-    tm_borders(col = "black")
-canopy_tm <- tm_shape(st_as_sf(canopy)) +
-    tm_fill(col = "#FFFFFF")
+layers <- list()
+
+if (length(canopy$geometry)) layers <- c(layers, list(tm_shape((canopy)), tm_fill(col = "#FFFFFF")))
+if (length(contours$geometry)) layers <- c(layers, list(tm_shape((contours)), tm_lines(lwd = 1, col = "#D15C00")))
+if (length(water$geometry)) layers <- c(layers, list(tm_shape(water), tm_fill(col = "#00FFFF"), tm_borders(col = "black")))
+# layers <- c(layers, list(tm_shape(vegetation) + tm_raster()))
 
 print("RSCRIPT: Rendering map...")
-map <- tm_view(set.zoom.limits = c(18, 25)) +
+map <- tm_view(
+    # set.zoom.limits = c(0, 10)
+    ) +
     tm_basemap(NULL) +
-    tm_layout(bg.color = "#FFBA35") +
-    canopy_tm +
-    water_tm +
-    contours_tm
+    tm_layout(bg.color = "#FFBA35") + 
+    Reduce("+", layers)
 
 print("RSCRIPT: Saving map...")
 tmap_save(map, "map.html")
