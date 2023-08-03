@@ -44,7 +44,7 @@ canopy <- terra::as.polygons(vegetation) |>
 
 tmap_mode("view")
 tmap_options(check.and.fix = TRUE)
-print("RSCRIPT: Drawing features...")
+print("map: Drawing features...")
 layers <- list()
 
 if (length(canopy$geometry)) layers <- c(layers, list(tm_shape((canopy)), tm_fill(col = "#FFFFFF")))
@@ -52,7 +52,7 @@ if (length(contours$geometry)) layers <- c(layers, list(tm_shape((contours)), tm
 if (length(water$geometry)) layers <- c(layers, list(tm_shape(water), tm_fill(col = "#00FFFF"), tm_borders(col = "black")))
 # layers <- c(layers, list(tm_shape(vegetation) + tm_raster()))
 
-print("RSCRIPT: Rendering map...")
+print("map: Rendering map...")
 map <- tm_view(
     # set.zoom.limits = c(0, 10)
     ) +
@@ -60,5 +60,5 @@ map <- tm_view(
     tm_layout(bg.color = "#FFBA35") + 
     Reduce("+", layers)
 
-print("RSCRIPT: Saving map...")
+print("map: Saving map...")
 tmap_save(map, "map.html")
