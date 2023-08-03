@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+cd "$(dirname "$0")/../"
+Rscript src/create_map.R
+python3 -m webbrowser -t "file:$(realpath "map.html")"
