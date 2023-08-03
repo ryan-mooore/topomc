@@ -62,7 +62,10 @@ def to_tiffs(settings):
 
 
     def iter_chunk(region, cx, cz):
-        chunk = Chunk.from_region(region, cx, cz)
+        try:
+            chunk = Chunk.from_region(region, cx, cz)
+        except KeyError:
+            raise Exception("Error parsing NBT data. Is the world derived from a 1.18 version?")
         hm = get_chunk_hm(chunk)
         return foreach_within_bound(iter_block, (chunk, hm), cx, cz, 16, bx1, bx2, bz1, bz2)
 
