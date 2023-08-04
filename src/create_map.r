@@ -65,8 +65,8 @@ if (length(water$geometry)) layers <- c(layers, list(tm_shape(water), tm_fill(co
 
 print("map: Rendering map...")
 map <- tm_view(
-    set.zoom.limits = c(17, 21),
-    set.view = 18
+    # set.zoom.limits = c(17, 21),
+    # set.view = 18
     ) +
     tm_basemap(NULL) +
     tm_shape(st_as_sf(vect(crop_ext))) + 
