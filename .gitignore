@@ -1,7 +1,14 @@
 .vscode
 .venv
 renv
+
 .Rprofile
+.Rhistory
+.Rproj.user
+Rplots.pdf
+map.html
+map_files
+tmap*.png
 
 data
 resources
@@ -10,7 +17,3 @@ resources
 **.pyc
 
 settings.yml
-
-Rplots.pdf
-map.html
-.Rproj.user

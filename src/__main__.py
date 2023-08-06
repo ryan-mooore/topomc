@@ -73,6 +73,9 @@ def settings_init(args: Namespace, filename: str = "settings.yml") -> dict:
     elif not settings["world"]:
         settings["world"] = "New World"
 
+    if not settings.get("compress_height_limit"):
+        settings["compress_height_limit"] = False
+
     return settings
 
 

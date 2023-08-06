@@ -30,7 +30,7 @@ contours <- dem |>
         by = contour_interval
     )) |>
     st_as_sf() |>
-    # smoothr::smooth(method = "ksmooth", smoothness = smoothing) |>
+    smoothr::smooth(method = "ksmooth", smoothness = smoothing) |>
     st_crop(crop_ext)
 
 water <- terra::classify(landcover, rcl = matrix(

@@ -3,6 +3,7 @@ from os import mkdir, path
 
 import numpy as np
 from anvil import Chunk, Region
+from anvil.errors import ChunkNotFound
 from tifffile import imwrite
 
 # This was the last version where heightmap data was streammed across bits. See:
@@ -24,7 +25,11 @@ class ChunkWithHeightmap(Chunk):
 
 @cache
 def region_at(world, rx, rz):
-    return Region.from_file(path.join(world,"region", f"r.{rx}.{rz}.mca"))
+    try:
+        return Region.from_file(path.join(world,"region", f"r.{rx}.{rz}.mca"))
+    except FileNotFoundError:
+        print(f"Warning: region ({rx}) ({rz}) not loaded")
+        return None
 
 @cache
 def chunk_at(region, cx, cz):
@@ -32,6 +37,15 @@ def chunk_at(region, cx, cz):
         chunk = ChunkWithHeightmap.from_region(region, cx, cz)
     except KeyError:
         raise Exception("Error parsing NBT data. Is the world derived from a 1.18 version?")
+    except ChunkNotFound:
+        print(f"Warning: chunk ({cx}) ({cz}) not loaded")
+        return None
+    if not chunk.data["Heightmaps"]:
+        print(f"Warning: heightmaps not loaded for chunk ({cx}) ({cz})")
+        return None
+    if not chunk.data["Heightmaps"].get("MOTION_BLOCKING"):
+        print(f"Warning: MOTION_BLOCKING heightmap not loaded for chunk ({cx}) ({cz})")
+        return None
 
     block = 0
     block_value = 0
@@ -65,11 +79,12 @@ def to_tiffs(settings):
     bx2 = settings["bounding_points"][2] + CROP_BUFFER
     bz2 = settings["bounding_points"][3] + CROP_BUFFER
 
-    empty_mat = np.mat(np.zeros((bz2 - bz1, bx2 - bx1)))
-    layers = {
-        "dem": empty_mat.copy(),
-        "vegetation": empty_mat.copy(),
-        "landcover": empty_mat.copy()
+    create_mat = lambda dtype : np.mat(np.zeros((bz2 - bz1, bx2 - bx1)), dtype=dtype)
+    np.any
+    data = {
+        "dem": create_mat(np.uint8) if settings["compress_height_limit"] else create_mat(np.uint16),
+        "vegetation": create_mat(np.bool_),
+        "landcover": create_mat(np.uint8)
     }
 
     print("generate: Reading data...")
@@ -81,13 +96,20 @@ def to_tiffs(settings):
             bx_in_c = bx % 16
 
             region = region_at(world_path, rx, rz)
+            if not region: continue
             chunk = chunk_at(region, cx, cz)
+            if not chunk: continue
 
             if chunk.version >= V21W06A:
-                max_height = int(chunk.heightmap[bz_in_c, bx_in_c]) - 64 if chunk.heightmap.any() else 319
-                min_height = -64
+                if settings["compress_height_limit"]:
+                    max_height = min(int(chunk.heightmap[bz_in_c, bx_in_c]) - 64, 255)
+                    min_height = 0
+                else:
+                    max_height = int(chunk.heightmap[bz_in_c, bx_in_c]) - 64
+                    min_height = -64
+
             else:
-                max_height = int(chunk.heightmap[bz_in_c, bx_in_c]) if chunk.heightmap else 255
+                max_height = int(chunk.heightmap[bz_in_c, bx_in_c]) if chunk.heightmap.any() else 255
                 min_height = 0
 
             for by in range(max_height, min_height, -1):
@@ -95,30 +117,35 @@ def to_tiffs(settings):
                 
                 # -- surface processes: dem and landcover --
                 if block.id in settings["surface_blocks"]:
-                    layers["dem"][bz - bz1, bx - bx1] = by
-                    layers["landcover"][bz - bz1, bx - bx1] = settings["surface_blocks"].index("water")
+                    data["dem"][bz - bz1, bx - bx1] = by
+                    data["landcover"][bz - bz1, bx - bx1] = settings["surface_blocks"].index("water")
                     break
                 elif "water" in settings["surface_blocks"]:
                     # inherently waterlogged blocks, see https://minecraft.fandom.com/wiki/Waterlogging
                     if block.id in ["seagrass", "tall_seagrass", "kelp", "kelp_plant"]:
-                        layers["dem"][bz - bz1, bx - bx1] = by
-                        layers["landcover"][bz - bz1, bx - bx1] = settings["surface_blocks"].index("water")
+                        data["dem"][bz - bz1, bx - bx1] = by
+                        data["landcover"][bz - bz1, bx - bx1] = settings["surface_blocks"].index("water")
                         break
                     # waterlogged blocks
                     elif block.properties.get("waterlogged"):
                         if block.properties["waterlogged"] == "true" and "water" in settings["surface_blocks"]:
-                            layers["dem"][bz - bz1, bx - bx1] = by
-                            layers["landcover"][bz - bz1, bx - bx1] = settings["surface_blocks"].index("water")
+                            data["dem"][bz - bz1, bx - bx1] = by
+                            data["landcover"][bz - bz1, bx - bx1] = settings["surface_blocks"].index("water")
                             break
                 
                 # -- other processes: vegetation --
                 if block.id.endswith("leaves"):
-                    layers["vegetation"][bz - bz1, bx - bx1] = 1
+                    data["vegetation"][bz - bz1, bx - bx1] = 1
 
     print("generate: Writing data...")
     try:
         mkdir("data")
     except FileExistsError:
         pass
-    for layer, layers in layers.items():
-        imwrite(f"data/{layer}.tif", layers.astype("uint16"), bitspersample=16)
+    bits = {
+        0: 1,
+        2: 8,
+        4: 16
+    }
+    for layer, data in data.items():
+        imwrite(f"data/{layer}.tif", data, bitspersample=bits[data.dtype.num])
