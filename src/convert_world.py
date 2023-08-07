@@ -26,7 +26,9 @@ class ChunkWithHeightmap(Chunk):
 @cache
 def region_at(world, rx, rz):
     try:
-        return Region.from_file(path.join(world,"region", f"r.{rx}.{rz}.mca"))
+        filename = f"r.{rx}.{rz}.mca"
+        print(f"generate: Reading {filename}...")
+        return Region.from_file(path.join(world, "region", filename))
     except FileNotFoundError:
         print(f"Warning: region ({rx}) ({rz}) not loaded")
         return None
@@ -152,4 +154,10 @@ def to_tiffs(settings):
         4: 16
     }
     for layer, data in data.items():
-        imwrite(f"data/{layer}.tif", data, bitspersample=bits[data.dtype.num])
+        filename = f"data/{layer}.tif"
+        print(f"generate: Writing {filename}...")
+        imwrite(
+            filename,
+            np.kron(data, np.ones(np.repeat(settings["downsample"], 2), dtype=data.dtype)),
+            bitspersample=bits[data.dtype.num]
+        )
