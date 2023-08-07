@@ -1,3 +1,4 @@
+library(optparse)
 library(tmap)
 library(sf)
 library(smoothr)
@@ -13,6 +14,10 @@ smoothing <- 10
 canopy_smoothing <- 30
 canopy_buffer <- 2
 crop_buffer <- 16
+
+settings <- parse_args(OptionParser(
+    option_list=list(make_option(c("--interactive"), action="store_true", default=F))),
+)
 
 vegetation[vegetation == 0] <- NA
 
@@ -53,26 +58,31 @@ canopy <- terra::as.polygons(vegetation) |>
     st_buffer(dist = 0) |> # fix self-intersection
     st_crop(crop_ext)
 
-tmap_mode("view")
-tmap_options(check.and.fix = TRUE)
 print("map: Drawing features...")
 layers <- list()
-
 if (length(canopy$geometry)) layers <- c(layers, list(tm_shape((canopy)), tm_fill(col = "#FFFFFF")))
 if (length(contours$geometry)) layers <- c(layers, list(tm_shape((contours)), tm_lines(lwd = 1, col = "#D15C00")))
 if (length(water$geometry)) layers <- c(layers, list(tm_shape(water), tm_fill(col = "#00FFFF"), tm_borders(col = "black")))
 # layers <- c(layers, list(tm_shape(vegetation) + tm_raster()))
 
+tmap_options(check.and.fix = TRUE, output.dpi = 600, basemaps = NULL)
 print("map: Rendering map...")
-map <- tm_view(
-    # set.zoom.limits = c(17, 21),
-    # set.view = 18
-    ) +
-    tm_basemap(NULL) +
-    tm_shape(st_as_sf(vect(crop_ext))) + 
+map <- tm_shape(st_as_sf(vect(crop_ext))) +
     tm_fill(col="#FFBA35") +
-    tm_borders(col="black") + 
-    Reduce("+", layers)
+    tm_borders(col="black") +
+    Reduce("+", layers) +
+    tm_layout(scale=0.25) +
+    tm_view(
+        # set.zoom.limits = c(17, 21),
+        # set.view = 18
+        )
 
 print("map: Saving map...")
-tmap_save(map, "map.html")
+
+if (settings$interactive) {
+    tmap_mode("view")
+    tmap_save(map, "map.html")
+} else {
+    tmap_mode("plot")
+    tmap_save(map, "map.png")
+}

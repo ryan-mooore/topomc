@@ -8,7 +8,8 @@ renv
 Rplots.pdf
 map.html
 map_files
-tmap*.png
+map.png
+tmap*.*
 
 data
 resources

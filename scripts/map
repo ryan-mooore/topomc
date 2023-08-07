@@ -1,3 +1,10 @@
 #!/usr/bin/env bash
 cd "$(dirname "$0")/../"
-Rscript src/create_map.R && python3 -m webbrowser -t "file:$(realpath "map.html")"
+Rscript src/create_map.R "$@"
+FILE=$([[ $1 == "--interactive" ]] && realpath "map.html" || realpath "map.png")
+case "$OSTYPE" in
+    darwin*)  open $FILE;; 
+    linux*)   xdg-open $FILE;;
+    msys*)    explorer $FILE;;
+    cygwin*)  explorer $FILE;;
+esac

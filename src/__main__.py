@@ -50,8 +50,10 @@ def settings_init(args: Namespace, filename: str = "settings.yml") -> dict:
                 settings = settings | advanced_settings
         except FileNotFoundError as e:
             print(f"{filename} could not be found")
+            sys.exit()
         except ScannerError as e:
             print(f"{filename} is incorrectly formatted")
+            sys.exit()
     for start, end in zip([args.x1, args.z1], [args.x2, args.z2]):
         if end is None:
             end = start
