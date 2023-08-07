@@ -118,7 +118,7 @@ def to_tiffs(settings):
                 # -- surface processes: dem and landcover --
                 if block.id in settings["surface_blocks"]:
                     data["dem"][bz - bz1, bx - bx1] = by
-                    data["landcover"][bz - bz1, bx - bx1] = settings["surface_blocks"].index("water")
+                    data["landcover"][bz - bz1, bx - bx1] = settings["surface_blocks"].index(block.id)
                     break
                 elif "water" in settings["surface_blocks"]:
                     # inherently waterlogged blocks, see https://minecraft.fandom.com/wiki/Waterlogging
