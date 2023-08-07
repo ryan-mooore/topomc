@@ -4,14 +4,10 @@ library(sf)
 library(smoothr)
 library(terra)
 
-dem <- terra::rast("data/dem.tif")
-vegetation <- terra::rast("data/vegetation.tif")
-landcover <- terra::rast("data/landcover.tif")
-
 contour_interval <- 1
-smoothing <- 10
+smoothing <- 8
 
-canopy_smoothing <- 30
+canopy_smoothing <- 25
 canopy_buffer <- 2
 crop_buffer <- 16
 
@@ -19,26 +15,37 @@ settings <- parse_args(OptionParser(
     option_list=list(make_option(c("--interactive"), action="store_true", default=F))),
 )
 
-vegetation[vegetation == 0] <- NA
+layers <- lapply(list(
+    dem=terra::rast("data/dem.tif"),
+    vegetation=terra::rast("data/vegetation.tif"),
+    landcover=terra::rast("data/landcover.tif")
+), function(layer) {crs(layer) <- "ESRI:53032"; layer})
 
-crop_ext <- ext(
-    ext(dem)$xmin + crop_buffer,
-    ext(dem)$xmax - crop_buffer,
-    ext(dem)$ymin + crop_buffer,
-    ext(dem)$ymax - crop_buffer
-)
+bounds <- st_as_sf(vect(ext(
+    ext(layers$dem)$xmin + crop_buffer,
+    ext(layers$dem)$xmax - crop_buffer,
+    ext(layers$dem)$ymin + crop_buffer,
+    ext(layers$dem)$ymax - crop_buffer
+)))
+st_crs(bounds) <- "ESRI:53032"
 
-contours <- dem |>
+layers$vegetation[layers$vegetation == 0] <- NA
+
+contours <- list(
+    feature=layers$dem |>
     terra::as.contour(levels = seq(
-        from = min(dem[]),
-        to = max(dem[]),
+        from = min(layers$dem[]),
+        to = max(layers$dem[]),
         by = contour_interval
     )) |>
     st_as_sf() |>
-    smoothr::smooth(method = "ksmooth", smoothness = smoothing) |>
-    st_crop(crop_ext)
+    smoothr::smooth(method = "ksmooth", smoothness = smoothing),
+    render=list(tm_lines(lwd = 1, col = "#D15C00"))
+)
 
-water <- terra::classify(landcover, rcl = matrix(
+
+water <- list(
+    feature=terra::classify(layers$landcover, rcl = matrix(
     data = c(
         -Inf, 19, NA,
         19, 21, 1,
@@ -48,34 +55,58 @@ water <- terra::classify(landcover, rcl = matrix(
     terra::as.polygons() |>
     st_as_sf() |>
     smoothr::smooth(method = "ksmooth", smoothness = smoothing) |>
-    st_buffer(dist = 0) |> # fix self-intersection
-    st_crop(crop_ext)
+    st_buffer(dist = 0), # fix self-intersection
+    render=list(tm_fill(col = "#00FFFF"), tm_borders(col = "black"))
+)
 
-canopy <- terra::as.polygons(vegetation) |>
+canopy <- list(
+    feature=terra::as.polygons(layers$vegetation) |>
     terra::buffer(canopy_buffer) |>
     st_as_sf() |>
     smoothr::smooth(method = "ksmooth", smoothness = canopy_smoothing) |>
-    st_buffer(dist = 0) |> # fix self-intersection
-    st_crop(crop_ext)
+    st_buffer(dist = 0), # fix self-intersection
+    render=list(tm_fill(col = "#FFFFFF"))
+)
 
-print("map: Drawing features...")
-layers <- list()
-if (length(canopy$geometry)) layers <- c(layers, list(tm_shape((canopy)), tm_fill(col = "#FFFFFF")))
-if (length(contours$geometry)) layers <- c(layers, list(tm_shape((contours)), tm_lines(lwd = 1, col = "#D15C00")))
-if (length(water$geometry)) layers <- c(layers, list(tm_shape(water), tm_fill(col = "#00FFFF"), tm_borders(col = "black")))
-# layers <- c(layers, list(tm_shape(vegetation) + tm_raster()))
+symbols <- list(
+    canopy=canopy,
+    water=water,
+    contours=contours
+) # symbols in overprinting order for rendering
 
-tmap_options(check.and.fix = TRUE, output.dpi = 600, basemaps = NULL)
+symbols <- symbols |> lapply(function(symbol) list(
+        feature=symbol$feature |> st_crop(bounds),
+        render=symbol$render
+    ) # crop all symbols to extent
+) 
+symbols <- symbols[symbols |> sapply(function(symbol) {
+    as.logical(length(symbol$feature$geometry))
+})] # filter symbols to only include those with geometry
+
+render <- symbols |> 
+    lapply(function(symbol) {c(
+    list(tm_shape(symbol$feature)),
+    symbol$render)
+    }) |>
+    unlist(recursive=F) # create list of tmap elements
+render <- c(
+  list(
+    tm_shape(bounds),
+    tm_fill(col="#FFBA35"),
+    tm_borders(col="black")
+  ), # add border to elements
+  render
+)
+
+tmap_options(check.and.fix = TRUE, output.dpi = 600, basemaps=NULL)
 print("map: Rendering map...")
-map <- tm_shape(st_as_sf(vect(crop_ext))) +
-    tm_fill(col="#FFBA35") +
-    tm_borders(col="black") +
-    Reduce("+", layers) +
-    tm_layout(scale=0.25) +
-    tm_view(
-        # set.zoom.limits = c(17, 21),
-        # set.view = 18
-        )
+(map <- Reduce("+", render) +
+  tm_layout(scale=0.25, frame=F) +
+  tm_view(
+    set.zoom.limits = c(17, 21),
+    set.view = 18
+  )
+)
 
 print("map: Saving map...")
 
