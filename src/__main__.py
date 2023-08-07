@@ -74,6 +74,10 @@ def settings_init(args: Namespace, filename: str = "settings.yml") -> dict:
         settings["world"] = args.world
     elif not settings["world"]:
         settings["world"] = "New World"
+    if args.downsample:
+        settings["downsample"] = args.downsample
+    elif not settings["downsample"]:
+        settings["downsample"] = 1
 
     if not settings.get("compress_height_limit"):
         settings["compress_height_limit"] = False
@@ -98,6 +102,14 @@ def parse_args(args: list[str]) -> Namespace:
         metavar="WORLD",
         type=str,
         help="Set world to map",
+    )
+    parser.add_argument(
+        "-d",
+        "--downsample",
+        metavar="DOWNSAMPLE",
+        type=int,
+        default=1,
+        help="Set downsampling level (default: 1)",
     )
     parser.add_argument("--settings", type=str, help="Link to settings file")
     return parser.parse_args(args)

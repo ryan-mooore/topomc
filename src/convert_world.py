@@ -79,7 +79,10 @@ def to_tiffs(settings):
     bx2 = settings["bounding_points"][2] + CROP_BUFFER
     bz2 = settings["bounding_points"][3] + CROP_BUFFER
 
-    create_mat = lambda dtype : np.mat(np.zeros((bz2 - bz1, bx2 - bx1)), dtype=dtype)
+    create_mat = lambda dtype : np.mat(np.zeros((
+        (bz2 - bz1) // settings["downsample"] + 1, 
+        (bx2 - bx1) // settings["downsample"] + 1
+    )), dtype=dtype)
     np.any
     data = {
         "dem": create_mat(np.uint8) if settings["compress_height_limit"] else create_mat(np.uint16),
@@ -88,12 +91,13 @@ def to_tiffs(settings):
     }
 
     print("generate: Reading data...")
-    for bz in range(bz1, bz2):
-        for bx in range(bx1, bx2):
+    for row, bz in enumerate(range(bz1, bz2, settings["downsample"])):
+        for col, bx in enumerate(range(bx1, bx2, settings["downsample"])):
             cz, cx = bz // 16, bx // 16
             rz, rx = cz // 32, cx // 32
             bz_in_c = bz % 16
             bx_in_c = bx % 16
+            entry = row, col
 
             region = region_at(world_path, rx, rz)
             if not region: continue
@@ -117,25 +121,25 @@ def to_tiffs(settings):
                 
                 # -- surface processes: dem and landcover --
                 if block.id in settings["surface_blocks"]:
-                    data["dem"][bz - bz1, bx - bx1] = by
-                    data["landcover"][bz - bz1, bx - bx1] = settings["surface_blocks"].index(block.id)
+                    data["dem"][entry] = by
+                    data["landcover"][entry] = settings["surface_blocks"].index(block.id)
                     break
                 elif "water" in settings["surface_blocks"]:
                     # inherently waterlogged blocks, see https://minecraft.fandom.com/wiki/Waterlogging
                     if block.id in ["seagrass", "tall_seagrass", "kelp", "kelp_plant"]:
-                        data["dem"][bz - bz1, bx - bx1] = by
-                        data["landcover"][bz - bz1, bx - bx1] = settings["surface_blocks"].index("water")
+                        data["dem"][entry] = by
+                        data["landcover"][entry] = settings["surface_blocks"].index("water")
                         break
                     # waterlogged blocks
                     elif block.properties.get("waterlogged"):
                         if block.properties["waterlogged"] == "true" and "water" in settings["surface_blocks"]:
-                            data["dem"][bz - bz1, bx - bx1] = by
-                            data["landcover"][bz - bz1, bx - bx1] = settings["surface_blocks"].index("water")
+                            data["dem"][entry] = by
+                            data["landcover"][entry] = settings["surface_blocks"].index("water")
                             break
                 
                 # -- other processes: vegetation --
                 if block.id.endswith("leaves"):
-                    data["vegetation"][bz - bz1, bx - bx1] = 1
+                    data["vegetation"][entry] = 1
 
     print("generate: Writing data...")
     try:
