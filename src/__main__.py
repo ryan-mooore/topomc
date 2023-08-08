@@ -7,41 +7,19 @@ from yaml.scanner import ScannerError
 
 from src import convert_world
 
-SURFACE_BLOCKS = [
-    "grass_block",
-    "grass_path",
-    "dirt",
-    "coarse_dirt",
-    "farmland",
-    "sand",
-    "sandstone",
-    "red_sand",
-    "red_sandstone",
-    "clay",
-    "podzol",
-    "mycelium",
-    "stone",
-    "granite",
-    "diorite",
-    "andesite",
-    "gravel",
-    "coal_ore",
-    "iron_ore",
-    "gold_ore",
-    "water",
-]
-
-
 DEFAULT_SAVES = {
     "windows": "%appdata%\\.minecraft\\saves",
     "darwin": "~/Library/Application Support/minecraft/saves",
     "linux": "~/.minecraft/saves/",
 }
 
+surface_blocks = [line.rstrip() for line in open("surface_blocks.txt") if line.rstrip()]
+structure_blocks = [line.rstrip() for line in open("structure_blocks.txt") if line.rstrip()]
 
 def settings_init(args: Namespace, filename: str = "settings.yml") -> dict:
     settings = {
-        "surface_blocks": SURFACE_BLOCKS,
+        "surface_blocks": surface_blocks,
+        "structure_blocks": structure_blocks,
         "saves_path": DEFAULT_SAVES[platform.system().lower()]}
     if filename:
         try:

@@ -5,37 +5,37 @@ library(smoothr)
 library(terra)
 
 contour_interval <- 1
-smoothing <- 8
+smoothing <- 3
 
 canopy_smoothing <- 25
 canopy_buffer <- 2
 crop_buffer <- 16
 
+surface_blocks <- read.table("surface_blocks.txt")$V1
+
 settings <- parse_args(OptionParser(
     option_list=list(make_option(c("--interactive"), action="store_true", default=F))),
 )
 
-layers <- lapply(list(
+data <- lapply(list(
     dem=terra::rast("data/dem.tif"),
     vegetation=terra::rast("data/vegetation.tif"),
     landcover=terra::rast("data/landcover.tif")
-), function(layer) {crs(layer) <- "ESRI:53032"; layer})
+), function(raster) {crs(raster) <- "ESRI:53032"; raster})
 
 bounds <- st_as_sf(vect(ext(
-    ext(layers$dem)$xmin + crop_buffer,
-    ext(layers$dem)$xmax - crop_buffer,
-    ext(layers$dem)$ymin + crop_buffer,
-    ext(layers$dem)$ymax - crop_buffer
+    ext(data$dem)$xmin + crop_buffer,
+    ext(data$dem)$xmax - crop_buffer,
+    ext(data$dem)$ymin + crop_buffer,
+    ext(data$dem)$ymax - crop_buffer
 )))
 st_crs(bounds) <- "ESRI:53032"
 
-layers$vegetation[layers$vegetation == 0] <- NA
-
 contours <- list(
-    feature=layers$dem |>
+    feature=data$dem |>
     terra::as.contour(levels = seq(
-        from = min(layers$dem[]),
-        to = max(layers$dem[]),
+        from = min(data$dem[]),
+        to = max(data$dem[]),
         by = contour_interval
     )) |>
     st_as_sf() |>
@@ -43,15 +43,11 @@ contours <- list(
     render=list(tm_lines(lwd = 1, col = "#D15C00"))
 )
 
+water <- data$landcover
+water[data$landcover != (match("water", surface_blocks) - 1)] <- NA
 
 water <- list(
-    feature=terra::classify(layers$landcover, rcl = matrix(
-    data = c(
-        -Inf, 19, NA,
-        19, 21, 1,
-        21, Inf, NA
-    ), ncol = 3, nrow = 3, byrow = TRUE
-    )) |>
+    feature=water |>
     terra::as.polygons() |>
     st_as_sf() |>
     smoothr::smooth(method = "ksmooth", smoothness = smoothing) |>
@@ -59,8 +55,10 @@ water <- list(
     render=list(tm_fill(col = "#00FFFF"), tm_borders(col = "black"))
 )
 
+data$vegetation[data$vegetation == 0] <- NA
+
 canopy <- list(
-    feature=terra::as.polygons(layers$vegetation) |>
+    feature=terra::as.polygons(data$vegetation) |>
     terra::buffer(canopy_buffer) |>
     st_as_sf() |>
     smoothr::smooth(method = "ksmooth", smoothness = canopy_smoothing) |>
@@ -75,12 +73,13 @@ symbols <- list(
 ) # symbols in overprinting order for rendering
 
 symbols <- symbols |> lapply(function(symbol) list(
-        feature=symbol$feature |> st_crop(bounds),
-        render=symbol$render
-    ) # crop all symbols to extent
+  feature=symbol$feature |> st_crop(bounds),
+  render=symbol$render
+  ) # crop all symbols to extent
 ) 
+
 symbols <- symbols[symbols |> sapply(function(symbol) {
-    as.logical(length(symbol$feature$geometry))
+  as.logical(length(symbol$feature$geometry))
 })] # filter symbols to only include those with geometry
 
 render <- symbols |> 
