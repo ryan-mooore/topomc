@@ -8,10 +8,25 @@ TopoMC combines the ecosystem of Python libraries for Minecraft and the extensiv
 
 ### Requirements
 
-- Python >= 3.9
-  - [pipenv](https://pipenv.pypa.io/): `pip install pipenv --user`
-- R >= 4.1.0
-  - [renv](https://rstudio.github.io/renv/): (in R shell)> `install.packages("renv")`
+- Python >= 3.9: check with `python3 --version`
+  - [pipenv](https://pipenv.pypa.io/en/latest/installation/#installing-pipenv): check with `pipenv --version`
+- R >= 4.1.0: check with `R --version`
+  - [renv](https://rstudio.github.io/renv/#installation): check with `Rscript -e "'renv' %in% rownames(installed.packages())`
+
+#### MacOS
+
+If using MacOS, the `sf` package of R requires some extra libraries and options to be installed correctly.
+Firstly, install dependencies:
+
+```
+brew install udunits
+brew install pkg-config
+brew install gdal
+```
+
+Then, install `sf` from source in R shell: `install.packages("sf", type="source", configure.args="--with-proj-lib=$(brew --prefix)/lib/")`
+
+See the official [sf repo README](https://github.com/r-spatial/sf#installing) for more information on installing `sf` for various linux distrobutions
 
 ### Instructions
 
