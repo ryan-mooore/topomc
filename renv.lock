@@ -661,6 +661,16 @@
       ],
       "Hash": "001cecbeac1cff9301bdc3775ee46a86"
     },
+    "logger": {
+      "Package": "logger",
+      "Version": "0.2.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "utils"
+      ],
+      "Hash": "c269b06beb2bbadb0d058c0e6fa4ec3d"
+    },
     "lwgeom": {
       "Package": "lwgeom",
       "Version": "0.2-13",

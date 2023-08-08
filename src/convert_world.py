@@ -1,14 +1,20 @@
+import logging
 import platform
 import sys
 from argparse import ArgumentParser
 from functools import cache
-from pathlib import Path
 from os import mkdir, path
+from pathlib import Path
 
 import numpy as np
 from anvil import Chunk, Region
 from anvil.errors import ChunkNotFound
 from PIL import Image
+
+logging.basicConfig(
+    format="generate: (%(levelname)s) %(message)s",
+    level=logging.INFO
+)
 
 # This was the last version where heightmap data was streammed across bits. See:
 # https://minecraft.fandom.com/wiki/Chunk_format (under Heightmaps)
@@ -31,10 +37,10 @@ class ChunkWithHeightmap(Chunk):
 def region_at(world, rx, rz):
     try:
         filename = f"r.{rx}.{rz}.mca"
-        print(f"generate: Reading {filename}...")
+        logging.info(f"Reading {filename}...")
         return Region.from_file(path.join(world, "region", filename))
     except FileNotFoundError:
-        print(f"Warning: region ({rx}) ({rz}) not loaded")
+        logging.warning(f"Region ({rx}) ({rz}) not loaded!")
         return None
 
 @cache
@@ -44,13 +50,13 @@ def chunk_at(region, cx, cz):
     except KeyError:
         raise Exception("Error parsing NBT data. Is the world derived from a 1.18 version?")
     except ChunkNotFound:
-        print(f"Warning: chunk ({cx}) ({cz}) not loaded")
+        logging.warning(f"Chunk ({cx}) ({cz}) not loaded!")
         return None
     if not chunk.data["Heightmaps"]:
-        print(f"Warning: heightmaps not loaded for chunk ({cx}) ({cz})")
+        logging.warning(f"Heightmaps not loaded for chunk ({cx}) ({cz})!")
         return None
     if not chunk.data["Heightmaps"].get("MOTION_BLOCKING"):
-        print(f"Warning: MOTION_BLOCKING heightmap not loaded for chunk ({cx}) ({cz})")
+        logging.warning(f"MOTION_BLOCKING heightmap not loaded for chunk ({cx}) ({cz})")
         return None
 
     block = 0
@@ -97,7 +103,7 @@ surface_blocks = [line.rstrip() for line in open("surface_blocks.txt") if line.r
 
 bx1, bz1, bx2, bz2 = args.x1, args.z1, args.x2, args.z2
 if bx1 > bx2 or bz1 > bz2:
-    print("Invalid co-ordinates")
+    logging.critical("Invalid co-ordinates! Exiting...")
     sys.exit()
 
 saves_path = {
@@ -111,7 +117,7 @@ world_path = path.expanduser(path.join(
     saves_path,
     args.world,
 ))
-print(f"generate: Reading data from {world_path}")
+logging.info(f"Reading data from {world_path}...")
 
 bx1 -= CROP_BUFFER 
 bz1 -= CROP_BUFFER
@@ -179,14 +185,14 @@ for row, bz in enumerate(range(bz1, bz2, args.downsample)):
             if block.id.endswith("leaves"):
                 data["vegetation"][entry] = 1
 
-print("generate: Writing data...")
+logging.info("Writing data...")
 try:
     mkdir("data")
 except FileExistsError:
     pass
 for layer, data in data.items():
     filename = f"data/{layer}.tif"
-    print(f"generate: Writing {filename}...")
+    logging.info(f"Writing {filename}...")
     image = Image.fromarray(np.kron(
         data,
         np.ones(np.repeat(args.downsample, 2),

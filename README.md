@@ -37,8 +37,8 @@ The map can be opened at any time without re-rendering by opening the map file c
 
 #### Options
 
-- `-w`, `--world` World to map (world directory name - not in-game world name!). If not specified the world named "_New World_" will attempt to be mapped
 - `-d`, `--downsample` How much to downsample the generated data (int, `>=1`). If set to a value other than 1, will only read every _nth_ block from the world. Improves generation speed somewhat for very large areas but reduces detail of map and can create some inaccuracies.
+- `--saves-path` Path to non-standard saves location for the current platform. Useful if using a 3rd party launcher such as MultiMC.
 - `--compress-height-limit` If the world version is `>1.16.5`, attempt to fit the increased height limit within a 8-bit `.tif` instead of a 16-bit `.tif` (sets height values `<0` to `0` and all height values `>=256` to 255). If the world vesion is `<=1.16.5`, this setting has no effect.
 
 ### `./map`
