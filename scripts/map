@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 cd "$(dirname "$0")/../"
+set -e
 Rscript src/create_map.R "$@"
 FILE=$([[ $1 == "--interactive" ]] && realpath "map.html" || realpath "map.png")
 case "$OSTYPE" in
