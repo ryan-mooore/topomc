@@ -4,7 +4,7 @@ from os import mkdir, path
 import numpy as np
 from anvil import Chunk, Region
 from anvil.errors import ChunkNotFound
-from tifffile import imwrite
+from PIL import Image
 
 # This was the last version where heightmap data was streammed across bits. See:
 # https://minecraft.fandom.com/wiki/Chunk_format (under Heightmaps)
@@ -148,16 +148,13 @@ def to_tiffs(settings):
         mkdir("data")
     except FileExistsError:
         pass
-    bits = {
-        0: 1,
-        2: 8,
-        4: 16
-    }
     for layer, data in data.items():
         filename = f"data/{layer}.tif"
         print(f"generate: Writing {filename}...")
-        imwrite(
-            filename,
-            np.kron(data, np.ones(np.repeat(settings["downsample"], 2), dtype=data.dtype)),
-            bitspersample=bits[data.dtype.num]
-        )
+        image = Image.fromarray(np.kron(
+            data,
+            np.ones(np.repeat(settings["downsample"], 2),
+            dtype=data.dtype)
+        ))
+        # store downsampling amount as image resolution
+        image.save(filename, dpi=tuple(np.repeat(settings["downsample"] * 300, 2)))

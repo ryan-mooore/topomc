@@ -1,13 +1,19 @@
 library(optparse)
-library(tmap)
+library(tiff)
+
 library(sf)
-library(smoothr)
 library(terra)
+library(tmap)
+
+library(smoothr)
 
 contour_interval <- 1
-smoothing <- 3
 
-canopy_smoothing <- 25
+# increase smoothing with more downsampling to account for inaccuracies
+resolution <- tiff::readTIFF("data/dem.tif", payload=F)$x.resolution / 300
+smoothing <- 3 * resolution 
+canopy_smoothing <- 20 * resolution
+
 canopy_buffer <- 2
 crop_buffer <- 16
 

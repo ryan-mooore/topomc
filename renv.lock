@@ -1101,6 +1101,16 @@
       ],
       "Hash": "a84e2cc86d07289b3b6f5069df7a004c"
     },
+    "tiff": {
+      "Package": "tiff",
+      "Version": "0.1-11",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R"
+      ],
+      "Hash": "9b1679a33f3adff6a6eb05c97fb90f50"
+    },
     "tinytex": {
       "Package": "tinytex",
       "Version": "0.45",
