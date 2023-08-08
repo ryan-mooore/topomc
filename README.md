@@ -2,7 +2,7 @@
 
 ![](images/example.png)
 
-TopoMC combines the ecosystem of Python libraries for Minecraft and the extensive spatial support of R to create beautiful topocraphical maps of your Minecraft worlds. TopoMC supports all Minecraft versions from 1.9 up to the current release (1.20.1), excluding 1.18-based versions (for now).
+TopoMC combines the ecosystem of Python libraries for Minecraft and the extensive spatial support of R to create beautiful topographical maps of your Minecraft worlds. TopoMC supports all Minecraft versions from 1.9 up to the current release (1.20.1), excluding 1.18-based versions (for now).
 
 ## How to Use
 
@@ -27,22 +27,23 @@ The map can be opened at any time without re-rendering by opening the map file c
 
 ### `./generate`
 
-#### Synopsis
+#### Usage
 
-`./generate x1 z1 x2 z2 [-w worldname] [-d downsample_amount] [--settings path/to/settings.yml]`
+`./generate world x1 z1 x2 z2 [-d DOWNSAMPLE] [--saves-path SAVES_PATH] [--compress-height-limit]`
 
-- (`x1`, `z1`) - Top left block of map
-- (`x2`, `z2`) - Bottom right block of map
+- `world` World to map (world directory name - not in-game world name!)
+- (`x1`, `z1`) Top left block of map
+- (`x2`, `z2`) Bottom right block of map
 
 #### Options
 
-- `-w`, `--world` World to use (world directory name - not in-game world name!). If not specified the world named "_New World_" will attempt to be mapped
+- `-w`, `--world` World to map (world directory name - not in-game world name!). If not specified the world named "_New World_" will attempt to be mapped
 - `-d`, `--downsample` How much to downsample the generated data (int, `>=1`). If set to a value other than 1, will only read every _nth_ block from the world. Improves generation speed somewhat for very large areas but reduces detail of map and can create some inaccuracies.
 - `--compress-height-limit` If the world version is `>1.16.5`, attempt to fit the increased height limit within a 8-bit `.tif` instead of a 16-bit `.tif` (sets height values `<0` to `0` and all height values `>=256` to 255). If the world vesion is `<=1.16.5`, this setting has no effect.
 
 ### `./map`
 
-#### Synopsis
+#### Usage
 
 `./map [--interactive]`
 

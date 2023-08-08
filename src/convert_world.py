@@ -1,4 +1,8 @@
+import platform
+import sys
+from argparse import ArgumentParser
 from functools import cache
+from pathlib import Path
 from os import mkdir, path
 
 import numpy as np
@@ -70,91 +74,123 @@ def chunk_at(region, cx, cz):
         if chunk.version > V1_15_2:
             bit_of_value = 0
 
-def to_tiffs(settings):
-    world_path = path.expanduser(path.join(
-        settings["saves_path"],
-        settings["world"],
-    ))
+parser = ArgumentParser(description="Generate a map")
 
-    bx1 = settings["bounding_points"][0] - CROP_BUFFER 
-    bz1 = settings["bounding_points"][1] - CROP_BUFFER
-    bx2 = settings["bounding_points"][2] + CROP_BUFFER
-    bz2 = settings["bounding_points"][3] + CROP_BUFFER
+parser.add_argument("world", type=str, help="World to map")
+parser.add_argument("x1", type=int, help="X value of start chunk")
+parser.add_argument("z1", type=int, help="Z value of start chunk")
+parser.add_argument("x2", type=int, help="X value of end chunk")
+parser.add_argument("z2", type=int, help="Z value of end chunk")
+parser.add_argument("-d", "--downsample", type=int, default=1,
+    help="Set downsampling level (default: 1)",
+)
+parser.add_argument("--saves-path", type=Path,
+    help="Set a non-standard Minecraft saves path"
+)
+parser.add_argument("--compress-height-limit", action="store_true",
+    help="Compress height limit to 8-bit tiff (0-255)"
+)
+args = parser.parse_args(sys.argv[1:])
 
-    create_mat = lambda dtype : np.mat(np.zeros((
-        (bz2 - bz1) // settings["downsample"] + 1, 
-        (bx2 - bx1) // settings["downsample"] + 1
-    )), dtype=dtype)
-    np.any
-    data = {
-        "dem": create_mat(np.uint8) if settings["compress_height_limit"] else create_mat(np.uint16),
-        "vegetation": create_mat(np.bool_),
-        "landcover": create_mat(np.uint8)
-    }
+surface_blocks = [line.rstrip() for line in open("surface_blocks.txt") if line.rstrip()]
+# structure_blocks = [line.rstrip() for line in open("structure_blocks.txt") if line.rstrip()]
 
-    print("generate: Reading data...")
-    for row, bz in enumerate(range(bz1, bz2, settings["downsample"])):
-        for col, bx in enumerate(range(bx1, bx2, settings["downsample"])):
-            cz, cx = bz // 16, bx // 16
-            rz, rx = cz // 32, cx // 32
-            bz_in_c = bz % 16
-            bx_in_c = bx % 16
-            entry = row, col
+bx1, bz1, bx2, bz2 = args.x1, args.z1, args.x2, args.z2
+if bx1 > bx2 or bz1 > bz2:
+    print("Invalid co-ordinates")
+    sys.exit()
 
-            region = region_at(world_path, rx, rz)
-            if not region: continue
-            chunk = chunk_at(region, cx, cz)
-            if not chunk: continue
+saves_path = {
+    "windows": "%appdata%\\.minecraft\\saves",
+    "darwin": "~/Library/Application Support/minecraft/saves",
+    "linux": "~/.minecraft/saves/",
+}[platform.system().lower()]
+if args.saves_path:
+    saves_path = args.saves_path
+world_path = path.expanduser(path.join(
+    saves_path,
+    args.world,
+))
+print(f"generate: Reading data from {world_path}")
 
-            if chunk.version >= V21W06A:
-                if settings["compress_height_limit"]:
-                    max_height = min(int(chunk.heightmap[bz_in_c, bx_in_c]) - 64, 255)
-                    min_height = 0
-                else:
-                    max_height = int(chunk.heightmap[bz_in_c, bx_in_c]) - 64
-                    min_height = -64
+bx1 -= CROP_BUFFER 
+bz1 -= CROP_BUFFER
+bx2 += CROP_BUFFER
+bz2 += CROP_BUFFER
 
-            else:
-                max_height = int(chunk.heightmap[bz_in_c, bx_in_c]) if chunk.heightmap.any() else 255
+create_mat = lambda dtype : np.mat(np.zeros((
+    (bz2 - bz1) // args.downsample + 1, 
+    (bx2 - bx1) // args.downsample + 1
+)), dtype=dtype)
+
+data = {
+    "dem": create_mat(np.uint8) if args.compress_height_limit else create_mat(np.uint16),
+    "vegetation": create_mat(np.bool_),
+    "landcover": create_mat(np.uint8)
+}
+
+for row, bz in enumerate(range(bz1, bz2, args.downsample)):
+    for col, bx in enumerate(range(bx1, bx2, args.downsample)):
+        cz, cx = bz // 16, bx // 16
+        rz, rx = cz // 32, cx // 32
+        bz_in_c = bz % 16
+        bx_in_c = bx % 16
+        entry = row, col
+
+        region = region_at(world_path, rx, rz)
+        if not region: continue
+        chunk = chunk_at(region, cx, cz)
+        if not chunk: continue
+
+        if chunk.version >= V21W06A:
+            if args.compress_height_limit:
+                max_height = min(int(chunk.heightmap[bz_in_c, bx_in_c]) - 64, 255)
                 min_height = 0
+            else:
+                max_height = int(chunk.heightmap[bz_in_c, bx_in_c]) - 64
+                min_height = -64
 
-            for by in range(max_height, min_height, -1):
-                block = chunk.get_block(bx_in_c, by, bz_in_c)
-                
-                # -- surface processes: dem and landcover --
-                if block.id in settings["surface_blocks"]:
+        else:
+            max_height = int(chunk.heightmap[bz_in_c, bx_in_c]) if chunk.heightmap.any() else 255
+            min_height = 0
+
+        for by in range(max_height, min_height, -1):
+            block = chunk.get_block(bx_in_c, by, bz_in_c)
+            
+            # -- surface processes: dem and landcover --
+            if block.id in surface_blocks:
+                data["dem"][entry] = by
+                data["landcover"][entry] = surface_blocks.index(block.id)
+                break
+            elif "water" in surface_blocks:
+                # inherently waterlogged blocks, see https://minecraft.fandom.com/wiki/Waterlogging
+                if block.id in ["seagrass", "tall_seagrass", "kelp", "kelp_plant"]:
                     data["dem"][entry] = by
-                    data["landcover"][entry] = settings["surface_blocks"].index(block.id)
+                    data["landcover"][entry] = surface_blocks.index("water")
                     break
-                elif "water" in settings["surface_blocks"]:
-                    # inherently waterlogged blocks, see https://minecraft.fandom.com/wiki/Waterlogging
-                    if block.id in ["seagrass", "tall_seagrass", "kelp", "kelp_plant"]:
+                # waterlogged blocks
+                elif block.properties.get("waterlogged"):
+                    if block.properties["waterlogged"] == "true" and "water" in surface_blocks:
                         data["dem"][entry] = by
-                        data["landcover"][entry] = settings["surface_blocks"].index("water")
+                        data["landcover"][entry] = surface_blocks.index("water")
                         break
-                    # waterlogged blocks
-                    elif block.properties.get("waterlogged"):
-                        if block.properties["waterlogged"] == "true" and "water" in settings["surface_blocks"]:
-                            data["dem"][entry] = by
-                            data["landcover"][entry] = settings["surface_blocks"].index("water")
-                            break
-                
-                # -- other processes: vegetation --
-                if block.id.endswith("leaves"):
-                    data["vegetation"][entry] = 1
+            
+            # -- other processes: vegetation --
+            if block.id.endswith("leaves"):
+                data["vegetation"][entry] = 1
 
-    print("generate: Writing data...")
-    try:
-        mkdir("data")
-    except FileExistsError:
-        pass
-    for layer, data in data.items():
-        filename = f"data/{layer}.tif"
-        print(f"generate: Writing {filename}...")
-        image = Image.fromarray(np.kron(
-            data,
-            np.ones(np.repeat(settings["downsample"], 2),
-            dtype=data.dtype)
-        ))
-        # store downsampling amount as image resolution
-        image.save(filename, dpi=tuple(np.repeat(settings["downsample"] * 300, 2)))
+print("generate: Writing data...")
+try:
+    mkdir("data")
+except FileExistsError:
+    pass
+for layer, data in data.items():
+    filename = f"data/{layer}.tif"
+    print(f"generate: Writing {filename}...")
+    image = Image.fromarray(np.kron(
+        data,
+        np.ones(np.repeat(args.downsample, 2),
+        dtype=data.dtype)
+    ))
+    # store downsampling amount as image resolution
+    image.save(filename, dpi=tuple(np.repeat(args.downsample * 300, 2)))
