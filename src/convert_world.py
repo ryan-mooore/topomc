@@ -3,6 +3,7 @@ import platform
 import sys
 from argparse import ArgumentParser
 from functools import cache
+from math import ceil
 from os import mkdir, path
 from pathlib import Path
 
@@ -121,12 +122,17 @@ logging.info(f"Reading data from {world_path}...")
 
 bx1 -= CROP_BUFFER 
 bz1 -= CROP_BUFFER
-bx2 += CROP_BUFFER
-bz2 += CROP_BUFFER
+bx2 += CROP_BUFFER + 1
+bz2 += CROP_BUFFER + 1
+
+print(
+    ceil((bz2 - bz1) / args.downsample),
+    ceil((bx2 - bx1) / args.downsample)
+)
 
 create_mat = lambda dtype : np.mat(np.zeros((
-    (bz2 - bz1) // args.downsample + 1, 
-    (bx2 - bx1) // args.downsample + 1
+    ceil((bz2 - bz1) / args.downsample),
+    ceil((bx2 - bx1) / args.downsample)
 )), dtype=dtype)
 
 data = {
