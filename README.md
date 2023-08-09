@@ -60,15 +60,18 @@ The map can be opened at any time without re-rendering by opening the map file c
 
 #### Usage
 
-`./map [--interactive]`
+`./map [-i INTERVAL] [-s SMOOTHING] [--interactive] [--keep-crumbs]`
 
 #### Options
 
+- `-i`, `--interval` Set the contour interval of the generated map, in blocks (default=1).
+- `-s`, `--smoothing` Factor of smoothing (generalisation) of the map. Set to 0 to turn smoothing off (default=1). Smoothing is automatically scaled with the amount of downsampling used to generate the data, but this option can be used as a multiplication factor.
 - `--interactive` Whether to open an interactive webview, using Leaflet.js. Works better for smaller maps, HTML file generation may break and/or frame rate of website may be low for larger maps.
+- `--keep-crumbs` Whether to keep very small features on the final map instaed of deleting them.
 
 ### Example
 
-`./generate -255 -255 255 255 --world my_world -d 2 && ./scripts/map`
+`./generate -255 -255 255 255 --world my_world -d 2 && ./scripts/map -i 2.5 --interactive`
 
 ## Contributing
 

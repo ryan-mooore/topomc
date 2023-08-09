@@ -1,9 +1,23 @@
-suppressPackageStartupMessages({
-    library(logger)
-    log_layout(layout_glue_generator(format = 'map: ({level}) {msg}'))
-    log_info("Attaching packages...")
-    library(optparse)
+library(optparse)
+settings <- parse_args(OptionParser(
+    option_list=list(
+        make_option(c("--interactive"), action="store_true", default=F, 
+        help="Opens map in interactive viewer"),
+        make_option(c("--keep-crumbs"), action="store_true", default=F,
+        help="Keep very small features instead of deleting them"),
+        make_option(c("-i", "--interval"), default=1,
+        help="Set contour interval in blocks (default=1)"),
+        make_option(c("-s", "--smoothing"), default=1,
+        help="Set smoothing of map or set to 0 to turn off (default=1)")
+    )),
+)
 
+library(logger)
+log_layout(layout_glue_generator(format = 'map: ({level}) {msg}'))
+options(warn = -1)
+log_info("Attaching packages...")
+
+suppressPackageStartupMessages({
     library(sf)
     library(terra)
     library(tmap)
@@ -11,21 +25,13 @@ suppressPackageStartupMessages({
     library(tiff)
     library(smoothr)
 })
-options(warn = -1)
 
-contour_interval <- 1
-canopy_buffer <- 2
-crop_buffer <- 16
 surface_blocks <- read.table("surface_blocks.txt")$V1
 
 # increase smoothing with more downsampling to account for inaccuracies
 resolution <- tiff::readTIFF("data/dem.tif", payload=F)$x.resolution / 300
-smoothing <- 3 * resolution 
-canopy_smoothing <- 20 * resolution
-
-settings <- parse_args(OptionParser(
-    option_list=list(make_option(c("--interactive"), action="store_true", default=F))),
-)
+canopy_buffer <- 2
+crop_buffer <- 16
 
 log_info("Reading data...")
 data <- lapply(list(
@@ -49,11 +55,10 @@ contours <- list(
     terra::as.contour(levels = seq(
         from = min(data$dem[]),
         to = max(data$dem[]),
-        by = contour_interval
-    )) |>
-    st_as_sf() |>
-    smoothr::smooth(method = "ksmooth", smoothness = smoothing),
-    render=list(tm_lines(lwd = 1, col = "#D15C00"))
+        by = settings$interval
+    )),
+    render=list(tm_lines(lwd = 1, col = "#D15C00")),
+    smoothing=3
 )
 
 log_info("Creating water...")
@@ -61,36 +66,47 @@ water <- data$landcover
 water[data$landcover != (match("water", surface_blocks) - 1)] <- NA
 water <- list(
     feature=water |>
-    terra::as.polygons() |>
-    st_as_sf() |>
-    smoothr::smooth(method = "ksmooth", smoothness = smoothing) |>
-    st_buffer(dist = 0), # fix self-intersection
-    render=list(tm_fill(col = "#00FFFF"), tm_borders(col = "black"))
+    terra::as.polygons(),
+    render=list(tm_fill(col = "#00FFFF"), tm_borders(col = "black")),
+    smoothing=3
 )
 
 log_info("Creating canopy...")
 data$vegetation[data$vegetation == 0] <- NA
 canopy <- list(
     feature=terra::as.polygons(data$vegetation) |>
-    terra::buffer(canopy_buffer) |>
-    st_as_sf() |>
-    smoothr::smooth(method = "ksmooth", smoothness = canopy_smoothing) |>
-    st_buffer(dist = 0), # fix self-intersection
-    render=list(tm_fill(col = "#FFFFFF"))
+    terra::buffer(canopy_buffer * as.logical(settings$smoothing)),
+    render=list(tm_fill(col = "#FFFFFF")),
+    smoothing=20
 )
 
 symbols <- list(
     canopy=canopy,
-    water=water,
-    contours=contours
+    contours=contours,
+    water=water
 ) # symbols in overprinting order for rendering
 
-log_info("Cropping symbols...")
-symbols <- symbols |> lapply(function(symbol) list(
-  feature=symbol$feature |> st_crop(bounds),
-  render=symbol$render
-  ) # crop all symbols to extent
-) 
+log_info("Applying geometry operations to symbols...")
+symbols <- mapply(function(symbol, name) {
+    log_info(sprintf("Applying geometry operations to %s...", name))
+    feature <- symbol$feature |> st_as_sf()
+    smoothing <- symbol$smoothing * resolution * settings$smoothing
+    if (smoothing >= 0.1) {
+        feature <- feature |> smoothr::smooth(method="ksmooth", smoothness = smoothing)
+    }
+    if (!settings$`keep-crumbs`) {
+        feature <- feature |> smoothr::drop_crumbs(12)
+    }
+    feature <- tryCatch({
+        feature |> st_crop(bounds)
+    }, error=function (error) {
+        feature |> st_buffer(dist=0) |> st_crop(bounds)
+    })
+    list(
+        feature=feature,
+        render=symbol$render
+    ) # crop all symbols to extent}
+}, symbols, names(symbols), SIMPLIFY=F)
 
 symbols <- symbols[symbols |> sapply(function(symbol) {
   as.logical(length(symbol$feature$geometry))
@@ -99,7 +115,7 @@ symbols <- symbols[symbols |> sapply(function(symbol) {
 log_info("Creating map objects...")
 render <- symbols |> 
     lapply(function(symbol) {c(
-    list(tm_shape(symbol$feature)),
+    list(tm_shape(st_cast(symbol$feature))),
     symbol$render)
     }) |>
     unlist(recursive=F) # create list of tmap elements

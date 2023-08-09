@@ -88,7 +88,7 @@ parser.add_argument("z1", type=int, help="Z value of start chunk")
 parser.add_argument("x2", type=int, help="X value of end chunk")
 parser.add_argument("z2", type=int, help="Z value of end chunk")
 parser.add_argument("-d", "--downsample", type=int, default=1,
-    help="Set downsampling level (default: 1)",
+    help="Set downsampling level (default=1)",
 )
 parser.add_argument("--saves-path", type=Path,
     help="Set a non-standard Minecraft saves path"

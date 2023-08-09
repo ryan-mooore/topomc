@@ -2,7 +2,7 @@
 cd "$(dirname "$0")/../"
 set -e
 Rscript src/create_map.R "$@"
-FILE=$([[ $1 == "--interactive" ]] && realpath "map.html" || realpath "map.png")
+FILE=$([[ "$*" == *"--interactive"* ]] && realpath "map.html" || realpath "map.png")
 echo "map: Opening map..."
 case "$OSTYPE" in
     darwin*)  open $FILE;; 
