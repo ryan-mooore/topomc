@@ -136,7 +136,7 @@ create_mat = lambda dtype : np.mat(np.zeros((
 )), dtype=dtype)
 
 data = {
-    "dem": create_mat(np.uint8) if args.compress_height_limit else create_mat(np.uint16),
+    "dem": create_mat(np.uint8) if args.compress_height_limit else create_mat(np.int16),
     "vegetation": create_mat(np.bool_),
     "landcover": create_mat(np.uint8)
 }
