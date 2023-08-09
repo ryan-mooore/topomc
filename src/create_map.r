@@ -7,7 +7,9 @@ settings <- parse_args(OptionParser(
         help="Keep very small features instead of deleting them"),
         make_option(c("-i", "--interval"), default=1,
         help="Set contour interval in blocks (default=1)"),
-        make_option(c("-s", "--smoothing"), default=1,
+        make_option(c("-s", "--scale"), default=5000,
+        help="Set scale ratio of resulting map (default=5000 (representing 1:5000))"),
+        make_option(c("-k", "--smoothing"), default=1,
         help="Set smoothing of map or set to 0 to turn off (default=1)")
     )),
 )
@@ -27,11 +29,20 @@ suppressPackageStartupMessages({
 })
 
 surface_blocks <- read.table("surface_blocks.txt")$V1
+exif <- tiff::readTIFF("data/dem.tif", payload=F)
 
 # increase smoothing with more downsampling to account for inaccuracies
-resolution <- tiff::readTIFF("data/dem.tif", payload=F)$x.resolution / 300
+resolution <- exif$x.resolution / 300
+dpi <- 300
+in_per_block <- 39.3701
 canopy_buffer <- 2
 crop_buffer <- 16
+
+dotwidth <- function (mmwidth) {
+    in_per_mm <- in_per_block / 1000
+    dots_per_mm <- in_per_mm * dpi
+    mmwidth * dots_per_mm
+}
 
 log_info("Reading data...")
 data <- lapply(list(
@@ -57,7 +68,7 @@ contours <- list(
         to = max(data$dem[]),
         by = settings$interval
     )),
-    render=list(tm_lines(lwd = 1, col = "#D15C00")),
+    render=list(tm_lines(lwd = dotwidth(0.14), col = "#D15C00")),
     smoothing=3
 )
 
@@ -67,7 +78,7 @@ water[data$landcover != (match("water", surface_blocks) - 1)] <- NA
 water <- list(
     feature=water |>
     terra::as.polygons(),
-    render=list(tm_fill(col = "#00FFFF"), tm_borders(col = "black")),
+    render=list(tm_fill(col = "#00FFFF"), tm_borders(lwd = dotwidth(0.18), col = "black")),
     smoothing=3
 )
 
@@ -122,16 +133,24 @@ render <- symbols |>
 render <- c(
   list(
     tm_shape(bounds),
-    tm_fill(col="#FFBA35"),
-    tm_borders(col="black")
+    tm_fill(col="#FFBA35")
   ), # add border to elements
   render
 )
 
+img_width <- (exif$width - 2 * crop_buffer) / settings$scale * in_per_block
+img_length <- (exif$length - 2 * crop_buffer) / settings$scale * in_per_block
+margins <- c(0, 0, 0, 0)
+
 log_info("Rendering map...")
-tmap_options(check.and.fix = TRUE, output.dpi = 600, basemaps=NULL)
+tmap_options(
+    check.and.fix = TRUE,
+    output.dpi=dpi, 
+    output.size = img_width * img_length,
+    basemaps=NULL
+)
 (map <- Reduce("+", render) +
-  tm_layout(scale=0.25, frame=F) +
+  tm_layout(scale=0.25, frame=F, outer.margins=margins, inner.margins=margins) +
   tm_view(
     set.zoom.limits = c(17, 21),
     set.view = 18
@@ -139,7 +158,7 @@ tmap_options(check.and.fix = TRUE, output.dpi = 600, basemaps=NULL)
 )
 
 log_info("Saving map...")
-suppressMessages({
+# suppressMessages({
     if (settings$interactive) {
         tmap_mode("view")
         tmap_save(map, "map.html")
@@ -147,4 +166,4 @@ suppressMessages({
         tmap_mode("plot")
         tmap_save(map, "map.png")
     }
-})
+# })
