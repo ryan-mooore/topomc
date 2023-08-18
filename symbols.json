@@ -59,13 +59,15 @@
         }
     },
     "314": {
-        "name": "Ice",
+        "name": "Ice/Snow",
         "blocks": {
             "ground": [
                 "ice",
                 "packed_ice",
                 "blue_ice",
-                "frosted_ice"
+                "frosted_ice",
+                "snow",
+                "snow_block"
             ]
         }
     },

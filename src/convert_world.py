@@ -167,15 +167,15 @@ for row, bz in enumerate(range(bz1, bz2, args.downsample)):
             max_height = int(chunk.heightmap[bz_in_c, bx_in_c]) if chunk.heightmap.any() else 255
             min_height = 0
 
-        tree_so_far = False
-        for by in range(max_height, min_height, -1):
+        tree_so_far = 0
+        for by in range(max_height + 1, min_height, -1):
             block = chunk.get_block(bx_in_c, by, bz_in_c)
 
             # -- surface processes: dem and landcover --
             if block.id in surface_blocks:
                 data["dem"][entry] = by
                 data["landcover"][entry] = surface_blocks.index(block.id)
-                if tree_so_far:
+                if tree_so_far == 2:
                     data["trees"][entry] = 1
                 break
 
@@ -198,9 +198,11 @@ for row, bz in enumerate(range(bz1, bz2, args.downsample)):
             
             # -- other processes: trees --
             if block.id in symbol_data["418"]["blocks"]["canopy"]:
-                tree_so_far = True
-            elif not block.id in symbol_data["418"]["blocks"]["trunk"]:
-                tree_so_far = False
+                tree_so_far = 1
+            elif block.id in symbol_data["418"]["blocks"]["trunk"]:
+                tree_so_far = 2 if tree_so_far else 0
+            else:
+                tree_so_far = 0
 
 logging.info("Writing data...")
 try:

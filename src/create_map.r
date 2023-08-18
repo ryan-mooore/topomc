@@ -91,7 +91,7 @@ contours <- list(
 
 log_info("Creating water...")
 water <- data$landcover
-water[data$landcover != (match(symbol_data$`301`$blocks$ground, surface_blocks) - 1)] <- NA
+water[!(data$landcover %in%(match(symbol_data$`301`$blocks$ground, surface_blocks) - 1))] <- NA
 water <- list(
     feature=water |>
     terra::as.polygons(),
@@ -99,6 +99,36 @@ water <- list(
       tm_fill(col = "#00FFFF"),
       tm_borders(lwd = lwd_from_mm(0.18), col = "black")
     ),
+    smoothing=3
+)
+
+log_info("Creating ice...")
+ice <- data$landcover
+ice[!(data$landcover %in%(match(symbol_data$`314`$blocks$ground, surface_blocks) - 1))] <- NA
+ice <- list(
+    feature=ice |>
+    terra::as.polygons(),
+    render=list(tm_fill(col = "#BFFFFF")),
+    smoothing=3
+)
+
+log_info("Creating bare rock...")
+bare_rock <- data$landcover
+bare_rock[!(data$landcover %in%(match(symbol_data$`214`$blocks$ground, surface_blocks) - 1))] <- NA
+bare_rock <- list(
+    feature=bare_rock |>
+    terra::as.polygons(),
+    render=list(tm_fill(col = "#B3B3B3")),
+    smoothing=3
+)
+
+log_info("Creating sand...")
+sand <- data$landcover
+sand[!(data$landcover %in%(match(symbol_data$`213`$blocks$ground, surface_blocks) - 1))] <- NA
+sand <- list(
+    feature=sand |>
+    terra::as.polygons(),
+    render=list(tm_fill(col = "#FFFF80")),
     smoothing=3
 )
 
@@ -129,6 +159,9 @@ if (resolution == 1) {
 
 if (resolution == 1) { # include point symbols
     symbols <- list(
+    ice=ice,
+    sand=sand,
+    bare_rock=bare_rock,
     canopy=canopy,
     contours=contours,
     water=water,
@@ -136,6 +169,9 @@ if (resolution == 1) { # include point symbols
   )
 } else { # exclude point symbols
   symbols <- list(
+    ice=ice,
+    sand=sand,
+    bare_rock=bare_rock,
     canopy=canopy,
     contours=contours,
     water=water
