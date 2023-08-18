@@ -1,0 +1,191 @@
+{
+    "213": {
+        "name": "Sandy ground",
+        "blocks": {
+            "ground": [
+                "sand",
+                "red_sand",
+                "suspicious_sand"
+            ]
+        }
+    },
+    "214": {
+        "name": "Bare rock",
+        "blocks": {
+            "ground": [
+                "stone",
+                "granite",
+                "andesite",
+                "diorite",
+                "cobblestone",
+                "mossy_cobblestone",
+                "tuff",
+                "calcite",
+                "dripstone_block",
+                "cobbled_deepslate",
+                "bedrock",
+                "coal",
+                "copper",
+                "lapis_lazuli",
+                "iron",
+                "gold",
+                "redstone",
+                "diamond",
+                "emerald",
+                "nether_quartz",
+                "nether_gold",
+                "obsidian",
+                "gravel",
+                "infested_stone",
+                "infested_cobblestone",
+                "infested_deepslate"
+            ]
+        }
+    },
+    "301": {
+        "name": "Uncrossable body of water",
+        "blocks": {
+            "ground": [
+                "water"
+            ]
+        }
+    },
+    "302": {
+        "name": "Shallow body of water",
+        "blocks": {
+            "ground": [
+                "water"
+            ]
+        }
+    },
+    "314": {
+        "name": "Ice",
+        "blocks": {
+            "ground": [
+                "ice",
+                "packed_ice",
+                "blue_ice",
+                "frosted_ice"
+            ]
+        }
+    },
+    "401": {
+        "name": "Open land",
+        "blocks": {
+            "ground": [
+                "grass_block",
+                "dirt",
+                "coarse_dirt",
+                "mycelium",
+                "podzol",
+                "farmland",
+                "grass_path",
+                "soul_soil",
+                "rooted_dirt",
+                "packed_mud",
+                "muddy_mangrove_roots",
+                "clay",
+                "sandstone",
+                "red_sandstone",
+                "smooth_sandstone",
+                "smooth_red_sandstone",
+                "deepslate"
+            ]
+        }
+    },
+    "405": {
+        "name": "forest",
+        "blocks": {
+            "canopy": [
+                "oak_leaves",
+                "spruce_leaves",
+                "birch_leaves",
+                "jungle_leaves",
+                "acacia_leaves",
+                "dark_oak_leaves",
+                "mangrove_leaves",
+                "cherry_leaves",
+                "azalea_leaves",
+                "flowering_azalea_leaves",
+                "brown_mushroom_block"
+            ]
+        }
+    },
+    "501": {
+        "name": "Paved area",
+        "blocks": {
+            "ground": [
+                "terracotta",
+                "white_terracotta",
+                "orange_terracotta",
+                "magenta_terracotta",
+                "light_blue_terracotta",
+                "yellow_terracotta",
+                "lime_terracotta",
+                "pink_terracotta",
+                "gray_terracotta",
+                "light_gray_terracotta",
+                "cyan_terracotta",
+                "purple_terracotta",
+                "blue_terracotta",
+                "brown_terracotta",
+                "green_terracotta",
+                "red_terracotta",
+                "black_terracotta",
+                "white_concrete",
+                "orange_concrete",
+                "magenta_concrete",
+                "light_blue_concrete",
+                "yellow_concrete",
+                "lime_concrete",
+                "pink_concrete",
+                "gray_concrete",
+                "light_gray_concrete",
+                "cyan_concrete",
+                "purple_concrete",
+                "blue_concrete",
+                "brown_concrete",
+                "green_concrete",
+                "red_concrete",
+                "black_concrete"
+            ]
+        }
+    },
+    "418": {
+        "name": "Prominent bush or tree",
+        "blocks": {
+            "canopy": [
+                "oak_leaves",
+                "spruce_leaves",
+                "birch_leaves",
+                "jungle_leaves",
+                "acacia_leaves",
+                "dark_oak_leaves",
+                "mangrove_leaves",
+                "cherry_leaves",
+                "azalea_leaves",
+                "flowering_azalea_leaves",
+                "brown_mushroom_block"
+            ],
+            "trunk": [
+                "oak_log",
+                "spruce_log",
+                "birch_log",
+                "jungle_log",
+                "acacia_log",
+                "dark_oak_log",
+                "mangrove_log",
+                "cherry_log",
+                "stripped_oak_log",
+                "stripped_spruce_log",
+                "stripped_birch_log",
+                "stripped_jungle_log",
+                "stripped_acacia_log",
+                "stripped_dark_oak_log",
+                "stripped_mangrove_log",
+                "stripped_cherry_log",
+                "mushroom_stem"
+            ]
+        }
+    }
+}

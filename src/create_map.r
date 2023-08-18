@@ -24,11 +24,12 @@ suppressPackageStartupMessages({
     library(terra)
     library(tmap)
 
+    library(jsonlite)
     library(tiff)
     library(smoothr)
 })
 
-surface_blocks <- read.table("surface_blocks.txt")$V1
+symbol_data <- fromJSON("symbols.json", simplifyDataFrame = F)
 exif <- tiff::readTIFF("data/dem.tif", payload=F)
 
 # increase smoothing with more downsampling to account for inaccuracies
@@ -57,7 +58,7 @@ size_from_mm <- function (mmwidth) {
 log_info("Reading data...")
 data <- lapply(list(
     dem=terra::rast("data/dem.tif"),
-    vegetation=terra::rast("data/vegetation.tif"),
+    canopy=terra::rast("data/canopy.tif"),
     landcover=terra::rast("data/landcover.tif"),
     trees=terra::rast("data/trees.tif")
 ), function(raster) {crs(raster) <- "ESRI:53032"; raster})
@@ -69,6 +70,11 @@ bounds <- st_as_sf(vect(ext(
     ext(data$dem)$ymax - crop_buffer
 )))
 st_crs(bounds) <- "ESRI:53032"
+
+surface_blocks <- symbol_data |>
+  lapply(function(obj) obj$blocks$ground) |>
+  unlist() |>
+  unique()
 
 log_info("Creating symbols...")
 log_info("Creating contours...")
@@ -85,7 +91,7 @@ contours <- list(
 
 log_info("Creating water...")
 water <- data$landcover
-water[data$landcover != (match("water", surface_blocks) - 1)] <- NA
+water[data$landcover != (match(symbol_data$`301`$blocks$ground, surface_blocks) - 1)] <- NA
 water <- list(
     feature=water |>
     terra::as.polygons(),
@@ -97,9 +103,9 @@ water <- list(
 )
 
 log_info("Creating canopy...")
-data$vegetation[data$vegetation == 0] <- NA
+data$canopy[data$canopy == 0] <- NA
 canopy <- list(
-    feature=terra::as.polygons(data$vegetation) |>
+    feature=terra::as.polygons(data$canopy) |>
     terra::buffer(canopy_buffer * as.logical(settings$smoothing)),
     render=list(tm_fill(col = "#FFFFFF")),
     smoothing=20

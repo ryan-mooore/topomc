@@ -80,7 +80,7 @@ Feel free to create a PR at any point, or open an issue if you have any problems
 
 ## How it Works
 
-Chunk data is read by opening the world save directory and reading its region files (`.mca`). Once the region data is decoded chunks can be iterated through to find surface blocks (can be changed by editing [surface_blocks.txt](surface_blocks.txt)). To make this process more efficient, the script takes advantage of precomputed heightmaps, which are also decoded from their binary format. These heightmaps contain info such as the y-level of the first motion-blocking minecraft block, so efficiency of finding the surface is greatly improved.
+Chunk data is read by opening the world save directory and reading its region files (`.mca`). Once the region data is decoded chunks can be iterated through to find surface blocks (can be changed by editing [symbols.json](symbols.json)). To make this process more efficient, the script takes advantage of precomputed heightmaps, which are also decoded from their binary format. These heightmaps contain info such as the y-level of the first motion-blocking minecraft block, so efficiency of finding the surface is greatly improved.
 
 After the chunks are read several `.tif` files are saved in a folder called `data` at the root directory of the project. These files contain the raw data extracted from the minecraft files that is needed to create the topographical map. `.tif` files are chosen as they are a cross-compatible and effective data matrix format.
 
