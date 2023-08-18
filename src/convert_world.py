@@ -125,11 +125,6 @@ bz1 -= CROP_BUFFER
 bx2 += CROP_BUFFER + 1
 bz2 += CROP_BUFFER + 1
 
-print(
-    ceil((bz2 - bz1) / args.downsample),
-    ceil((bx2 - bx1) / args.downsample)
-)
-
 create_mat = lambda dtype : np.mat(np.zeros((
     ceil((bz2 - bz1) / args.downsample),
     ceil((bx2 - bx1) / args.downsample)
@@ -138,7 +133,8 @@ create_mat = lambda dtype : np.mat(np.zeros((
 data = {
     "dem": create_mat(np.uint8) if args.compress_height_limit else create_mat(np.int16),
     "vegetation": create_mat(np.bool_),
-    "landcover": create_mat(np.uint8)
+    "landcover": create_mat(np.uint8),
+    "trees": create_mat(np.bool_)
 }
 
 for row, bz in enumerate(range(bz1, bz2, args.downsample)):
@@ -166,14 +162,23 @@ for row, bz in enumerate(range(bz1, bz2, args.downsample)):
             max_height = int(chunk.heightmap[bz_in_c, bx_in_c]) if chunk.heightmap.any() else 255
             min_height = 0
 
+        canopy = False
+        tree = False
         for by in range(max_height, min_height, -1):
             block = chunk.get_block(bx_in_c, by, bz_in_c)
-            
+
             # -- surface processes: dem and landcover --
+            if block.id == "air":
+                canopy = False
+                tree = False
+                continue
             if block.id in surface_blocks:
                 data["dem"][entry] = by
                 data["landcover"][entry] = surface_blocks.index(block.id)
+                if tree:
+                    data["trees"][entry] = 1
                 break
+
             elif "water" in surface_blocks:
                 # inherently waterlogged blocks, see https://minecraft.fandom.com/wiki/Waterlogging
                 if block.id in ["seagrass", "tall_seagrass", "kelp", "kelp_plant"]:
@@ -190,6 +195,11 @@ for row, bz in enumerate(range(bz1, bz2, args.downsample)):
             # -- other processes: vegetation --
             if block.id.endswith("leaves"):
                 data["vegetation"][entry] = 1
+                canopy = True
+            
+            # -- other processes: trees --
+            if block.id.endswith("log") and canopy:
+                tree = True
 
 logging.info("Writing data...")
 try:

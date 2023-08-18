@@ -35,20 +35,31 @@ exif <- tiff::readTIFF("data/dem.tif", payload=F)
 resolution <- exif$x.resolution / 300
 dpi <- 300
 in_per_block <- 39.3701
+
 canopy_buffer <- 2
 crop_buffer <- 16
 
-dotwidth <- function (mmwidth) {
+# helper functions to convert mm to tmap's internal sizing
+lwd_from_mm <- function (mmwidth) {
     in_per_mm <- in_per_block / 1000
     dots_per_mm <- in_per_mm * dpi
-    mmwidth * dots_per_mm
+    (lwd_from_mm <- mmwidth * dots_per_mm)
+}
+size_from_mm <- function (mmwidth) {
+  default_font_size <- 12
+  font_to_point_margin <- 0.3
+  
+  lwd_from_mm <- lwd_from_mm(mmwidth)
+  pointsize <- default_font_size - (2 * font_to_point_margin)
+  size_from_mm <- (lwd_from_mm / pointsize) ^ 2
 }
 
 log_info("Reading data...")
 data <- lapply(list(
     dem=terra::rast("data/dem.tif"),
     vegetation=terra::rast("data/vegetation.tif"),
-    landcover=terra::rast("data/landcover.tif")
+    landcover=terra::rast("data/landcover.tif"),
+    trees=terra::rast("data/trees.tif")
 ), function(raster) {crs(raster) <- "ESRI:53032"; raster})
 
 bounds <- st_as_sf(vect(ext(
@@ -68,7 +79,7 @@ contours <- list(
         to = max(data$dem[]),
         by = settings$interval
     )),
-    render=list(tm_lines(lwd = dotwidth(0.14), col = "#D15C00")),
+    render=list(tm_lines(lwd = lwd_from_mm(0.14), col = "#D15C00")),
     smoothing=3
 )
 
@@ -78,7 +89,10 @@ water[data$landcover != (match("water", surface_blocks) - 1)] <- NA
 water <- list(
     feature=water |>
     terra::as.polygons(),
-    render=list(tm_fill(col = "#00FFFF"), tm_borders(lwd = dotwidth(0.18), col = "black")),
+    render=list(
+      tm_fill(col = "#00FFFF"),
+      tm_borders(lwd = lwd_from_mm(0.18), col = "black")
+    ),
     smoothing=3
 )
 
@@ -91,22 +105,49 @@ canopy <- list(
     smoothing=20
 )
 
-symbols <- list(
+# point symbols should only be created if resolution has block accuracy
+if (resolution == 1) {
+  log_info("Creating trees...")
+  data$trees[data$trees == 0] <- NA
+  trees <- list(
+    feature=as.points(data$trees),
+    render=list(
+      tm_symbols(
+        size = size_from_mm(0.4),
+        alpha=0,
+        border.col = "#3DFF17",
+        border.lwd = lwd_from_mm(0.2))
+    )
+  )
+}
+
+if (resolution == 1) { # include point symbols
+    symbols <- list(
+    canopy=canopy,
+    contours=contours,
+    water=water,
+    trees=trees
+  )
+} else { # exclude point symbols
+  symbols <- list(
     canopy=canopy,
     contours=contours,
     water=water
-) # symbols in overprinting order for rendering
+  )
+}
 
 log_info("Applying geometry operations to symbols...")
 symbols <- mapply(function(symbol, name) {
     log_info(sprintf("Applying geometry operations to %s...", name))
     feature <- symbol$feature |> st_as_sf()
     smoothing <- symbol$smoothing * resolution * settings$smoothing
-    if (smoothing >= 0.1) {
+    if (!("POINT" %in% (feature |> st_geometry_type() |> as.character()))) {
+      if (smoothing >= 0.1) {
         feature <- feature |> smoothr::smooth(method="ksmooth", smoothness = smoothing)
-    }
-    if (!settings$`keep-crumbs`) {
+      }
+      if (!settings$`keep-crumbs`) {
         feature <- feature |> smoothr::drop_crumbs(12)
+      }
     }
     feature <- tryCatch({
         feature |> st_crop(bounds)
