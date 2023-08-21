@@ -168,7 +168,7 @@ for row, bz in enumerate(range(bz1, bz2, args.downsample)):
             min_height = 0
 
         tree_so_far = 0
-        for by in range(max_height + 1, min_height, -1):
+        for by in range(max_height, min_height, -1):
             block = chunk.get_block(bx_in_c, by, bz_in_c)
 
             # -- surface processes: dem and landcover --

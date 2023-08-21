@@ -66,7 +66,6 @@
                 "packed_ice",
                 "blue_ice",
                 "frosted_ice",
-                "snow",
                 "snow_block"
             ]
         }
@@ -153,8 +152,45 @@
             ]
         }
     },
-    "418": {
+    "417": {
         "name": "Prominent bush or tree",
+        "blocks": {
+            "canopy": [
+                "oak_leaves",
+                "spruce_leaves",
+                "birch_leaves",
+                "jungle_leaves",
+                "acacia_leaves",
+                "dark_oak_leaves",
+                "mangrove_leaves",
+                "cherry_leaves",
+                "azalea_leaves",
+                "flowering_azalea_leaves",
+                "brown_mushroom_block"
+            ],
+            "trunk": [
+                "oak_log",
+                "spruce_log",
+                "birch_log",
+                "jungle_log",
+                "acacia_log",
+                "dark_oak_log",
+                "mangrove_log",
+                "cherry_log",
+                "stripped_oak_log",
+                "stripped_spruce_log",
+                "stripped_birch_log",
+                "stripped_jungle_log",
+                "stripped_acacia_log",
+                "stripped_dark_oak_log",
+                "stripped_mangrove_log",
+                "stripped_cherry_log",
+                "mushroom_stem"
+            ]
+        }
+    },
+    "418": {
+        "name": "Tree or small bush",
         "blocks": {
             "canopy": [
                 "oak_leaves",
