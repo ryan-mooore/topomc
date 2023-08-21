@@ -40,6 +40,9 @@ in_per_block <- 39.3701
 canopy_buffer <- 2
 crop_buffer <- 16
 
+small_tree_buffer <- 11
+distinctive_tree_buffer <- 19
+
 # helper functions to convert mm to tmap's internal sizing
 lwd_from_mm <- function (mmwidth) {
     in_per_mm <- in_per_block / 1000
@@ -144,9 +147,21 @@ canopy <- list(
 # point symbols should only be created if resolution has block accuracy
 if (resolution == 1) {
   log_info("Creating trees...")
-  data$trees[data$trees == 0] <- NA
+  trees <- (data$trees |>
+    focal(w=small_tree_buffer, fun="sum") |>
+    clamp(lower=1, upper=1, values=F) & 
+    data$trees) |>
+    ifel(1, NA)
+  distinctive <- (data$trees |>
+    focal(w=distinctive_tree_buffer, fun="sum") |>
+    clamp(lower=1, upper=1, values=F) & 
+    data$trees) |>
+    ifel(1, NA)
+  only_trees <- (trees |> is.na() |> ifel(0, 1)) - (distinctive |> is.na() |> ifel(0, 1))
+  only_trees <- only_trees |> ifel(1, NA)
+
   trees <- list(
-    feature=as.points(data$trees),
+    feature= only_trees |> as.points(),
     render=list(
       tm_symbols(
         size = size_from_mm(0.4),
@@ -155,8 +170,17 @@ if (resolution == 1) {
         border.lwd = lwd_from_mm(0.2))
     )
   )
+  dist_trees <- list(
+    feature= distinctive |> as.points(),
+    render=list(
+      tm_symbols(
+        size = size_from_mm(0.72),
+        alpha=0,
+        border.col = "#3DFF17",
+        border.lwd = lwd_from_mm(0.18))
+    )
+  )
 }
-
 if (resolution == 1) { # include point symbols
     symbols <- list(
     ice=ice,
@@ -165,7 +189,8 @@ if (resolution == 1) { # include point symbols
     canopy=canopy,
     contours=contours,
     water=water,
-    trees=trees
+    trees=trees,
+    dist_trees=dist_trees
   )
 } else { # exclude point symbols
   symbols <- list(
