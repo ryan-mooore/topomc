@@ -2,11 +2,11 @@ library(optparse)
 settings <- parse_args(OptionParser(
   option_list = list(
     make_option(c("--interactive"),
-      action = "store_true", default = F,
+      action = "store_true", default = FALSE,
       help = "Opens map in interactive viewer"
     ),
     make_option(c("--keep-crumbs"),
-      action = "store_true", default = F,
+      action = "store_true", default = FALSE,
       help = "Keep very small features instead of deleting them"
     ),
     make_option(c("-i", "--interval"),
@@ -39,8 +39,8 @@ suppressPackageStartupMessages({
   library(smoothr)
 })
 
-symbol_data <- fromJSON("symbols.json", simplifyDataFrame = F)
-exif <- tiff::readTIFF("data/dem.tif", payload = F)
+symbol_data <- fromJSON("symbols.json", simplifyDataFrame = FALSE)
+exif <- tiff::readTIFF("data/dem.tif", payload = FALSE)
 
 # increase smoothing with more downsampling to account for inaccuracies
 resolution <- exif$x.resolution / 300
@@ -57,7 +57,7 @@ distinctive_tree_buffer <- 19
 lwd_from_mm <- function(mmwidth) {
   in_per_mm <- in_per_block / 1000
   dots_per_mm <- in_per_mm * dpi
-  (lwd_from_mm <- mmwidth * dots_per_mm)
+  mmwidth * dots_per_mm
 }
 size_from_mm <- function(mmwidth) {
   default_font_size <- 12
@@ -65,7 +65,7 @@ size_from_mm <- function(mmwidth) {
 
   lwd_from_mm <- lwd_from_mm(mmwidth)
   pointsize <- default_font_size - (2 * font_to_point_margin)
-  size_from_mm <- (lwd_from_mm / pointsize)^2
+  (lwd_from_mm / pointsize)^2
 }
 
 log_info("Reading data...")
@@ -96,11 +96,13 @@ log_info("Creating symbols...")
 log_info("Creating contours...")
 contours <- list(
   feature = data$dem |>
-    terra::as.contour(levels = seq(
-      from = min(data$dem[]),
-      to = max(data$dem[]),
-      by = settings$interval
-    )),
+    terra::as.contour(
+      levels = seq(
+        from = min(data$dem[]),
+        to = max(data$dem[]),
+        by = settings$interval
+      )
+    ),
   render = list(tm_lines(lwd = lwd_from_mm(0.14), col = "#D15C00")),
   smoothing = 3
 )
@@ -170,7 +172,8 @@ if (resolution == 1) {
     clamp(lower = 1, upper = 1, values = F) &
     data$trees) |>
     ifel(1, NA)
-  only_trees <- (trees |> is.na() |> ifel(0, 1)) - (distinctive |> is.na() |> ifel(0, 1))
+  only_trees <- (trees |> is.na() |> ifel(0, 1)) - (distinctive |> is.na() |> ifel(0, 1)
+  )
   only_trees <- only_trees |> ifel(1, NA)
 
   trees <- list(
@@ -225,27 +228,31 @@ symbols <- mapply(function(symbol, name) {
   smoothing <- symbol$smoothing * resolution * settings$smoothing
   if (!("POINT" %in% (feature |> st_geometry_type() |> as.character()))) {
     if (smoothing >= 0.1) {
-      feature <- feature |> smoothr::smooth(method = "ksmooth", smoothness = smoothing)
+      feature <- feature |>
+        smoothr::smooth(
+          method = "ksmooth",
+          smoothness = smoothing
+        )
     }
     if (!settings$`keep-crumbs`) {
       feature <- feature |> smoothr::drop_crumbs(12)
     }
+    feature <- tryCatch(
+      {
+        feature |> st_crop(bounds)
+      },
+      error = function(error) {
+        feature |>
+          st_buffer(dist = 0) |>
+          st_crop(bounds)
+      }
+    )
   }
-  feature <- tryCatch(
-    {
-      feature |> st_crop(bounds)
-    },
-    error = function(error) {
-      feature |>
-        st_buffer(dist = 0) |>
-        st_crop(bounds)
-    }
-  )
   list(
     feature = feature,
     render = symbol$render
-  ) # crop all symbols to extent}
-}, symbols, names(symbols), SIMPLIFY = F)
+  )
+}, symbols, names(symbols), SIMPLIFY = FALSE)
 
 symbols <- symbols[symbols |> sapply(function(symbol) {
   as.logical(length(symbol$feature$geometry))
@@ -259,7 +266,7 @@ render <- symbols |>
       symbol$render
     )
   }) |>
-  unlist(recursive = F) # create list of tmap elements
+  unlist(recursive = FALSE) # create list of tmap elements
 render <- c(
   list(
     tm_shape(bounds),
@@ -280,7 +287,12 @@ tmap_options(
   basemaps = NULL
 )
 (map <- Reduce("+", render) +
-  tm_layout(scale = 0.25, frame = F, outer.margins = margins, inner.margins = margins) +
+  tm_layout(
+    scale = 0.25,
+    frame = FALSE,
+    outer.margins = margins,
+    inner.margins = margins
+  ) +
   tm_view(
     set.zoom.limits = c(17, 21),
     set.view = 18
