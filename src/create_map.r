@@ -46,6 +46,7 @@ exif <- tiff::readTIFF("data/dem.tif", payload = FALSE)
 resolution <- exif$x.resolution / 300
 dpi <- 300
 in_per_block <- 39.3701
+in_per_mm <- in_per_block / 1000
 
 canopy_buffer <- 2
 crop_buffer <- 16
@@ -55,17 +56,14 @@ distinctive_tree_buffer <- 19
 
 # helper functions to convert mm to tmap's internal sizing
 lwd_from_mm <- function(mmwidth) {
-  in_per_mm <- in_per_block / 1000
-  dots_per_mm <- in_per_mm * dpi
-  mmwidth * dots_per_mm
+  lwd_in <- 0.01038889
+  inwidth <- in_per_mm * mmwidth
+  inwidth / lwd_in
 }
 size_from_mm <- function(mmwidth) {
-  default_font_size <- 12
-  font_to_point_margin <- 0.3
-
-  lwd_from_mm <- lwd_from_mm(mmwidth)
-  pointsize <- default_font_size - (2 * font_to_point_margin)
-  (lwd_from_mm / pointsize)^2
+  size_in <- 0.0225
+  inwidth <- in_per_mm * mmwidth
+  inwidth^2 / size_in
 }
 
 log_info("Reading data...")
@@ -241,16 +239,6 @@ symbols <- mapply(function(symbol, name) {
     if (!settings$`keep-crumbs`) {
       feature <- feature |> smoothr::drop_crumbs(2) # drop <2x2 (single block)
     }
-    feature <- tryCatch(
-      {
-        feature |> st_crop(bounds)
-      },
-      error = function(error) {
-        feature |>
-          st_buffer(dist = 0) |>
-          st_crop(bounds)
-      }
-    )
   }
   list(
     feature = feature,
@@ -292,14 +280,14 @@ tmap_options(
 )
 (map <- Reduce("+", render) +
   tm_layout(
-    scale = 0.25,
     frame = FALSE,
     outer.margins = margins,
-    inner.margins = margins
+    inner.margins = margins,
   ) +
   tm_view(
     set.zoom.limits = c(17, 21),
-    set.view = 18
+    set.view = 18,
+    bbox = bounds
   )
 )
 
