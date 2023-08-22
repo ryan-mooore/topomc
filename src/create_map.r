@@ -19,7 +19,7 @@ settings <- parse_args(OptionParser(
     ),
     make_option(c("-k", "--smoothing"),
       default = 1,
-      help = "Set smoothing of map or set to 0 to turn off (default=1)"
+      help = "set smoothing of map or set to 0 to turn off (default=1)"
     )
   )
 ), )
@@ -97,6 +97,7 @@ log_info("Creating contours...")
 contours <- list(
   feature = data$dem |>
     terra::as.contour(
+      maxcell = Inf,
       levels = seq(
         from = min(data$dem[]),
         to = max(data$dem[]),
@@ -225,8 +226,11 @@ log_info("Applying geometry operations to symbols...")
 symbols <- mapply(function(symbol, name) {
   log_info(sprintf("Applying geometry operations to %s...", name))
   feature <- symbol$feature |> st_as_sf()
-  smoothing <- symbol$smoothing * resolution * settings$smoothing
-  if (!("POINT" %in% (feature |> st_geometry_type() |> as.character()))) {
+  geom_types <- feature |>
+    st_geometry_type() |>
+    as.character() # smooth only if feature is line or polygon
+  if ("MULTIPOLYGON" %in% geom_types | "MULTILINESTRING" %in% geom_types) {
+    smoothing <- symbol$smoothing * resolution * settings$smoothing
     if (smoothing >= 0.1) {
       feature <- feature |>
         smoothr::smooth(
@@ -235,7 +239,7 @@ symbols <- mapply(function(symbol, name) {
         )
     }
     if (!settings$`keep-crumbs`) {
-      feature <- feature |> smoothr::drop_crumbs(12)
+      feature <- feature |> smoothr::drop_crumbs(2) # drop <2x2 (single block)
     }
     feature <- tryCatch(
       {
