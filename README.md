@@ -1,6 +1,6 @@
 # TopoMC
 
-![](images/example.png)
+![](images/example-downscaled.png)
 
 TopoMC combines the ecosystem of Python libraries for Minecraft and the extensive spatial support of R to create beautiful topographical maps of your Minecraft worlds. TopoMC supports all Minecraft versions from 1.9 up to the current release (1.20.1).
 
@@ -60,7 +60,7 @@ The map can be opened at any time without re-rendering by opening the map file c
 
 #### Usage
 
-`./map [-i INTERVAL] [-k SMOOTHING] [--interactive] [--keep-crumbs]`
+`./map [-i INTERVAL] [-s SCALE] [-k SMOOTHING] [--interactive] [--keep-crumbs]`
 
 #### Options
 
