@@ -17,8 +17,6 @@
                 "granite",
                 "andesite",
                 "diorite",
-                "cobblestone",
-                "mossy_cobblestone",
                 "tuff",
                 "calcite",
                 "dripstone_block",
@@ -38,9 +36,7 @@
                 "nether_gold",
                 "obsidian",
                 "gravel",
-                "infested_stone",
-                "infested_cobblestone",
-                "infested_deepslate"
+                "infested_stone"
             ]
         }
     },
@@ -224,6 +220,22 @@
                 "stripped_mangrove_log",
                 "stripped_cherry_log",
                 "mushroom_stem"
+            ]
+        }
+    },
+    "521": {
+        "name": "Building",
+        "blocks": {
+            "roof": [
+                "oak_planks",
+                "oak_stairs",
+                "acacia_planks",
+                "acacia_slab",
+                "acacia_stairs",
+                "smooth_stone_slab",
+                "cobblestone",
+                "spruce_planks",
+                "smooth_sandstone_slab"
             ]
         }
     }

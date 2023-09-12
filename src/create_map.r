@@ -72,7 +72,8 @@ data <- lapply(list(
   dem = terra::rast("data/dem.tif"),
   canopy = terra::rast("data/canopy.tif"),
   landcover = terra::rast("data/landcover.tif"),
-  trees = terra::rast("data/trees.tif")
+  trees = terra::rast("data/trees.tif"),
+  buildings = terra::rast("data/buildings.tif")
 ), function(raster) {
   crs(raster) <- "ESRI:53032"
   raster
@@ -164,6 +165,17 @@ sand <- list(
   smoothing = 3
 )
 
+log_info("Creating buildings...")
+data$buildings[data$buildings == 0] <- NA
+buildings <- list(
+  feature = terra::as.polygons(data$buildings),
+  render = list(
+    tm_fill(col = "#808080"),
+    tm_borders(lwd = lwd_from_mm(0.2), col = "#000000")
+  ),
+  smoothing = 0
+)
+
 log_info("Creating canopy...")
 data$canopy[data$canopy == 0] <- NA
 canopy <- list(
@@ -223,7 +235,8 @@ if (resolution == 1) { # include point symbols
     cliffs = cliffs,
     water = water,
     trees = trees,
-    dist_trees = dist_trees
+    dist_trees = dist_trees,
+    buildings = buildings
   )
 } else { # exclude point symbols
   symbols <- list(
@@ -233,7 +246,8 @@ if (resolution == 1) { # include point symbols
     canopy = canopy,
     contours = contours,
     cliffs = cliffs,
-    water = water
+    water = water,
+    buildings = buildings
   )
 }
 

@@ -139,7 +139,8 @@ data = {
     "dem": create_mat(np.uint8) if args.compress_height_limit else create_mat(np.int16),
     "canopy": create_mat(np.bool_),
     "landcover": create_mat(np.uint8),
-    "trees": create_mat(np.bool_)
+    "trees": create_mat(np.bool_),
+    "buildings": create_mat(np.bool_)
 }
 
 for row, bz in enumerate(range(bz1, bz2, args.downsample)):
@@ -203,6 +204,10 @@ for row, bz in enumerate(range(bz1, bz2, args.downsample)):
                 tree_so_far = 2 if tree_so_far else 0
             else:
                 tree_so_far = 0
+            
+            # -- other processes: buildings --
+            if block.id in symbol_data["521"]["blocks"]["roof"]:
+                data["buildings"][entry] = 1
 
 logging.info("Writing data...")
 try:
