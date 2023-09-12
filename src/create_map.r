@@ -50,6 +50,7 @@ in_per_mm <- in_per_block / 1000
 
 canopy_buffer <- 2
 crop_buffer <- 16
+cliff_threshold_deg <- 55
 
 small_tree_buffer <- 11
 distinctive_tree_buffer <- 19
@@ -103,6 +104,20 @@ contours <- list(
       )
     ),
   render = list(tm_lines(lwd = lwd_from_mm(0.14), col = "#D15C00")),
+  smoothing = 3
+)
+
+log_info("Creating cliffs...")
+cliffs <- list(
+  feature = data$dem |>
+    terra::terrain(v = "slope") |>
+    classify(cbind(0, cliff_threshold_deg, NA), right = FALSE) |>
+    as.polygons() |>
+    st_as_sf() |>
+    st_union(),
+  render = list(
+    tm_fill(col = "#000000")
+  ),
   smoothing = 3
 )
 
@@ -205,6 +220,7 @@ if (resolution == 1) { # include point symbols
     bare_rock = bare_rock,
     canopy = canopy,
     contours = contours,
+    cliffs = cliffs,
     water = water,
     trees = trees,
     dist_trees = dist_trees
@@ -216,6 +232,7 @@ if (resolution == 1) { # include point symbols
     bare_rock = bare_rock,
     canopy = canopy,
     contours = contours,
+    cliffs = cliffs,
     water = water
   )
 }
@@ -227,7 +244,7 @@ symbols <- mapply(function(symbol, name) {
   geom_types <- feature |>
     st_geometry_type() |>
     as.character() # smooth only if feature is line or polygon
-  if ("MULTIPOLYGON" %in% geom_types | "MULTILINESTRING" %in% geom_types) {
+  if ("MULTIPOLYGON" %in% geom_types | "MULTILINESTRING" %in% geom_types | "POLYGON" %in% geom_types) {
     smoothing <- symbol$smoothing * resolution * settings$smoothing
     if (smoothing >= 0.1) {
       feature <- feature |>
@@ -247,7 +264,9 @@ symbols <- mapply(function(symbol, name) {
 }, symbols, names(symbols), SIMPLIFY = FALSE)
 
 symbols <- symbols[symbols |> sapply(function(symbol) {
-  as.logical(length(symbol$feature$geometry))
+  st_geometry(symbol$feature) |>
+    length() |>
+    as.logical()
 })] # filter symbols to only include those with geometry
 
 log_info("Creating map objects...")
