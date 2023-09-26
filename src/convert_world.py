@@ -19,11 +19,11 @@ logging.basicConfig(
 )
 
 # This was the last version where heightmap data was streammed across bits. See:
-# https://minecraft.fandom.com/wiki/Chunk_format (under Heightmaps)
+# https://minecraft.wiki/w/Chunk_format (under Heightmaps)
 V1_15_2 = 2230
 
 # This was the first snapshot that included the increased 1.17 height limit. See: 
-# https://minecraft.fandom.com/wiki/Java_Edition_21w06a
+# https://minecraft.wiki/w/Java_Edition_21w06a
 V21W06A = 2694
 
 # Buffer which will be cropped in the R script to remove smoothed geometry
@@ -71,7 +71,7 @@ def chunk_at(region, cx, cz):
             curr_bit = (data_long >> bit_of_long) & 0x01
             block_value = (curr_bit << bit_of_value) | block_value
             bit_of_value += 1
-            # 9 bits per heightmap value (See: https://minecraft.fandom.com/wiki/Chunk_format)
+            # 9 bits per heightmap value (See: https://minecraft.wiki/w/Chunk_format)
             if bit_of_value >= 9:
                 chunk.heightmap[block // 16, block % 16] = block_value
                 block += 1
@@ -181,7 +181,7 @@ for row, bz in enumerate(range(bz1, bz2, args.downsample)):
                 break
 
             elif "water" in surface_blocks:
-                # inherently waterlogged blocks, see https://minecraft.fandom.com/wiki/Waterlogging
+                # inherently waterlogged blocks, see https://minecraft.wiki/w/Waterlogging
                 if block.id in ["seagrass", "tall_seagrass", "kelp", "kelp_plant"]:
                     data["dem"][entry] = by
                     data["landcover"][entry] = surface_blocks.index("water")
