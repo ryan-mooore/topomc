@@ -32,7 +32,7 @@ CROP_BUFFER = 16
 # Extend Chunk class from anvil-parser to include native heightmap support
 class ChunkWithHeightmap(Chunk):
     def __init__(self, *args):
-        self.heightmap = np.mat(np.empty((16, 16)))
+        self.heightmap = np.asmatrix(np.empty((16, 16)))
         super().__init__(*args)
 
 @cache
@@ -130,7 +130,7 @@ bz1 -= CROP_BUFFER
 bx2 += CROP_BUFFER + 1
 bz2 += CROP_BUFFER + 1
 
-create_mat = lambda dtype : np.mat(np.zeros((
+create_mat = lambda dtype : np.asmatrix(np.zeros((
     ceil((bz2 - bz1) / args.downsample),
     ceil((bx2 - bx1) / args.downsample)
 )), dtype=dtype)
